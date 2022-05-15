@@ -37,3 +37,18 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# data
+data/*
+
+# mus
+mus/mods/*
+
+#
+old/*
+
+#
+figs/*
+
+
+
