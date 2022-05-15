@@ -988,8 +988,6 @@ x
 
 t1kable(x, format ="latex")
 
-
-km_all3$As
 # create new data set
 library(tidyverse)
 kf3  <- km_all3 %>%
