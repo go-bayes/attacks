@@ -17,6 +17,13 @@
 # Output files from R CMD check
 /*.Rcheck/
 
+# ignore figs
+figs/*
+
+#ignore mods
+mods/*
+
+
 # RStudio files
 .Rproj.user/
 
