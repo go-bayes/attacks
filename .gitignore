@@ -49,13 +49,16 @@ vignettes/*.pdf
 data/*
 
 # mus
-mus/mods/*
+mods/*
 
 #
 old/*
 
 #
 figs/*
+
+#
+data_raw
 
 
 
