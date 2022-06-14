@@ -22,31 +22,37 @@ library("broom.mixed") # mixed effects models
 library("brms") # bayesian estimation
 library("rstan") # backend brms
 library("rstanarm") # graphing
-#library("cmdstanr") # backend brms', not used
+library("cmdstanr") # backend brms', not used
 library("tidybayes") # workign with posterior probability distributions
 library("bayesplot") # graphs
 library("ggokabeito")   # color palette
-#library("gghalves")     #  half geoms, not used
-#library("ggbeeswarm")   # Special distribution-shaped point jittering, not used
+library("gghalves")     #  half geoms, not used
+library("ggbeeswarm")   # Special distribution-shaped point jittering, not used
 library("emmeans") # estimate marginal means
 library("table1") # tables /now with latex
 library("tidyverse") # data wrangling
-library("sjstats")
-library("magick")
-library("simstudy")
-library("future")
+library("sjstats") # stat summaries
+library("magick") # images
+library("simstudy") # simulation
+library("future") #parrallel processing
 library("brms") # bayesian estimation
+library("ggpubr") # graphs
+library("ggsci") # graphs
+
+# increase vecor limit
+# library(usethis)
+# usethis::edit_r_environ()
 
 # rstan options
-#library("cmdstanr") # backend brms, not used
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores ())
 
 
 
 # import data -------------------------------------------------------------
+df <- readRDS(here::here("data_raw", "df"))# orig data
 
-df <- readRDS(here::here("data", "df_s"))
+#df <- readRDS(here::here("data", "df_s")) # gitterd data for reproduction (ethics requires)
 
 # create timeline ---------------------------------------------------------
 
@@ -224,6 +230,187 @@ ggsave(
   dpi = 1200
 )
 
+# timeline for the 2016-2021 cohort
+
+# create timeline 2016 - 2021 ---------------------------------------------------------
+
+
+rarep2 <- df %>%
+  dplyr::filter(YearMeasured == 1) %>%
+  dplyr::filter(Wave == 2016 | Wave == 2017 | Wave == 2018 | Wave == 2019 | Wave == 2020) %>%
+  droplevels() %>%
+  dplyr::mutate(org2016 =  ifelse(Wave == 2016 &
+                                    YearMeasured == 1, 1, 0)) %>%
+  group_by(Id) %>%
+  dplyr::mutate(hold = mean(org2016, na.rm = TRUE)) %>%  # Hack
+  filter(hold > 0) %>% # hack!
+  ungroup(Id) %>%
+  dplyr::mutate(timeline = make_date(year = 2009, month = 6, day = 30) + TSCORE) %>%
+  dplyr:::count(day = floor_date(timeline, "day")) %>%
+  dplyr::mutate(Condition = factor(
+    ifelse(
+      day >= "2016-06-18" & day < "2019-03-15",
+      0,
+      ifelse(
+        day >= "2019-03-15" & day < "2019-06-18",
+        1,
+        ifelse(day >= "2019-06-18" &
+                 day < "2020-10-15", 2, 3)
+      )
+    ),
+    labels = c(
+      "Baseline",
+      "Post-attack",
+      "Post-attack one year",
+      "Post-attack two years"
+    )
+  )) %>%
+  arrange(day, Condition)
+
+rarep2
+
+# get  dates
+dates_vline2 <- as.Date("2019-03-15")
+dates_vline3 <- as.Date("2019-06-18")
+dates_vline4 <- as.Date("2021-06-18")
+#3665 - min = 13 July 2019
+
+# for line in a graph
+dates_vline2b <- which(rarep2$day %in% dates_vline2)
+dates_vline3b <- which(rarep2$day %in% dates_vline3)
+dates_vline4b <- which(rarep2$day %in% dates_vline4)
+
+# graph
+
+lds3 <- ggplot(rarep2, aes(day, n)) +
+  geom_col(aes(fill = Condition)) +
+  scale_x_date(date_labels = "%b/%Y",
+               date_breaks = "1 year",
+               limits = c(as.Date("2016-09-10"), as.Date("2021-10-16")))  +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, NA)) +
+  geom_vline(xintercept = as.numeric(rarep$day[dates_vline2b]),
+             col = "red",
+             linetype = "dashed") +
+  xlab("NZAVS Waves years 2016 - 2021 daily counts by condition") + ylab("Count of Responses") +
+  theme_classic() +
+  annotate(
+    "rect",
+    xmin = dates_vline2,
+    xmax = dates_vline3,
+    ymin = 0,
+    ymax = 1500,
+    alpha = .3,
+    fill = "darkred"
+  ) +
+  annotate(
+    "rect",
+    xmin = dates_vline3,
+    xmax = as.Date("2020-10-15"),
+    ymin = 0,
+    ymax = 1500,
+    alpha = .05,
+    fill = "orange"
+  ) +
+  annotate(
+    "rect",
+    xmin = as.Date("2020-10-15"),
+    xmax = as.Date("2021-10-15"),
+    ymin = 0,
+    ymax = 1500,
+    alpha = .05,
+    fill = "yellow"
+  ) +
+  annotate("text",
+           x = as.Date("2017-06-01"),
+           y = 2000,
+           label = "Time 8-10\npre-attacks waves") +
+  annotate("text",
+           x = as.Date("2019-01-01"),
+           y = 1700,
+           label = "**attack**") +
+  annotate("text",
+           x = as.Date("2019-06-15"),
+           y = 2000,
+           label = "Time 10\npost-attacks") +
+  annotate("text",
+           x = as.Date("2020-03-01"),
+           y = 2000,
+           label = "Time 11 Year\nFollowing") +
+  annotate("text",
+           x = as.Date("2021-03-01"),
+           y = 2000,
+           label = "Time 12 2 years \nFollowing") +
+#   annotate(
+#     geom = "curve",
+#     x = as.Date("2016-11-15"),
+#     y = 2000,
+#     xend = as.Date("2020-02-15"),
+#     yend = 2000,
+#     curvature = -.3,
+#     arrow = arrow(length = unit(2, "mm"))
+#   ) +
+#   annotate(
+#     geom = "curve",
+#     x = as.Date("2016-02-15"),
+#     y = 2300,
+#     xend = as.Date("2016-10-15"),
+#     yend = 2300,
+#     curvature = -.3,
+#     arrow = arrow(length = unit(2, "mm"))
+#   ) +
+#   annotate(
+#     geom = "curve",
+#     x = as.Date("2016-02-15"),
+#     y = 2000,
+#     xend = as.Date("2019-01-01"),
+#     yend = 2000,
+#     curvature = -.3,
+#     arrow = arrow(length = unit(2, "mm"))
+#   ) +
+#   annotate(
+#     geom = "curve",
+#     x = as.Date("2019-01-01"),
+#     y = 2000,
+#     xend = as.Date("2020-10-15"),
+#     yend = 2000,
+#     curvature = -.3,
+#     arrow = arrow(length = unit(2, "mm"))
+#   ) +
+#   annotate(
+#     geom = "curve",
+#     x = as.Date("2020-03-15"),
+#     y = 2000,
+#     xend = as.Date("2021-06-15"),
+#     yend = 2000,
+#     curvature = -.3,
+#     arrow = arrow(length = unit(2, "mm"))
+#   ) +
+#   theme(
+#     legend.position = "top",
+#     legend.text = element_text(size = 6),
+#     legend.title = element_text(color = "Black", size = 8)
+#   )
+ scale_fill_viridis_d(option = "plasma") +
+ scale_y_continuous(limits = c(0, 2300))
+ #theme(legend.position="none")
+
+
+# inspect graph
+lds3
+
+# save graph
+ggsave(
+  lds3,
+  path = here::here(here::here("figs")),
+  width = 10,
+  height = 5,
+  units = "in",
+  filename = "timeline3.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 1200
+)
+
 
 
 # pre-attack trend in muslim cohort from t4 -t10 --------------------------
@@ -348,6 +535,7 @@ levels(all_d$Wave) <-
   c("Time4", "Time5", "Time6", "Time7", "Time8", "Time9")
 
 
+head(all_d_selected)
 
 # select variables
 all_d_selected <- all_d %>%
@@ -380,6 +568,7 @@ tall <-
   table1::table1( ~ Ys |
                     Wave, data = all_d_selected, overall = FALSE)
 
+tall
 kable(tall, format = "latex", booktabs = TRUE)
 
 
@@ -509,6 +698,9 @@ ggsave(
   limitsize = FALSE,
   dpi = 1000
 )
+
+
+### DATA FOR MISSIN YEARS
 
 
 
@@ -833,6 +1025,7 @@ summary(bind_zero1$wave)
 # correct
 
 
+
 # zero table --------------------------------------------------------------
 
 
@@ -842,7 +1035,7 @@ zt <-
                   data = bind_zero1,
                   overall = F,
                   transpose = F)
-
+zt
 t1kable(zt, format = "latex")
 
 # Impute 0s ------------------------------------------------------------
@@ -1483,7 +1676,7 @@ sim_prior_strong_plot <-
     ndraws = 200,
     spaghetti = T
   ))
-library(ggsci)
+
 sim_prior_strong_plot2 <-
   sim_prior_strong_plot$`Wave:As`  + scale_y_continuous(limits = c(-10.0, 15)) +
   labs(subtitle = "Sampling from prior only: weakly regularised",
@@ -2912,7 +3105,6 @@ tab [, c(1:5)] %>%
 
 plot(tab, show_labels = TRUE)
 
-yola
 
 
 # Kurz model
@@ -3102,7 +3294,7 @@ levels(km_all5$Wave) <-
 
 
 # correct
-table1::table1( ~ TSCORE_i | Wave, data = km_all5, overall = FALSE)
+table1::table1( ~ Ys | Wave*As, data = km_all5, overall = FALSE)
 
 # latex summary
 kable(x, format = "latex", booktabs = TRUE)
@@ -3244,7 +3436,6 @@ table1::table1( ~ Ys | Wave * As, data = km_zero5, overall = FALSE)
 
 
 bind_zero5 <- as.data.frame(km_zero5)
-
 library(Amelia)
 
 
@@ -3284,7 +3475,7 @@ imputed0_5 <- amelia(
 saveRDS(imputed0_5, here::here( "mods", "imputed0_5"))
 
 
-# check means, looks good!
+# check means, looks good
 
 table1::table1( ~ Ys |
                   Wave * As,
@@ -3328,7 +3519,7 @@ table1::table1( ~ Ys |
                 overall = FALSE)
 
 
-# impute 4 1s ---------------------------------------------------------------
+# impute 5 1s ---------------------------------------------------------------
 
 km_one5 <- ka5 %>%
   filter((As == 1 & Wave == "Time10") |
@@ -3443,10 +3634,10 @@ table1::table1( ~ Ys |
 
 
 # 5 make frames compatible --------------------------------------------------
-imputed0_5 <-
-  readRDS(here::here( "mods", "imputed0_5"))
-imputed1_5 <-
-  readRDS(here::here( "mods", "imputed1_5"))
+# imputed0_5 <-
+#   readRDS(here::here( "mods", "imputed0_5"))
+# imputed1_5 <-
+#   readRDS(here::here( "mods", "imputed1_5"))
 
 
 
@@ -3514,6 +3705,7 @@ listbayes5 <- imps_bind5$imputations$imp
 #readRDS
 #listbayes5<- readRDS(here::here( "mods", "listbayes5"))
 
+table((imps_bind5$imputations$imp[[1]]$Ys) ==head(imps_bind5$imputations$imp[[2]]$Ys))
 
 # ML model 5 ----------------------------------------------------------------
 
@@ -3558,24 +3750,14 @@ plot_5 <- fitted_lines5 %>%
   alpha = 1 / 10) +
   geom_line(aes(y = predicted, group = group),
             size = 1 / 4) + theme_clean() +  scale_y_continuous(limits =
-                                                                  c(4.0, 4.5)) +<  <  <  <  <  <  < HEAD
-labs(subtitle = "Multiple imputation: sample from previous 2 waves prior to attack + 2 waves post-attack",
-     y = "Muslim Warmth",
-     x = "Years: 2016-2020/21; N=21796") + scale_colour_okabe_ito(alpha =
-                                                                    .5)
-==  ==  ==  =
-  labs(subtitle = "MI from two previous waves",
-       y = "Muslim Warmth",
-       x = "Years: 2016-2020/21; N=21796") +  scale_colour_npg(alpha =
-                                                                 .5) +  theme_classic()# +
-# scale_colour_okabe_ito(alpha =.5)
->  >  >  >  >  >  > 9f5a16fc41e9927370908b86e724d0204590a0ed
+                                                                  c(4.0, 4.5))
+
 plot_5
 
 
 ggsave(
   plot_5,
-  path = here::here(here::here( "figs")),
+  path = here::here(here::here( "mods")),
   width = 12,
   height = 9,
   units = "in",
@@ -3584,6 +3766,85 @@ ggsave(
   limitsize = FALSE,
   dpi = 1000
 )
+
+
+
+# bayesian model 2016-2021 ----------------------------------------------------------
+
+## put data in list
+imps_bind5$imputations$imp[[1]]%>%
+  select(Id, As, Ys, Wave) %>%
+  mutate(post_1 = lead(Ys, n = 1)) %>%
+  mutate(post_2 = lead(Ys, n= 2)) %>%
+  dplyr::filter(Wave == 0) %>%
+  rename(baseline = Ys) %>%
+  dplyr::select(-Wave) %>%
+  head()
+
+  mutate(Wave = factor(Wave, labels = c("baseline","post1","post2")))%>%
+  pivot_wider(id_cols = "Id", values_from = c("Ys"), names_from= c("As","Wave")) %>%
+  head()
+
+imps_bind5$imputations$imp[[1]]%>%
+
+
+# make list
+imp1w <- as.data.frame(imps_bind5$imputations$imp[[1]])
+imp2w <- as.data.frame(imps_bind5$imputations$imp[[2]])
+imp3w <- as.data.frame(imps_bind5$imputations$imp[[3]])
+imp4w <- as.data.frame(imps_bind5$imputations$imp[[4]])
+imp5w <- as.data.frame(imps_bind5$imputations$imp[[5]])
+imp6w <- as.data.frame(imps_bind5$imputations$imp[[6]])
+imp7w <- as.data.frame(imps_bind5$imputations$imp[[7]])
+imp8w <- as.data.frame(imps_bind5$imputations$imp[[8]])
+imp9w <- as.data.frame(imps_bind5$imputations$imp[[9]])
+imp10w <- as.data.frame(imps_bind5$imputations$imp[[10]])
+
+
+
+
+ameliadataw <-
+  list(imp1w, imp2w, imp3w, imp4w, imp5w, imp6w, imp7w, imp8w, imp9w, imp10w)
+
+
+
+
+bform =   bf(Ys ~ As  *  Wave + (0 + As || Id),
+             sigma ~ 0 + As, set_rescor(rescor = FALSE))
+
+prior_strong_even2 = c(
+  set_prior("normal(0, 0.25)",  class = "b"),
+  set_prior("normal(0,1)", class = "b", dpar = "sigma"),
+  set_prior(
+    "student_t(3, 4, 1)",
+    class = "Intercept",
+    lb = 1,
+    ub = 7
+  ),
+  set_prior("exponential(1)", class = "sd")
+)
+
+
+system.time(
+  m_fivewaves  <- brms::brm_multiple(
+    bform,
+    family = gaussian,
+    data = ameliadataw,
+    prior = prior_strong_even2,
+    #seed = 1234,
+    init = 0,
+    warmup = 1000,
+    iter =  2000,
+    chains = 2,
+    backend = "cmdstan",
+    file = here::here("mods", "m_fivewaves.rds")
+  )
+)
+
+
+
+
+
 #
 #
 # bayes_5 <- conditional5$`Wave:As` +   scale_y_continuous(limits=c(4.0,4.48)) +
@@ -3615,6 +3876,8 @@ ggsave(
 
 # IMPUTE 9wave ---------------------------------------------------------------
 # df 9 for estimating time trajectory in attack sample ---------------------------
+df$Warm.Muslims
+
 km_all9 <- df %>%
   dplyr::select(
     Id,
@@ -3765,7 +4028,7 @@ sum(is.na(km_all9$TSCORE_i))
 
 
 # correct
-table1::table1( ~ TSCORE_i | Wave, data = km_all9, overall = FALSE)
+table1::table1( ~ Ys | Wave, data = km_all9, overall = FALSE)
 
 # latex summary
 kable(x, format = "latex", booktabs = TRUE)
@@ -4258,9 +4521,452 @@ ggsave(
 )
 
 
+
+# sensitivity analysis delete known cases and recover with imputation method ---------------------------------
+
+# link dataframe
+library(tidyverse)
+km_pre
+nw_9 <- nw_9 %>%
+  filter(As ==0) %>%
+  select(-As)
+km_pre
+
+bind_zero_s <- full_join(km_pre, bind_zero5) %>%
+  arrange(Wave, Id)
+
+table(bind_zero_s$Wave)
+# relevel
+levels = c("Time4",
+           "Time5",
+           "Time6",
+           "Time7",
+           "Time8",
+           "Time9",
+           "Time10",
+           "Time11",
+           "Time12")
+
+bind_zero_s$Wave <- fct_relevel(bind_zero_s$Wave, levels)
+levels(bind_zero_s$Wave)
+str(bind_zero_s$Wave)
+head(bind_zero_s)
+
+
+bind_zero1_s <- bind_zero_s %>%
+  mutate(wave = as.numeric(Wave) - 1) %>%
+  dplyr::select(-c(dys, yrs)) %>%  # not working
+  arrange(Wave, Id) %>%
+  group_by(Id) %>%
+  mutate(dys = TSCORE_i - min(TSCORE_i)) %>% # Not used
+  mutate(yrs = dys / 365) %>% # note used
+  ungroup() %>%
+  dplyr::filter(Wave == "Time4"|
+           Wave == "Time5"|
+           Wave == "Time6"|
+           Wave == "Time7"|
+           Wave == "Time8"|
+           Wave == "Time9"|
+           Wave == "Time10") %>%
+  droplevels()
+
+
+summary(bind_zero1_s$Wave)
+
+table1::table1(~ Ys |Wave, data = bind_zero_s)
+
+## Make numeric var
+
+# correct
+
+
+# now create df with zeros
+# check
+table1::table1(~ Ys | Wave, data = bind_zero1_s)
+
+out <- lm(Ys ~ wave, bind_zero1_s)
+summary(out)
+
+
+new_s <- bind_zero1_s
+
+
+# Replace obeserved values with NA
+new_s$Ys[new_s$Wave == "Time9"] <- NA
+new_s$Ys[new_s$Wave == "Time10"] <- NA
+
+
+# check
+table1::table1(~ Ys | Wave, data = bind_zero1_s)
+table1::table1(~ Ys | Wave, data = new_s)
+
+# make data frame'
+nw_s <- new_s %>%
+  dplyr::select(
+    Id,
+    Wave,
+    wave,
+    As,
+    Ys,
+    pol_bz,
+    rel_bz,
+    partner_bz,
+    parent_bz,
+    nzdep_bz,
+    male_2z,
+    employed_bz,
+    edu_bz,
+    ubran_bz,
+    EthnicCats_b,
+    GenCohort,
+    dys,
+    yrs) %>%
+  arrange(Id, Wave)
+nw_s <- as.data.frame(nw_s)
+
+head(nw_s)
+match("Ys",names(nw_s))
+
+# create bounds for Ys
+bds <- matrix(c(5, 1, 7), nrow = 1, ncol = 3)
+
+imputed_new_s <- amelia(
+  set.seed = 1234,
+  nw_s,
+  cs = c("Id"),
+  ts = c("wave"),
+  m = 10,
+  # number of imputations
+  ords = "Ys",
+  noms = c("EthnicCats_b", "GenCohort"),
+  idvars = c("Wave", "As", "dys"),
+  lags = "Ys",
+  leads = "Ys",
+  polytime = 2,
+  # Allow polynomial, if 3,
+  intercs = F,
+  # too many vars
+  bounds = bds,
+  # lower upper bounds to Mus Prej
+  empri = .05 * nrow(nw_s)
+) # ridge prior see: Amelia pdf documentation p.23
+
+saveRDS(imputed_new_s, here::here( "mods", "imputed_new_s.rds"))
+imputed_new_s <- readRDS( here::here( "mods", "imputed_new_s.rds"))
+
+
+# easier for brms
+nine_dat_s<- miceadds::datlist2mids(imputed_new_s$imputations)
+
+
+table1::table1( ~ Ys |
+                  Wave ,
+                data = imputed_new_s$imputations$imp1,
+                overall = FALSE)
+table1::table1( ~ Ys |
+                  Wave ,
+                data = imputed_new_s$imputations$imp2,
+                overall = FALSE)
+table1::table1( ~ Ys |
+                  Wave ,
+                data = imputed_new_s$imputations$imp3,
+                overall = FALSE)
+table1::table1( ~ Ys |
+                  Wave ,
+                data = imputed_new_s$imputations$imp4,
+                overall = FALSE)
+table1::table1( ~ Ys |
+                  Wave ,
+                data = imputed_new_s$imputations$imp5,
+                overall = FALSE)
+table1::table1( ~ Ys |
+                  Wave ,
+                data = imputed_new_s$imputations$imp6,
+                overall = FALSE)
+table1::table1( ~ Ys |
+                  Wave ,
+                data = imputed_new_s$imputations$imp7,
+                overall = FALSE)
+table1::table1( ~ Ys |
+                  Wave ,
+                data = imputed_new_s$imputations$imp8,
+                overall = FALSE)
+table1::table1( ~ Ys |
+                  Wave ,
+                data = imputed_new_s$imputations$imp9,
+                overall = FALSE)
+table1::table1( ~ Ys |
+                  Wave ,
+                data = imputed_new_s$imputations$imp10,
+                overall = FALSE)
+
+  # original -- VERY CLOSE!!
+table1::table1( ~ Ys |
+                  Wave ,
+                data = bind_zero1_s,
+                overall = FALSE)
+
+
+
+# prepare data
+bind_zero1_sz <-
+  bind_zero1_s %>% mutate(
+    pol_bz = as.numeric(scale(pol_bz)),
+    rel_bz = as.numeric(scale(rel_bz)),
+    partner_bz = as.numeric(scale(partner_bz)),
+    parent_bz = as.numeric(scale(parent_bz)),
+    nzdep_bz = as.numeric(scale(nzdep_bz)),
+    male_2z = as.numeric(scale(male_2z)),
+    employed_bz = as.numeric(scale(employed_bz)),
+    edu_bz = as.numeric(scale(edu_bz)) ,
+    ubran_bz = as.numeric(scale(ubran_bz)) ,
+    EthnicCats_b = as.numeric(factor(EthnicCats_b)),
+    GenCohort = as.numeric(factor(GenCohort))
+  )
+
+
+
+imp_r <-
+  brm(
+    Ys ~  wave + EthnicCats_b + edu_bz + employed_bz +  pol_bz + male_2z +  nzdep_bz +
+      parent_bz + partner_bz +  rel_bz + ubran_bz + GenCohort + (1 | Id),
+    data = bind_zero1_sz,
+    backend = "cmdstanr",
+    file = here::here("mods", "imp_r.rds")
+  )
+
+
+imp_s <- brm_multiple(Ys ~  wave + (1|Id),  data = nine_dat_s, backend = "cmdstanr",
+                      file = here::here("mods","imp_s.rds"))
+
+
+summary(imp_r)
+summary(imp_s)
+
+
+sens_orig  <-
+  plot(conditional_effects(
+    imp_r,
+    "wave",
+    ndraws = 100,
+    spaghetti = T))#,
+#points = T, alpha = .01,
+#point_args = list(alpha = .005, width = .1))
+
+saveRDS(sens_orig, here::here("mods", "sens_orig.rds"))
+sens_orig<- readRDS(sens_orig, here::here("mods", "sens_orig.rds"))
+sens_imp  <- plot(conditional_effects(imp_s, "wave",ndraws = 100,  spaghetti = T))
+saveRDS(sens_imp, here::here("mods", "sens_imp.rds"))
+
+#points = T, alpha = .01,
+#point_args = list(alpha = .005, width = .1))
+sessionInfo()
+saveRDS(sens_imp, here::here("mods", "sens_imp.rds"))
+
+# graph
+sens_i_9  <- sens_imp$`wave` +   scale_y_continuous(limits=c(3.5,4.5)) + #scale_fill_manual(values=c("#CC6666")) +
+  labs(title="Deleted and fully imputed model: b = .06",
+       subtitle = "Years 2012-2018, N = 33,735 (2012 & 2016 Cohorts)",
+       y= "Muslim Warmth",
+       x = "Years: 2012-2018 (pre-attack)") + theme_classic() + scale_colour_okabe_ito(alpha =.5) +
+  annotate(
+    "rect",
+    xmin = 4,
+    xmax = 6,
+    ymin = 3.5,
+    ymax = 4.25,
+    alpha = .1,
+    fill = "red") +
+  annotate("text",
+           x = 5,
+           y = 4.35,
+           label = "Deleted & then\nmultiply-imputed")
+
+sens_i_9
+# Graph
+library(scales)
+sens_i_9a  <- sens_orig$`wave` +   scale_y_continuous(limits=c(3.5,4.5)) + #scale_fill_manual(values=c("#CC6666")) +
+  labs(title="No imputation model: b = .06",
+       subtitle = "Years 2012-2018, N = 33,735 (2012 & 2016 Cohorts)",
+       y= "Muslim Warmth",
+       x = "Years: 2012-2018 (pre-attack)") + theme_classic() + scale_colour_okabe_ito(alpha =.5)
+
+sens_i_9a
+
+comb_sens_graph<- sens_i_9a  + sens_i_9 + plot_annotation(tag_levels = "A")
+
+
+
+
+
+comb_sens_graph
+
+comb_sens_graph
+ggsave(
+  comb_sens_graph,
+  path = here::here(here::here( "figs")),
+  width = 16,
+  height = 9,
+  units = "in",
+  filename = "comb_sens_graph.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 1000
+)
+
+# rdd graph ---------------------------------------------------------------
+
+### Wave 10 Only
+library(dplyr)
+library()
+sadi <- df %>%
+  dplyr::filter((Wave == 2012 &  YearMeasured==1 )|
+                  (Wave == 2013 &  YearMeasured==1 )|
+                  (Wave == 2014 &  YearMeasured==1 )|
+                  (Wave == 2015 &  YearMeasured==1 )|
+                  (Wave == 2016 &  YearMeasured==1 )|
+                  (Wave == 2017 &  YearMeasured==1 )|
+                (Wave == 2018 &  YearMeasured==1 )|
+                (Wave = 2019 & YearMeasured==1))%>%
+  droplevels() %>%
+  select(Warm.Muslims, TSCORE, Id) %>%
+  dplyr::mutate(timeline = make_date(year = 2009, month = 6, day = 30) + TSCORE) %>%
+  dplyr::filter(timeline > "2012-06-06") %>%
+  # dplyr:::count(day = floor_date(timeline, "day"))%>%
+  dplyr::mutate(Attack_Condition = factor(
+    ifelse(timeline < "2019-03-15", 0, 1),
+    labels= c("Baseline","Post-attack")))%>%
+  arrange(timeline,Attack_Condition)
+
+sadi <-as.data.frame(sadi)
+head(sadi)
+min(sadi$day)
+
+ids <- df %>%
+  dplyr::filter((Wave == 2012 &  YearMeasured==1 )|
+                  (Wave == 2013 &  YearMeasured==1 )|
+                  (Wave == 2014 &  YearMeasured==1 )|
+                  (Wave == 2015 &  YearMeasured==1 )|
+                  (Wave == 2016 &  YearMeasured==1 )|
+                  (Wave == 2017 &  YearMeasured==1 )|
+                  (Wave == 2018 &  YearMeasured==1 )|
+                  (Wave = 2019 & YearMeasured==1))%>%
+  group_by(Id,Wave) %>%
+  select(Id, Wave)
+
+length(unique(ids$Id))
+
+table1::table1( ~ Attack_Condition, data = sadi )
+
+library(ggsci)
+rdd <- ggplot(sadi, aes(x = timeline, y = Warm.Muslims, color = Attack_Condition)) +
+  geom_jitter(alpha = .01, width = 1) +
+  stat_smooth(method = "gam") +
+  theme(legend.position = "bottom") +
+  labs(title = "Strong increase in acceptace after attacks\n(N = 67,858; years 2012-2021)",
+         subtitle = "GAM: discontinuity at attacks",
+       y = "Muslim Warmth",
+       x = "NZAVS Time 4 - 12 (2012-2021)") +
+  scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic()
+
+rdd
+
+
+comb_sens_graph2<- rdd  /(sens_i_9a  + sens_i_9) + plot_annotation(tag_levels = "A")
+comb_sens_graph2
+
+
+ggsave(
+  comb_sens_graph2,
+  path = here::here(here::here( "figs")),
+  width = 10,
+  height = 10,
+  units = "in",
+  filename = "comb_sens_graph2.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 1000
+)
+
+
+# Combine graphs
+
+
+
+
+
+### Graph of Timeline
+#
+# sadi2 <- df %>%
+#   filter(Wave == 2018 & YearMeasured == 1) %>%
+#   # drop_levels() %>%
+#   select(Warm.Muslims, TSCORE) %>%
+#   dplyr::mutate(timeline = make_date(year = 2009, month = 6, day = 30) + TSCORE) %>%
+#   dplyr::filter(timeline > "2018-06-06") %>%
+#   dplyr:::count(day = floor_date(timeline, "day")) %>%
+#   dplyr::mutate(Attack_Condition = factor(
+#     ifelse(day < "2019-03-15", 0, 1),
+#     labels = c("Baseline", "Post-attack")
+#   )) %>%
+#   arrange(day, Attack_Condition)
+#
+# sadi2
+# dates_vline2<- as.Date("2019-03-15")
+# dates_vline2b<-which(sadi2$day %in% dates_vline2)
+#
+# dates_vline3<- as.Date("2019-06-15")
+# dates_vline3b<-which(sadi2$day %in% dates_vline3)
+#
+# #dates_vline3<- as.Date("2019-06-18")
+#
+# lds3 <- ggplot(sadi2, aes(day, n)) +
+#   geom_col(aes(fill = Attack_Condition)) +
+#   scale_x_date(date_labels = "%b/%Y") +     #  limits = c(as.Date("2018-06-01"), as.Date("2021-10-16")))  +
+#   scale_y_continuous(expand = c(0, 0), limits = c(0, NA)) +
+#   geom_vline(xintercept = as.numeric(sadi2$day[dates_vline2b]),
+#              col = "red",
+#              linetype = "dashed") +
+#   geom_vline(xintercept = as.numeric(sadi2$day[dates_vline3b]),
+#              col = "red",
+#              linetype = "dashed") +
+#   labs(x = "NZAVS Waves years 2018 - 2021 daily counts by condition",
+#        y = "Count of Responses",
+#        #  title = "Data Collection for RDD Analysis of Mosque Attacks",
+#        subtitle = "Data Collection Wave 10 (after June 6)")+
+#   scale_colour_npg(alpha =.1) +
+#   annotate(
+#     geom = "text",
+#     x = as.Date("2019-05-01"),
+#     y = 2300,
+#     label = "90 Days\nafter attacks") +
+#   theme_classic()
+#
+#
+# rdd_graph <- lds3/rdd + plot_layout(guides = 'collect') + plot_annotation(tag_levels = "i", "Replication of Regression Discontinuity Analysis")
+#
+
+rdd_graph
+
+# zero table --------------------------------------------------------------
+
+
+zt_s <-
+  table1::table1( ~ Ys |
+                    As * Wave,
+                  data = bind_zero1_s,
+                  overall = F,
+                  transpose = F)
+
+t1kable(zt_s, format = "latex")
+
+zt_s
+
+
+
+
+
+
 # impute stationary  ---------------------------------------------------------------
-
-
 
 km_zero_st18 <- ka3 %>%
   filter((As == 0 &  Wave == "Time10")) %>%
