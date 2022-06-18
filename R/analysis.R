@@ -4814,6 +4814,29 @@ ggsave(
   dpi = 1000
 )
 
+
+## additional graphs
+posterior_r <- as.matrix(imp_r)
+posterior <- as.matrix(imp_s)
+
+p1 <- mcmc_areas(imp_r,
+           pars = c("b_wave"),
+           prob = 0.99)
+
+
+
+
+saveRDS(p2, here::here("mods", "p2"))
+
+p1 <- mcmc_intervals(imp_r, pars = c("b_wave", "sigma"))
+p1
+
+p1a <- mcmc_hist(posterior_r, pars = c("intercept",  "wave", "sigma"))
+
+p2<- mcmc_intervals(posterior,
+                pars = c("b_wave", "sigma"))
+
+
 # rdd graph ---------------------------------------------------------------
 
 ### Wave 10 Only
@@ -4879,7 +4902,7 @@ comb_sens_graph2
 ggsave(
   comb_sens_graph2,
   path = here::here(here::here( "figs")),
-  width = 10,
+  width = 11,
   height = 10,
   units = "in",
   filename = "comb_sens_graph2.jpg",
