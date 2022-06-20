@@ -4920,6 +4920,31 @@ imp_s <- brm_multiple(Ys ~  wave + (1|Id),  data = nine_dat_s, backend = "cmdsta
 summary(imp_r)
 summary(imp_s)
 
+tab_imp_r <-
+  lazerhawk::brms_SummaryTable(imp_r, panderize = F)
+
+
+# table in latex
+tab_imp_r [1:2, ] %>%
+  kable(booktabs = T,
+        "latex",
+        caption =  "Sensitivity anlysis: Marginal effect of attack on warmth to Muslims, observed",
+        digits = 2) %>%
+  print()
+
+
+tab_imp_s <-
+  lazerhawk::brms_SummaryTable(imp_s, panderize = F)
+
+
+# table in latex
+tab_imp_s %>%
+  kable(booktabs = T,
+        "latex",
+        caption =  "Sensitivity anlysis: Marginal effect of attack on warmth to Muslims, imputed",
+        digits = 2) %>%
+  print()
+
 
 sens_origA  <- conditional_effects(
     imp_r,
