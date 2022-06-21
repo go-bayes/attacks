@@ -5124,9 +5124,6 @@ comb_sens_graph3<- ldsA / rdd  + plot_annotation(tag_levels = "A")
 # check
 comb_sens_graph3
 
-comb_sens_graph3
-
-
 ggsave(
   comb_sens_graph3,
   path = here::here(here::here( "figs")),
