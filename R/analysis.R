@@ -629,6 +629,45 @@ all_d <- df %>%
   ) %>%
   dplyr::filter(YearMeasured != -1) %>% # remove people who passed away
   droplevels() %>%
+
+
+
+  EmotionRegulation01.T10,
+  EmotionRegulation02.T10,
+  EmotionRegulation03.T10,
+  EmotionRegulation01.T11,
+  EmotionRegulation02.T11,
+  EmotionRegulation03.T11,
+  EmotionRegulation01.T12,
+  EmotionRegulation02.T12,
+  EmotionRegulation03.T12,
+
+
+  T1.EmotionRegulation = as.numeric(rep(NA, nrow(erdat.1))),
+  Bodysat.T01
+  T1.VENGEFUL.RUMIN
+
+
+Am satisfied with the appearance, size and shape of my body.
+
+Emotion Regulation
+When I feel negative emotions, my emotions feel out of control.
+When I feel negative emotions, I suppress or hide my emotions.
+When I feel negative emotions, I change the way I think to help me stay calm.
+
+
+Self-control
+In general, I have a lot of self-control.
+I wish I had more self-discipline.
+Forgivingness versus Vengeful Rumination
+Sometimes I can't sleep because of thinking about past wrongs I have suffered.
+I can usually forgive and forget when someone does me wrong.
+I find myself regularly thinking about past times that I have been wronged.
+Perfectionism Discrepancy Subscale
+Doing my best never seems to be enough.
+My performance rarely measures up to my standards.
+I am hardly ever satisfied with my performance.
+
   dplyr::mutate(org2012 =  ifelse(Wave == 2012 &
                                     YearMeasured == 1, 1, 0)) %>%
   group_by(Id) %>%
@@ -5907,7 +5946,7 @@ fitted_lines %>%
 library(ggplot2)
 library(magick)
 library(patchwork)
-ggsave
+
 
 
 dag1 <-
@@ -5942,6 +5981,26 @@ dag5 <-
   )),
   interpolate = T)
 dag5
+
+
+### NEW
+
+a0 <-
+  image_ggplot(image_read(here::here(
+    "figs", "a0.tiff"
+  )),
+  interpolate = T)
+
+a0
+
+a1 <-
+  image_ggplot(image_read(here::here(
+    "figs", "a1.tiff"
+  )),
+  interpolate = T)
+
+a1
+
 
 imp0plot <-
   image_ggplot(image_read(here::here( "mods", "amelia-00.jpeg")),
@@ -5996,16 +6055,20 @@ ggsave(
 )
 
 
-
+d
+### USE
 fig1 <- ggarrange(
   lds2,
-  dag5,
-  labels = c("A", "B"),
+  a1,
+  a0,
+  labels = c("A", "B", "C"),
   #  widths = c(1, 1),
-  heights = c(1.5, 2),
+  heights = c(2, 1, 1.25),
   # ncol = 2,
-  nrow = 2
+  nrow = 3
 )
+
+
 
 fig1
 ggsave(
@@ -6020,6 +6083,43 @@ ggsave(
   dpi = 800
 )
 
+
+
+fig1 <- ggarrange(
+  lds2,
+  a1,
+  a0,
+  labels = c("A", "B", "C"),
+  #  widths = c(1, 1),
+  heights = c(2, 1, 1.5),
+  # ncol = 2,
+  nrow = 3
+)
+
+onlydags <- ggarrange(
+  a1,
+  a0,
+  labels = c("A", "B"),
+  #  widths = c(1, 1),
+  heights = c(1, 1.5),
+  # ncol = 2,
+  nrow = 2
+)
+onlydags
+
+
+##
+ggsave(
+  onlydags,
+  path = here::here( "figs"),
+  width = 10,
+  height = 10,
+  units = "in",
+  filename = "onlydags.jpg",
+  device = "jpeg",
+  limitsize = FALSE,
+  dpi = 800
+)
 
 #USED
 
