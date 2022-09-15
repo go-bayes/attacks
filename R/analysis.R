@@ -656,19 +656,7 @@ When I feel negative emotions, I suppress or hide my emotions.
 When I feel negative emotions, I change the way I think to help me stay calm.
 
 
-Self-control
-In general, I have a lot of self-control.
-I wish I had more self-discipline.
-Forgivingness versus Vengeful Rumination
-Sometimes I can't sleep because of thinking about past wrongs I have suffered.
-I can usually forgive and forget when someone does me wrong.
-I find myself regularly thinking about past times that I have been wronged.
-Perfectionism Discrepancy Subscale
-Doing my best never seems to be enough.
-My performance rarely measures up to my standards.
-I am hardly ever satisfied with my performance.
-
-  dplyr::mutate(org2012 =  ifelse(Wave == 2012 &
+dplyr::mutate(org2012 =  ifelse(Wave == 2012 &
                                     YearMeasured == 1, 1, 0)) %>%
   group_by(Id) %>%
   dplyr::mutate(hold = mean(org2012, na.rm = TRUE)) %>%  # Hack
