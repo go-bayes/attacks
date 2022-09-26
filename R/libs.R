@@ -1,10 +1,5 @@
-# Analyisis
-# author Joseph Bulbulia: joseph.bulbulia@gmail.com
-# created by assembling materials from original analysis into one script.
-
-
+# libraries
 # packages ----------------------------------------------------------------
-
 #libraries required for analysis
 library("here") # file management
 library("equatiomatic") # equations
@@ -28,7 +23,7 @@ library("bayesplot") # graphs
 library("ggokabeito")   # color palette
 library("gghalves")     #  half geoms, not used
 library("ggbeeswarm")   # Special distribution-shaped point jittering, not used
-library("emmeans") # estimate marginal means
+library("emmeans") # estimate marginal means, not used
 library("table1") # tables /now with latex
 library("tidyverse") # data wrangling
 library("sjstats") # stat summaries
@@ -38,23 +33,14 @@ library("future") #parrallel processing
 library("brms") # bayesian estimation
 library("ggpubr") # graphs
 library("ggsci") # graphs
+library("magick")  # manipulate dags
+library("splines") ## rdd analysis
+library("mgcv")# rdd analysis
+library("rdrobust")# rdd analysis
+library("stargazer")# rdd analysis
 
-# if you need to increase vector limit:
-# library(usethis)
-# usethis::edit_r_environ()
+
 
 # rstan options
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores ())
-
-
-# import data -------------------------------------------------------------
-#df <- readRDS(here::here("data_raw", "df"))# orig data
-
-# jittered data for reproduction (NZAVS ethics does not permit original data deposited
-# to internet. However, as per note, original data can be obtained, just email c.sibley@auckland.ac.nz or the chair of the U of Auckland ethics committee.
-
-df <- readRDS(here::here("data", "df_s"))
-
-
-### Analysis is now broken down into individual R scripts.  Best to run these sequentially.  Note that the key imputation is done in script #5 and the bayesian anlysis (and sensitivity analysis) is in script #6.
