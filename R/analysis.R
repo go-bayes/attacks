@@ -47,7 +47,6 @@ library("ggsci") # graphs
 rstan_options(auto_write = TRUE)
 options(mc.cores = parallel::detectCores ())
 
-
 # import data -------------------------------------------------------------
 #df <- readRDS(here::here("data_raw", "df"))# orig data
 
@@ -58,3 +57,6 @@ df <- readRDS(here::here("data", "df_s"))
 
 
 ### Analysis is now broken down into individual R scripts.  Best to run these sequentially.  Note that the key imputation is done in script #5 and the bayesian anlysis (and sensitivity analysis) is in script #6.
+
+
+## To tidy further before publication
