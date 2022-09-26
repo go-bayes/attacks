@@ -4,7 +4,7 @@ This is a repository for investigating "Causal Effects of Terroris on Acceptance
 ## Where
 The orginal analysis scripts for this study can be found in the "old" directory. No attempt has been made to edit or document these materials for clarity. These are for archival purposes only. 
 
-To reconstruct the analysis, please use the "ānalysis.R" script in the "R" directory. 
+To reconstruct the analysis, please start with the script numbered "1" in the "R" directory. From there, "2", "3" ...
 
 ## Data
 To enable reproducibility, random noise have been added to the dataset to protect the anonymity of participants in the NZAVS. The synthetic data can be found in the "data" folder.
@@ -18,10 +18,5 @@ A de-identified original dataset is available for the purposes of reproducticibi
 Materials are licensed under Creative Commons Attribution CC BY-NC-SA 4.0.
 
 
-
-
-
-
-
 # Questions
-joseph.bulbulia@gmail.com
+joseph.bulbulia@vuw.ac.nz
