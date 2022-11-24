@@ -32,6 +32,7 @@ pull_path <-
   )
 dat <- readRDS(pull_path)
 
+table(dat$Wave)
 # wrangle data
 # create basic outcomewide dataframe from which we will select the a small dataframe.
 dat_bayes <- dat |>
@@ -82,15 +83,17 @@ dat_bayes <- dat |>
     YearMeasured
   ) |>
   dplyr::mutate(Employed = as.numeric(Employed)) |>
+  dplyr::mutate(Year_drop2021 = if_else( Wave == 2020 & YearMeasured == -1, 1, 0))%>%
   dplyr::filter(
     (Wave ==    2016 & YearMeasured == 1) |
       (Wave ==  2017 & YearMeasured != -1) |
       (Wave ==  2018 & YearMeasured != -1) |
       (Wave ==  2019 & YearMeasured != -1) |
-      (Wave ==  2020 & YearMeasured != -1)
-  ) %>%
-  dplyr::filter(YearMeasured != -1) %>% # remove people who passed away
+      (Wave ==  2020 & YearMeasured != -1) |
+      Wave == 2021 )%>%
   droplevels() |>
+  dplyr::filter(YearMeasured != -1) %>% # remove people who passed away
+  ungroup() %>%
   dplyr::mutate(org2016 =  ifelse(Wave == 2016 &
                                     YearMeasured == 1, 1, 0)) %>%
   group_by(Id) %>%
@@ -113,15 +116,19 @@ dat_bayes <- dat |>
         TSCORE_b + 1094,
         # leap
         ifelse(YearMeasured == 0 &
-                 Wave == 2020, TSCORE_b + 1459, TSCORE)
+                 Wave == 2020, TSCORE_b + 1459,
+               if_else(YearMeasured == 0 &
+                         Wave == 2021,   TSCORE_b + 1824,
+                       TSCORE)
       )
     )
-  )) %>%
+  )) )  %>%
   dplyr::mutate(Attack = as.numeric((ifelse(
     (TSCORE_i >= 3545 &
        Wave == 2018) |
       (Wave == 2019 |
-         Wave == 2020), 1, 0
+         Wave == 2020|
+         Wave == 2021), 1, 0
   )))) %>% # All 2019s even if NA need to be 1
   dplyr::mutate(dys = (TSCORE_i - min(TSCORE_i))) %>%
   dplyr::mutate(
@@ -241,17 +248,19 @@ dat_bayes <- dat |>
 
 # relabel wave
 levels(dat_bayes$Wave) <-
-  c("Time8", "Time9", "Time10", "Time11", "Time12")
+  c("Time8", "Time9", "Time10", "Time11", "Time12", "Time13")
 
 length(unique(dat_bayes$Id)) # 19820
 
+table(dat_bayes$Wave)
 # image
 #modelsummary::datasummary_crosstab(mean(Warm.Muslims) ~ Wave * as.factor(Attack), data = dat_bayes)
 
 
 # check
-x <- table1::table1( ~ Y_Warm.Muslims |
+x <- table1::table1( ~ Y_Warm.Muslims + Y_Warm.Overweight|
                   factor(Wave) * factor(As), data = dat_bayes, overall = F)
+x
 
 kable(x, format = "latex", booktabs = TRUE)
 t1kable(x, format = "latex")
@@ -268,7 +277,7 @@ dt_five_prep <- dat_bayes %>%
   mutate(As = (
     ifelse(
       Wave == "Time10" & Attack == 1 | Wave == "Time11" |
-        Wave == "Time12",
+        Wave == "Time12"| Wave == "Time13",
       0,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -283,7 +292,7 @@ dt_five_prep <- dat_bayes %>%
     Y_Warm.Asians = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12",
+        Wave == "Time12"| Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -298,7 +307,7 @@ dt_five_prep <- dat_bayes %>%
     Y_Warm.Overweight = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12",
+        Wave == "Time12"| Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -313,7 +322,7 @@ dt_five_prep <- dat_bayes %>%
     Y_Warm.Chinese = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12",
+        Wave == "Time12"| Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -343,7 +352,7 @@ mutate(
   Y_Warm.Immigrants = ifelse(
     Wave == "Time10" & Attack == 1 |
       Wave == "Time11" |
-      Wave == "Time12",
+      Wave == "Time12"| Wave == "Time13",
     NA,
     ifelse(
       Wave == "Time10" & Attack == 0 |
@@ -358,7 +367,7 @@ mutate(
     Y_Warm.Indians = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12",
+        Wave == "Time12"| Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -373,7 +382,7 @@ mutate(
     Y_Warm.Maori = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12",
+        Wave == "Time12"| Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -403,7 +412,7 @@ mutate(
   Y_Warm.Muslims = ifelse(
     Wave == "Time10" & Attack == 1 |
       Wave == "Time11" |
-      Wave == "Time12",
+      Wave == "Time12"| Wave == "Time13",
     NA,
     ifelse(
       Wave == "Time10" & Attack == 0 |
@@ -418,7 +427,7 @@ mutate(
     Y_Warm.NZEuro = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12",
+        Wave == "Time12"| Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -433,7 +442,7 @@ mutate(
     Y_Warm.Pacific = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12",
+        Wave == "Time12"|Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -517,7 +526,8 @@ table(dt_five_zero_noimpute$wave)
 dt_five_one_noimpute_temp <- dt_five_bind |>
   filter((As == 1 & Wave == "Time10") |
            (As == 1 & Wave == "Time11") |
-           (As == 1 & Wave == "Time12")) %>%
+           (As == 1 & Wave == "Time12")|
+           (As == 1 & Wave == "Time13")) %>%
   mutate(wave = as.numeric(Wave)) |>
   arrange(Id, Wave)
 
@@ -527,26 +537,27 @@ dt_five_one_noimpute$wave  <- dt_five_one_noimpute_temp$wave - 3
 
 table(dt_five_one_noimpute$wave) # Correct
 
-
+str(dt_five_one_noimpute)
 
 # Check missing
 library(naniar)
 naniar::gg_miss_var(dt_five_one_noimpute)
 naniar::gg_miss_var(dt_five_one_noimpute)
 
+colnames(dt_five_one_noimpute)
 # naniar::vis_miss(dt_five_one_noimpute,
 #                  warn_large_data = FALSE)
 
 
 ## save data
-saveRDS(dt_five_zero_noimpute, here::here(push_mods,"dt_five_zero_noimpute-attacks"))
+saveRDS(dt_five_zero_noimpute, here::here(push_mods,"dt_five_zero_noimpute-attacks.rds"))
 
-saveRDS(dt_five_one_noimpute, here::here(push_mods,"dt_five_one_noimpute-attacks"))
+saveRDS(dt_five_one_noimpute, here::here(push_mods,"dt_five_one_noimpute-attacks.rds"))
 
 
 
-dt_five_zero_noimpute <- readRDS( here::here(push_mods,"dt_five_zero_noimpute-attacks"))
-dt_five_one_noimpute <- readRDS( here::here(push_mods,"dt_five_one_noimpute-attacks"))
+dt_five_zero_noimpute <- readRDS( here::here(push_mods,"dt_five_zero_noimpute-attacks.rds"))
+dt_five_one_noimpute <- readRDS( here::here(push_mods,"dt_five_one_noimpute-attacks.rds"))
 
 
 # bayes models ------------------------------------------------------------
@@ -594,7 +605,7 @@ bform_mus <-
       Male_cZ +
       Edu_cZ  +
       Employed_cZ +
-      EthCat_cZ  +
+      EthCat_c  +
       NZDep.2013_cZ +
       NZSEI13_cZ  +
       Parent_cZ  +
@@ -606,6 +617,7 @@ bform_mus <-
       Urban_cZ + (1 | Id)
   )
 
+
 m_0 <- brm(
   backend = "cmdstanr",
   data = dt_five_zero_noimpute,
@@ -613,10 +625,16 @@ m_0 <- brm(
   bform_mus,
   prior = prior,
   init = 0,
-  file = here::here(push_mods,"five-zero-MUS-attacks.rds")
+  warmup = 500,
+  iter =  1000,
+  chains = 1,
+  sample_prior = "only",
+  file = here::here(push_mods,"prior-only-five-zero-MUS-attacks.rds")
 )
 
+summary(m_0)
 
+# prior only
 m_1 <- brm(
   backend = "cmdstanr",
   data = dt_five_one_noimpute,
@@ -624,7 +642,10 @@ m_1 <- brm(
   bform_mus,
   prior = prior,
   init = 0,
-  file = here::here(push_mods,"five-zero-MUS-attacks.rds")
+  warmup = 500,
+  iter =  1000,
+  chains = 1,
+  file = here::here(push_mods,"prior-only-five-one-MUS-attacks.rds")
 )
 
 
@@ -647,7 +668,7 @@ bform_overweight <-
       Male_cZ +
       Edu_cZ  +
       Employed_cZ +
-      EthCat_cZ  +
+      EthCat_c  +
       NZDep.2013_cZ +
       NZSEI13_cZ  +
       Parent_cZ  +
@@ -677,7 +698,7 @@ m_4 <- brm(
   bform_overweight,
   prior = prior,
   init = 0,
-  file = here::here(push_mods,"five-zero-MUS-attacks.rds")
+  file = here::here(push_mods,"five-one-OVERWEIGHT-attacks.rds")
 )
 
 
