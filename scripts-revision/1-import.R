@@ -24,15 +24,20 @@ push_mods <-
 push_figs <-
   fs::path_expand("~/The\ Virtues\ Project\ Dropbox/outcomewide/attacks/figs")
 
-
+# install.packages("arrow", repos = c(arrow = "https://nightlies.apache.org/arrow/r", getOption("repos")))
 # read data (again bulbulia only) If replicating use the jittered data in the data folder
 pull_path <-
   fs::path_expand(
-    "~/The\ Virtues\ Project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/ldf.5"
+    "/Users/joseph/The\ Virtues\ Project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/time13"
   )
-dat <- readRDS(pull_path)
 
-table(dat$Wave)
+pull_path
+#arrow::write_parquet(time13, (here::here("data", "time13")))
+# wow this is fast
+#time13 <- read_parquet( (here::here("data", "time13")))
+
+dat <- arrow::read_parquet(pull_path)
+
 # wrangle data
 # create basic outcomewide dataframe from which we will select the a small dataframe.
 dat_bayes <- dat |>
@@ -267,7 +272,7 @@ t1kable(x, format = "latex")
 
 # Missing data problem
 t2 <- table1::table1( ~ Y_Warm.Muslims |
-                    Wave * As, data = dat_bayes, overall = F)
+                    Wave * as.factor(As), data = dat_bayes, overall = F)
 
 # data prep
 
@@ -550,21 +555,21 @@ colnames(dt_five_one_noimpute)
 
 
 ## save data
-saveRDS(dt_five_zero_noimpute, here::here(push_mods,"dt_five_zero_noimpute-attacks.rds"))
+arrow::write_parquet(dt_five_zero_noimpute, here::here(push_mods,"dt_five_zero_noimpute-attacks.rds"))
 
-saveRDS(dt_five_one_noimpute, here::here(push_mods,"dt_five_one_noimpute-attacks.rds"))
+arrow::write_parquet(dt_five_one_noimpute, here::here(push_mods,"dt_five_one_noimpute-attacks.rds"))
 
 
 
-dt_five_zero_noimpute <- readRDS( here::here(push_mods,"dt_five_zero_noimpute-attacks.rds"))
-dt_five_one_noimpute <- readRDS( here::here(push_mods,"dt_five_one_noimpute-attacks.rds"))
+dt_five_zero_noimpute <- arrow::read_parquet( here::here(push_mods,"dt_five_zero_noimpute-attacks.rds"))
+dt_five_one_noimpute <-  arrow::read_parquet( here::here(push_mods,"dt_five_one_noimpute-attacks.rds"))
 
 
 # bayes models ------------------------------------------------------------
 
 
 prior = c(
-  set_prior('normal(0, 1)', class = "b", coef = "wave"),
+  set_prior('normal(0, .25)', class = "b", coef = "wave"),
   set_prior("student_t(3, 4, 1)", class = "Intercept"),
   set_prior("cauchy(0, 1)", class = "sigma")
 )
@@ -617,7 +622,7 @@ bform_mus <-
       Urban_cZ + (1 | Id)
   )
 
-
+# test
 m_0 <- brm(
   backend = "cmdstanr",
   data = dt_five_zero_noimpute,
@@ -625,14 +630,8 @@ m_0 <- brm(
   bform_mus,
   prior = prior,
   init = 0,
-  warmup = 500,
-  iter =  1000,
-  chains = 1,
-  sample_prior = "only",
-  file = here::here(push_mods,"prior-only-five-zero-MUS-attacks.rds")
+  file =  here::here(push_mods,"five-zero-MUS-attacks-use.rds")
 )
-
-summary(m_0)
 
 # prior only
 m_1 <- brm(
@@ -642,10 +641,7 @@ m_1 <- brm(
   bform_mus,
   prior = prior,
   init = 0,
-  warmup = 500,
-  iter =  1000,
-  chains = 1,
-  file = here::here(push_mods,"prior-only-five-one-MUS-attacks.rds")
+  file = here::here(push_mods,"five-one-MUS-attacks-use.rds")
 )
 
 
@@ -687,7 +683,7 @@ m_3 <- brm(
   bform_overweight,
   prior = prior,
   init = 0,
-  file = here::here(push_mods,"five-zero-OVERWEIGHT-attacks.rds")
+  file = here::here(push_mods,"five-zero-OVERWEIGHT-attacks-use.rds")
 )
 
 
@@ -698,7 +694,7 @@ m_4 <- brm(
   bform_overweight,
   prior = prior,
   init = 0,
-  file = here::here(push_mods,"five-one-OVERWEIGHT-attacks.rds")
+  file = here::here(push_mods,"five-one-OVERWEIGHT-attacks-use.rds")
 )
 
 
