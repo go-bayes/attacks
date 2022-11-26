@@ -38,6 +38,10 @@ pull_path
 
 dat <- arrow::read_parquet(pull_path)
 
+dat$Warm.Overweight
+
+table1::table1(~Warm.Overweight |Wave, data = dat)
+dat$Relid
 # wrangle data
 # create basic outcomewide dataframe from which we will select the a small dataframe.
 dat_bayes <- dat |>
@@ -64,7 +68,7 @@ dat_bayes <- dat |>
     RWA,
     NZSEI13,
     NZDep.2013,
-    Religious,
+    Relid,
     Partner,
     Parent,
     TSCORE,
@@ -86,7 +90,7 @@ dat_bayes <- dat |>
     # not in 8
     TSCORE,
     YearMeasured
-  ) |>
+  )|>
   dplyr::mutate(Employed = as.numeric(Employed)) |>
   dplyr::mutate(Year_drop2021 = if_else( Wave == 2020 & YearMeasured == -1, 1, 0))%>%
   dplyr::filter(
@@ -101,7 +105,15 @@ dat_bayes <- dat |>
   ungroup() %>%
   dplyr::mutate(org2016 =  ifelse(Wave == 2016 &
                                     YearMeasured == 1, 1, 0)) %>%
+  dplyr::mutate(org2017 =  ifelse(Wave == 2017 &
+                                    YearMeasured == 1, 1, 0)) %>%
+  dplyr::mutate(org2018 =  ifelse(Wave == 2018 &
+                                    YearMeasured == 1, 1, 0)) %>%
   group_by(Id) %>%
+  dplyr::mutate(hold3 = mean(org2018, na.rm = TRUE)) %>%  # Hack
+  dplyr::filter(hold3 > 0) %>%
+  dplyr::mutate(hold2 = mean(org2017, na.rm = TRUE)) %>%  # Hack
+  dplyr::filter(hold2 > 0) %>%
   dplyr::mutate(hold = mean(org2016, na.rm = TRUE)) %>%  # Hack
   dplyr::filter(hold > 0) %>%
   ungroup(Id) |>
@@ -173,16 +185,18 @@ dat_bayes <- dat |>
   fill(Male_c) %>%
   dplyr::mutate(NZDep.2013_c = if_else(Wave == "2016", as.numeric(NZDep.2013), NA_real_)) %>%
   fill(NZDep.2013_c) %>%
+  dplyr::mutate(RaceRejAnx_c = if_else(Wave == "2016", as.numeric(RaceRejAnx), NA_real_)) %>%
+  fill(RaceRejAnx_c) %>%
   dplyr::mutate(EthCat_c = if_else(Wave == "2016", as.numeric(EthCat), NA_real_)) %>%
   fill(EthCat_c) %>%
   dplyr::mutate(BornNZ_c = if_else(Wave == "2016", as.numeric(BornNZ), NA_real_)) %>%
   fill(BornNZ_c) %>%
   dplyr::mutate(Pol.Orient_c = if_else(Wave == "2016", (Pol.Orient), NA_real_)) %>%
   fill(Pol.Orient_c) %>%
-  dplyr::mutate(Religious_c = if_else(Wave == "2016", as.numeric(Religious), NA_real_)) %>%
-  fill(Religious_c) %>%
+  dplyr::mutate(Relid_c = if_else(Wave == "2016", as.numeric(Relid), NA_real_)) %>%
+  fill(Relid_c) %>%
   dplyr::mutate(Partner_c = if_else(Wave == "2016", (as.numeric(Partner)), NA_real_)) %>%
-  fill(Partner_c) %>%
+  fill(Partner_c)%>%
   dplyr::mutate(Parent_c = if_else(Wave == "2016", (as.numeric(Parent)), NA_real_)) %>%
   fill(Parent_c) %>%
   dplyr::mutate(Employed_c = if_else(Wave == "2016", (as.numeric(Employed)), NA_real_)) %>%
@@ -197,6 +211,10 @@ dat_bayes <- dat |>
   fill(RWA_c) %>%
   dplyr::mutate(NZSEI13_c = if_else(Wave == "2016", (as.numeric(NZSEI13)), NA_real_)) %>%
   fill(NZSEI13_c) %>%
+  dplyr::mutate(Warm.Muslims_c = if_else(Wave == "2016", (as.numeric(Warm.Muslims)), NA_real_)) %>%
+  fill(Warm.Muslims_c) %>%
+  dplyr::mutate(Warm.Overweight_c = if_else(Wave == "2016", (as.numeric(Warm.Overweight)), NA_real_)) %>%
+  fill(Warm.Overweight_c)%>%
   ungroup() %>%
   select(
     -c(
@@ -209,7 +227,8 @@ dat_bayes <- dat |>
       NZSEI13,
       NZDep.2013,
       Age,
-      Religious,
+      Relid,
+      RaceRejAnx,
       Partner,
       Parent,
       hold,
@@ -235,7 +254,8 @@ dat_bayes <- dat |>
     !is.na(EthCat_c),
     !is.na(Parent_c),
     !is.na(Partner_c),
-    !is.na(Religious_c),
+    !is.na(Relid_c),
+    !is.na(RaceRejAnx_c),
     !is.na(Pol.Orient_c),
     !is.na(Urban_c),
     !is.na(SDO_c),
@@ -247,8 +267,36 @@ dat_bayes <- dat |>
     !is.na(OPENNESS_c),
     !is.na(HONESTY_HUMILITY_c),
     !is.na(EXTRAVERSION_c),
-    !is.na(NEUROTICISM_c)
+    !is.na(NEUROTICISM_c),
+    !is.na(Warm.Muslims_c),
+    !is.na(Warm.Overweight_c)
   ) |>
+  dplyr::mutate(
+    Age_cZ = scale(Age_c),
+    BornNZ_cZ = scale(BornNZ_c),
+    Male_cZ = scale (Male_c),
+    Edu_cZ = scale(Edu_c),
+    Employed_cZ = scale(Employed_c),
+    # EthCat_c = EthCat_c,
+    Parent_cZ = scale(Parent_c),
+    Partner_cZ = scale(Partner_c),
+    Relid_cZ = scale(Relid_c),
+    RaceRejAnx_cZ = scale(RaceRejAnx_c),
+    Pol.Orient_cZ = scale(Pol.Orient_c),
+    Urban_cZ = scale(Urban_c),
+    SDO_cZ = scale(SDO_c),
+    RWA_cZ = scale(RWA_c),
+    NZDep.2013_cZ = scale(NZDep.2013_c),
+    NZSEI13_cZ = scale(NZSEI13_c),
+    AGREEABLENESS_cZ = scale(AGREEABLENESS_c),
+    CONSCIENTIOUSNESS_cZ = scale(CONSCIENTIOUSNESS_c),
+    OPENNESS_cZ = scale(OPENNESS_c),
+    HONESTY_HUMILITY_cZ = scale(HONESTY_HUMILITY_c),
+    EXTRAVERSION_cZ = scale(EXTRAVERSION_c),
+    NEUROTICISM_cZ = scale(NEUROTICISM_c),
+    Warm.Muslims_cZ = scale(Warm.Muslims_c),
+    Warm.Overweight_cZ = scale(Warm.Overweight_c)
+  ) %>%
   dplyr::arrange(Id, Wave)
 
 # relabel wave
@@ -458,12 +506,15 @@ mutate(
       )
     )
   ) |>
-  ungroup() |>
-  dplyr::mutate(across(where(is.numeric), ~ scale(.x), .names = "{col}Z")) %>%
+  ungroup() %>%
   arrange(Id, Wave)
 
 # check
 length(unique(dt_five_prep$Id))
+
+
+skimr::skim(dt_five_prep) %>%
+  arrange(n_missing)
 
 head(dt_five_prep)
 colnames(dt_five_prep)
@@ -549,6 +600,10 @@ library(naniar)
 naniar::gg_miss_var(dt_five_one_noimpute)
 naniar::gg_miss_var(dt_five_one_noimpute)
 
+skimr::skim(dt_five_one_noimpute) %>%
+  arrange(n_missing)
+
+
 colnames(dt_five_one_noimpute)
 # naniar::vis_miss(dt_five_one_noimpute,
 #                  warn_large_data = FALSE)
@@ -591,6 +646,7 @@ name_error = "sd"
 
 library("brms")
 library("rstan")
+
 rstan_options(auto_write = TRUE) # bayesian estimation
 options(mc.cores = parallel::detectCores ()) # use all course
 theme_set(theme_pubclean()) # nice theme
@@ -605,7 +661,7 @@ bform_mus <-
       HONESTY_HUMILITY_cZ +
       EXTRAVERSION_cZ +
       NEUROTICISM_cZ +
-      Age_cZ +
+      Age_cZ+
       BornNZ_cZ +
       Male_cZ +
       Edu_cZ  +
@@ -615,12 +671,16 @@ bform_mus <-
       NZSEI13_cZ  +
       Parent_cZ  +
       Partner_cZ +
-      Pol.Orient_cZ +
-      Religious_cZ +
+      Pol.Orient_cZ+
+      Relid_cZ +
+      RaceRejAnx_cZ +
       SDO_cZ +
       RWA_cZ +
-      Urban_cZ + (1 | Id)
+      Urban_cZ +
+      (1 | Id)
   )
+
+
 
 # test
 m_0 <- brm(
@@ -659,7 +719,7 @@ bform_overweight <-
       HONESTY_HUMILITY_cZ +
       EXTRAVERSION_cZ +
       NEUROTICISM_cZ +
-      Age_cZ +
+      Age_cZ+
       BornNZ_cZ +
       Male_cZ +
       Edu_cZ  +
@@ -669,8 +729,9 @@ bform_overweight <-
       NZSEI13_cZ  +
       Parent_cZ  +
       Partner_cZ +
-      Pol.Orient_cZ +
-      Religious_cZ +
+      Pol.Orient_cZ+
+      Relid_cZ +
+      RaceRejAnx_cZ +
       SDO_cZ +
       RWA_cZ +
       Urban_cZ + (1 | Id)
@@ -696,5 +757,14 @@ m_4 <- brm(
   init = 0,
   file = here::here(push_mods,"five-one-OVERWEIGHT-attacks-use.rds")
 )
+
+
+summary(m_0)
+summary(m_1)
+summary(m_3)
+summary(m_4)
+
+plot(m_3)
+
 
 
