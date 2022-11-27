@@ -557,6 +557,7 @@ dt_five_zero_noimpute_temp2 <- dt_five_bind2 |>
 
 dt_five_zero_noimpute2 <- dt_five_zero_noimpute_temp2
 
+
 dt_five_zero_noimpute2$wave  =  dt_five_zero_noimpute_temp2$wave - 3
 
 table(dt_five_zero_noimpute2$wave)
@@ -589,30 +590,30 @@ library(naniar)
 naniar::gg_miss_var(dt_five_one_noimpute2)
 naniar::gg_miss_var(dt_five_one_noimpute2)
 
-skimr::skim(dt_five_one_noimpute) %>%
+skimr::skim(dt_five_one_noimpute2) %>%
   arrange(n_missing)
 
 
-colnames(dt_five_one_noimpute)
+colnames(dt_five_one_noimpute2)
 # naniar::vis_miss(dt_five_one_noimpute,
 #                  warn_large_data = FALSE)
 
 
 ## save data
 arrow::write_parquet(
-  dt_five_zero_noimpute,
-  here::here(push_mods, "dt_five_zero_noimpute-attacks.rds")
+  dt_five_zero_noimpute2,
+  here::here(push_mods, "dt_five_zero_noimpute-attacks2.rds")
 )
 
-arrow::write_parquet(dt_five_one_noimpute,
-                     here::here(push_mods, "dt_five_one_noimpute-attacks.rds"))
+arrow::write_parquet(dt_five_one_noimpute2,
+                     here::here(push_mods, "dt_five_one_noimpute-attacks2.rds"))
 
 
 
-dt_five_zero_noimpute <-
-  arrow::read_parquet(here::here(push_mods, "dt_five_zero_noimpute-attacks.rds"))
-dt_five_one_noimpute <-
-  arrow::read_parquet(here::here(push_mods, "dt_five_one_noimpute-attacks.rds"))
+dt_five_zero_noimpute2 <-
+  arrow::read_parquet(here::here(push_mods, "dt_five_zero_noimpute-attacks2.rds"))
+dt_five_one_noimpute2 <-
+  arrow::read_parquet(here::here(push_mods, "dt_five_one_noimpute-attacks2.rds"))
 
 
 # bayes models ------------------------------------------------------------
