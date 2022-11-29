@@ -35,18 +35,18 @@ I, along with the three reviewers, commend your work on this important question,
 1. More attention needs to be paid to theoretical expectations. Through which mechanism(s) do we expect the attack to influence attitudes? Which attitudes, specifically? And who is expected to be most affected? You'll see that answers to the last two questions may help you address items (2) and (3) below. 
 
 
-**explain why mechanims are not accessible**
+**In the revised manuscript, we examine effect modification by levels of political identification.**
 
 
 
 2. Both Reviewers #1 and #3 suggest looking at additional attitudes, either as alternative outcomes or look for placebo effects. I would encourage you to explore both, but the latter warrants particular attention. Depending on your theory (see (1)), you may expect the effect to spill-over to attitudes towards other groups. Alternatively, you may expect that only attitudes towards Muslims will be affected. Either way, you should find an attitude (or set of attitudes) that you think will not be affected and use these to test for a placebo effect. 
 
 
-**Overweight*** 
+**Potential negative controls in the NZAVS are as follows: warmth toward those with mental illness (introduced in Time 9); warmth toward elderly people (Time 9); warmth toward LGBTQ+ people (introduced in Time 12); Warmth toward People with a disability (Time 12);  Warmth toward Overweight people (Time 1). Because we need at least 2 x waves to estimate a slope, only warmth toward overweight people can be used as a negative control.  We include this analysis in the revised manuscript.*** 
 
 3. Reviewer #2 raises critical questions about your application of the imputation method to this particular case, where the entire population is treated. They are skeptical that you will be able to take population-wide confounders into account but want to remain open-minded, and I encourage you to take their concerns to heart. Although not directly related to the methodology -- more to the conclusions that we may draw from your results -- but you should also consider the question raised by Reviewer #1. Your treatment may in fact be a "bundle" -- not just the attack itself, but also a host of reactions to it. You may be unable to identify what exactly is doing the work here, but you need to at least acknowledge the realities of this particular treatment (and others like it). 
 
-**Impute a marginal effect**
+**We too are skeptical. Our reasons differ. The occurence of the attacks are random with respect to data collection. For this reason there are only three possible pathways for confounding. Mediation bias would occur were to to condition on an effect of the attacks that is an intermediary of the effect of warmth to Muslims. Collider bias would occur were we to condition on the effect of the effect of both the attacks and warmth to Muslims. An example of collider bias would be attrition, if attrition were affected by both the attacks and warmth to Muslims. The reviewer is concerned that warmth might have been affected by other conditions following the attacks, such as COVID. This concern is analagous to intention to treat and per-protocol estimands. This is a valid concern. Another concern, and more worrying perhaps, is that the effect of the **
 
 **Include comment about the effect early**
 
