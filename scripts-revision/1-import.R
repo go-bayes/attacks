@@ -38,10 +38,9 @@ pull_path
 
 dat <- arrow::read_parquet(pull_path)
 
-dat$Warm.Overweight
-
-table1::table1(~Warm.Overweight |Wave, data = dat)
-dat$Relid
+df <- dat |>
+  filter(YearMeasured == 1)
+table1::table1(~ as.factor(BornTerritorialAuthority) + Warm.Muslims | Wave, data = df)
 # wrangle data
 # create basic outcomewide dataframe from which we will select the a small dataframe.
 dat_bayes <- dat |>
@@ -56,18 +55,24 @@ dat_bayes <- dat |>
     EXTRAVERSION,
     NEUROTICISM,
     AGREEABLENESS,
+    HLTH.BMI,
+    REGC_2022,
+    Rural_GCH2018,
+    SampleOriginYear,
+  #  BornTerritorialAuthority,
+    REGC_2022,
     Age,
     Male,
     EthCat,
     BornNZ,
     Employed,
-    Urban,
     Edu,
     Pol.Orient,
     SDO,
     RWA,
+    NZSEI06,
     NZSEI13,
-    NZDep.2013,
+    NZDep2013,
     Relid,
     Partner,
     Parent,
@@ -93,27 +98,27 @@ dat_bayes <- dat |>
   ) |>
   dplyr::mutate(Employed = as.numeric(Employed)) |>
   dplyr::filter(
-     (Wave ==   2016 & YearMeasured == 1) |
+    (Wave ==   2016 & YearMeasured == 1) |
       (Wave ==  2017 & YearMeasured != -1) |
       (Wave ==  2018 & YearMeasured != -1) |
       (Wave ==  2019 & YearMeasured != -1) |
       (Wave ==  2020 & YearMeasured != -1) |
       (Wave == 2021 & YearMeasured != -1)
-    )%>%
+  ) %>%
   droplevels() |>
   dplyr::filter(YearMeasured != -1) %>% # remove people who passed away
   ungroup() %>%
   dplyr::mutate(org2016 =  ifelse(Wave == 2016 &
                                     YearMeasured == 1, 1, 0)) %>%
-  # dplyr::mutate(org2017 =  ifelse(Wave == 2017 &
-  #                                   YearMeasured == 1, 1, 0)) %>%
+  dplyr::mutate(org2017 =  ifelse(Wave == 2017 &
+                                    YearMeasured == 1, 1, 0)) %>%
   # dplyr::mutate(org2018 =  ifelse(Wave == 2018 &
   #                                   YearMeasured == 1, 1, 0)) %>%
   group_by(Id) %>%
   dplyr::mutate(hold = mean(org2016, na.rm = TRUE)) %>%  # Hack
   dplyr::filter(hold > 0) %>%
-  # dplyr::mutate(hold2 = mean(org2017, na.rm = TRUE)) %>%  # Hack
-  # dplyr::filter(hold2 > 0) %>%
+  dplyr::mutate(hold2 = mean(org2017, na.rm = TRUE)) %>%  # Hack
+  dplyr::filter(hold2 > 0) %>%
   # dplyr::mutate(hold3 = mean(org2018, na.rm = TRUE)) %>%  # Hack
   # dplyr::filter(hold3 > 0) %>%
   ungroup(Id) |>
@@ -172,92 +177,98 @@ dat_bayes <- dat |>
   ) %>%
   dplyr::mutate(dys = (TSCORE_i - min(TSCORE_i))) %>%
   dplyr::mutate(yrs =  (dys / 365)) %>%
-  dplyr::mutate(Age_c = if_else(Wave == "2016", (Age), NA_real_)) %>%
-  fill(Age_c, .direction = "downup") %>%
   dplyr::mutate(Warm.Muslims_b = if_else(Wave == "2016", (Warm.Muslims), NA_real_)) %>%
   fill(Warm.Muslims_b, .direction = "downup") %>%
   dplyr::mutate(Warm.Overweight_b = if_else(Wave == "2016", (Warm.Overweight), NA_real_)) %>%
   fill(Warm.Overweight_b, .direction = "downup") %>%
-  dplyr::mutate(CONSCIENTIOUSNESS_c = if_else(Wave == "2016", (CONSCIENTIOUSNESS), NA_real_)) %>%
+  dplyr::mutate(SampleOriginYear_b = if_else(Wave == "2016", (SampleOriginYear - 1), NA_real_)) %>%
+  fill(SampleOriginYear_b, .direction = "downup") %>%
+  dplyr::mutate(REGC_2022_c = if_else(Wave == "2017", as.numeric(REGC_2022), NA_real_)) %>%
+  fill(REGC_2022_c, .direction = "downup") %>%
+  dplyr::mutate(Rural_GCH2018_c = if_else(Wave == "2017", as.numeric(Rural_GCH2018), NA_real_)) %>%
+  fill(Rural_GCH2018_c, .direction = "downup") |>
+  dplyr::mutate(Age_c = if_else(Wave == "2017", (Age), NA_real_)) %>%
+  fill(Age_c, .direction = "downup") %>%
+  dplyr::mutate(HLTH.BMI_c = if_else(Wave == "2017", (HLTH.BMI), NA_real_)) %>%
+  fill(HLTH.BMI_c, .direction = "downup") %>%
+  dplyr::mutate(CONSCIENTIOUSNESS_c = if_else(Wave == "2017", (CONSCIENTIOUSNESS), NA_real_)) %>%
   fill(CONSCIENTIOUSNESS_c,  .direction = "downup") %>%
-  dplyr::mutate(OPENNESS_c = if_else(Wave == "2016", (OPENNESS), NA_real_)) %>%
+  dplyr::mutate(OPENNESS_c = if_else(Wave == "2017", (OPENNESS), NA_real_)) %>%
   fill(OPENNESS_c,  .direction = "downup") |>
-  dplyr::mutate(HONESTY_HUMILITY_c = if_else(Wave == "2016", (HONESTY_HUMILITY), NA_real_)) %>%
+  dplyr::mutate(HONESTY_HUMILITY_c = if_else(Wave == "2017", (HONESTY_HUMILITY), NA_real_)) %>%
   fill(HONESTY_HUMILITY_c,  .direction = "downup") |>
-  dplyr::mutate(EXTRAVERSION_c = if_else(Wave == "2016", (EXTRAVERSION), NA_real_)) %>%
+  dplyr::mutate(EXTRAVERSION_c = if_else(Wave == "2017", (EXTRAVERSION), NA_real_)) %>%
   fill(EXTRAVERSION_c,  .direction = "downup") |>
-  dplyr::mutate(NEUROTICISM_c = if_else(Wave == "2016", (NEUROTICISM), NA_real_)) %>%
+  dplyr::mutate(NEUROTICISM_c = if_else(Wave == "2017", (NEUROTICISM), NA_real_)) %>%
   fill(NEUROTICISM_c,  .direction = "downup") |>
-  dplyr::mutate(AGREEABLENESS_c = if_else(Wave == "2016", (AGREEABLENESS), NA_real_)) %>%
+  dplyr::mutate(AGREEABLENESS_c = if_else(Wave == "2017", (AGREEABLENESS), NA_real_)) %>%
   fill(AGREEABLENESS_c,  .direction = "downup") |>
-  dplyr::mutate(Male_c = if_else(Wave == "2016", as.numeric(Male), NA_real_)) %>%
+  dplyr::mutate(Male_c = if_else(Wave == "2017", as.numeric(Male), NA_real_)) %>%
   fill(Male_c,  .direction = "downup") %>%
-  dplyr::mutate(NZDep.2013_c = if_else(Wave == "2016", as.numeric(NZDep.2013), NA_real_)) %>%
-  fill(NZDep.2013_c,  .direction = "downup")  %>%
-  dplyr::mutate(RaceRejAnx_c = if_else(Wave == "2016", as.numeric(RaceRejAnx), NA_real_)) %>%
+  dplyr::mutate(NZDep2013_c = if_else(Wave == "2017", as.numeric(NZDep2013), NA_real_)) %>%
+  fill(NZDep2013_c,  .direction = "downup")  %>%
+  dplyr::mutate(RaceRejAnx_c = if_else(Wave == "2017", as.numeric(RaceRejAnx), NA_real_)) %>%
   fill(RaceRejAnx_c,  .direction = "downup")  %>%
-  dplyr::mutate(EthCat_c = if_else(Wave == "2016", as.numeric(EthCat), NA_real_)) %>%
+  dplyr::mutate(EthCat_c = if_else(Wave == "2017", as.numeric(EthCat), NA_real_)) %>%
   fill(EthCat_c,  .direction = "downup") %>%
-  dplyr::mutate(BornNZ_c = if_else(Wave == "2016", as.numeric(BornNZ), NA_real_)) %>%
+  dplyr::mutate(BornNZ_c = if_else(Wave == "2017", as.numeric(BornNZ), NA_real_)) %>%
   fill(BornNZ_c,  .direction = "downup")  %>%
-  dplyr::mutate(Pol.Orient_c = if_else(Wave == "2016", (Pol.Orient), NA_real_)) %>%
+  dplyr::mutate(Pol.Orient_c = if_else(Wave == "2017", (Pol.Orient), NA_real_)) %>%
   fill(Pol.Orient_c,  .direction = "downup") %>%
-  dplyr::mutate(Relid_c = if_else(Wave == "2016", as.numeric(Relid), NA_real_)) %>%
+  dplyr::mutate(Relid_c = if_else(Wave == "2017", as.numeric(Relid), NA_real_)) %>%
   fill(Relid_c,  .direction = "downup") %>%
-  dplyr::mutate(Partner_c = if_else(Wave == "2016", (as.numeric(Partner)), NA_real_)) %>%
+  dplyr::mutate(Partner_c = if_else(Wave == "2017", (as.numeric(Partner)), NA_real_)) %>%
   fill(Partner_c,  .direction = "downup") %>%
-  dplyr::mutate(Parent_c = if_else(Wave == "2016", (as.numeric(Parent)), NA_real_)) %>%
+  dplyr::mutate(Parent_c = if_else(Wave == "2017", (as.numeric(Parent)), NA_real_)) %>%
   fill(Parent_c,  .direction = "downup") %>%
-  dplyr::mutate(Employed_c = if_else(Wave == "2016", (as.numeric(Employed)), NA_real_)) %>%
+  dplyr::mutate(Employed_c = if_else(Wave == "2017", (as.numeric(Employed)), NA_real_)) %>%
   fill(Employed_c,  .direction = "downup") %>%
-  dplyr::mutate(Edu_c = if_else(Wave == "2016", (Edu), NA_real_)) %>%
+  dplyr::mutate(Edu_c = if_else(Wave == "2017", (Edu), NA_real_)) %>%
   fill(Edu_c,  .direction = "downup") %>%
-  dplyr::mutate(Urban_c = if_else(Wave == "2016", (as.numeric(Urban)), NA_real_)) %>%
-  fill(Urban_c,  .direction = "downup") %>%
-  dplyr::mutate(SDO_c = if_else(Wave == "2016", (as.numeric(SDO)), NA_real_)) %>%
+  dplyr::mutate(SDO_c = if_else(Wave == "2017", (as.numeric(SDO)), NA_real_)) %>%
   fill(SDO_c,  .direction = "downup") %>%
-  dplyr::mutate(RWA_c = if_else(Wave == "2016", (as.numeric(RWA)), NA_real_)) %>%
+  dplyr::mutate(RWA_c = if_else(Wave == "2017", (as.numeric(RWA)), NA_real_)) %>%
   fill(RWA_c,  .direction = "downup") %>%
-  dplyr::mutate(NZSEI13_c = if_else(Wave == "2016", (as.numeric(NZSEI13)), NA_real_)) %>%
-  fill(NZSEI13_c,  .direction = "downup") %>%
-  dplyr::mutate(Warm.Muslims_c = if_else(Wave == "2016", (as.numeric(Warm.Muslims)), NA_real_)) %>%
-  fill(Warm.Muslims_c,  .direction = "downup") %>%
-  dplyr::mutate(Warm.Overweight_c = if_else(Wave == "2016", (as.numeric(Warm.Overweight)), NA_real_)) %>%
-  fill(Warm.Overweight_c,  .direction = "downup") %>%
-  ungroup()%>%
- select(  -c(
-     Employed,
-     Urban,
-     Edu,
-     Pol.Orient,
-     SDO,
-     RWA,
-     NZSEI13,
-     NZDep.2013,
-     Age,
-     Relid,
-     RaceRejAnx,
-     Partner,
-     Parent,
-     hold,
-     Age,
-     EthCat,
-     BornNZ,
-     TSCORE,
-     org2016,
-     hold,
-     CONSCIENTIOUSNESS,
-     OPENNESS,
-     HONESTY_HUMILITY,
-     EXTRAVERSION,
-     NEUROTICISM,
-     AGREEABLENESS
- ) )|>
-  dplyr::mutate(EthCat_c = as.factor(EthCat_c))|>
+  dplyr::mutate(NZSEI13_c = if_else(Wave == "2017", (as.numeric(NZSEI13)), NA_real_)) %>%
+  fill(NZSEI13_c,  .direction = "downup") |>
+  ungroup() %>%
+  # select(
+  #   -c(
+  #     Employed,
+  #     Urban,
+  #     Edu,
+  #     HLTH.BMI,
+  #     Pol.Orient,
+  #     SDO,
+  #     RWA,
+  #     NZSEI13,
+  #     NZDep.2013,
+  #     Age,
+  #     Relid,
+  #     RaceRejAnx,
+  #     Partner,
+  #     Parent,
+  #     hold,
+  #     Age,
+  #     EthCat,
+  #     BornNZ,
+  #     TSCORE,
+  #     org2016,
+  #     hold,
+  #     CONSCIENTIOUSNESS,
+  #     OPENNESS,
+  #     HONESTY_HUMILITY,
+  #     EXTRAVERSION,
+  #     NEUROTICISM,
+  #     AGREEABLENESS
+  #   )
+  # ) |>
+  dplyr::mutate(EthCat_c = as.factor(EthCat_c)) |>
   dplyr::filter(
-    # !is.na(Warm.Muslims_b),
-    # !is.na(Warm.Overweight_b),
+    !is.na(Warm.Muslims_b),
+    !is.na(Warm.Overweight_b),
     !is.na(Age_c),
+    !is.na(HLTH.BMI_c),
     !is.na(BornNZ_c),
     !is.na(Male_c),
     !is.na(Edu_c),
@@ -268,10 +279,11 @@ dat_bayes <- dat |>
     !is.na(Relid_c),
     !is.na(RaceRejAnx_c),
     !is.na(Pol.Orient_c),
-    !is.na(Urban_c),
+    !is.na(REGC_2022_c),
+    !is.na(Rural_GCH2018_c),
     !is.na(SDO_c),
     !is.na(RWA_c),
-    !is.na(NZDep.2013_c),
+    !is.na(NZDep2013_c),
     !is.na(NZSEI13_c),
     !is.na(AGREEABLENESS_c),
     !is.na(CONSCIENTIOUSNESS_c),
@@ -281,7 +293,12 @@ dat_bayes <- dat |>
     !is.na(NEUROTICISM_c)
   ) |>
   dplyr::mutate(
+    Rural_GCH2018_c = as.factor(Rural_GCH2018_c),
+    #SampleOriginYear = as.factor(SampleOriginYear),
+#    BornTerritorialAuthority =  as.factor(BornTerritorialAuthority),
+    REGC_2022_c = as.factor(REGC_2022_c),
     Age_cZ = scale(Age_c),
+    HLTH.BMI_cZ = scale(HLTH.BMI_c),
     BornNZ_cZ = scale(BornNZ_c),
     Male_cZ = scale (Male_c),
     Edu_cZ = scale(Edu_c),
@@ -292,10 +309,10 @@ dat_bayes <- dat |>
     Relid_cZ = scale(Relid_c),
     RaceRejAnx_cZ = scale(RaceRejAnx_c),
     Pol.Orient_cZ = scale(Pol.Orient_c),
-    Urban_cZ = scale(Urban_c),
+   # Urban_cZ = scale(Urban_c),
     SDO_cZ = scale(SDO_c),
     RWA_cZ = scale(RWA_c),
-    NZDep.2013_cZ = scale(NZDep.2013_c),
+    NZDep2013_cZ = scale(NZDep2013_c),
     NZSEI13_cZ = scale(NZSEI13_c),
     AGREEABLENESS_cZ = scale(AGREEABLENESS_c),
     CONSCIENTIOUSNESS_cZ = scale(CONSCIENTIOUSNESS_c),
@@ -304,22 +321,33 @@ dat_bayes <- dat |>
     EXTRAVERSION_cZ = scale(EXTRAVERSION_c),
     NEUROTICISM_cZ = scale(NEUROTICISM_c)
   ) %>%
+  mutate(Sample = as.factor(if_else(SampleOriginYear <= 4,  1,
+                          if_else(SampleOriginYear >4  & SampleOriginYear < 8, 2, 3))) )|>
   dplyr::arrange(Id, Wave)
 
 # relabel wave
 levels(dat_bayes$Wave) <-
   c("Time8", "Time9", "Time10", "Time11", "Time12", "Time13")
 
-length(unique(dat_bayes$Id)) #
+table(dat_bayes$SampleOriginYear)
 
-table(dat_bayes$Wave)
+table1( ~ Sample + factor(SampleOriginYear)|Wave, data = dat_bayes)
+
+summary(lm ( Warm.Muslims ~ Sample + Age + Male + Wave, data = dat_bayes))
+
+length(unique(dat_bayes$Id)) # 13409
+
 # image
 #modelsummary::datasummary_crosstab(mean(Warm.Muslims) ~ Wave * as.factor(Attack), data = dat_bayes)
 
 
 # check
-x <- table1::table1( ~ Y_Warm.Muslims + Y_Warm.Overweight|
-                  factor(Wave) * factor(As), data = dat_bayes, overall = F)
+x <- table1::table1(
+  ~ Y_Warm.Muslims + Y_Warm.Overweight |
+    factor(Wave) * factor(As),
+  data = dat_bayes,
+  overall = F
+)
 x
 
 kable(x, format = "latex", booktabs = TRUE)
@@ -327,7 +355,9 @@ t1kable(x, format = "latex")
 
 # Missing data problem
 t2 <- table1::table1( ~ Y_Warm.Muslims |
-                    Wave * as.factor(As), data = dat_bayes, overall = F)
+                        Wave * as.factor(As),
+                      data = dat_bayes,
+                      overall = F)
 
 # data prep
 
@@ -337,7 +367,7 @@ dt_five_prep <- dat_bayes %>%
   mutate(As = (
     ifelse(
       Wave == "Time10" & Attack == 1 | Wave == "Time11" |
-        Wave == "Time12"| Wave == "Time13",
+        Wave == "Time12" | Wave == "Time13",
       0,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -352,7 +382,7 @@ dt_five_prep <- dat_bayes %>%
     Y_Warm.Asians = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12"| Wave == "Time13",
+        Wave == "Time12" | Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -367,7 +397,7 @@ dt_five_prep <- dat_bayes %>%
     Y_Warm.Overweight = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12"| Wave == "Time13",
+        Wave == "Time12" | Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -382,7 +412,7 @@ dt_five_prep <- dat_bayes %>%
     Y_Warm.Chinese = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12"| Wave == "Time13",
+        Wave == "Time12" | Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -412,7 +442,7 @@ mutate(
   Y_Warm.Immigrants = ifelse(
     Wave == "Time10" & Attack == 1 |
       Wave == "Time11" |
-      Wave == "Time12"| Wave == "Time13",
+      Wave == "Time12" | Wave == "Time13",
     NA,
     ifelse(
       Wave == "Time10" & Attack == 0 |
@@ -427,7 +457,7 @@ mutate(
     Y_Warm.Indians = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12"| Wave == "Time13",
+        Wave == "Time12" | Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -442,7 +472,7 @@ mutate(
     Y_Warm.Maori = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12"| Wave == "Time13",
+        Wave == "Time12" | Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -472,7 +502,7 @@ mutate(
   Y_Warm.Muslims = ifelse(
     Wave == "Time10" & Attack == 1 |
       Wave == "Time11" |
-      Wave == "Time12"| Wave == "Time13",
+      Wave == "Time12" | Wave == "Time13",
     NA,
     ifelse(
       Wave == "Time10" & Attack == 0 |
@@ -487,7 +517,7 @@ mutate(
     Y_Warm.NZEuro = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12"| Wave == "Time13",
+        Wave == "Time12" | Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -502,7 +532,7 @@ mutate(
     Y_Warm.Pacific = ifelse(
       Wave == "Time10" & Attack == 1 |
         Wave == "Time11" |
-        Wave == "Time12"|Wave == "Time13",
+        Wave == "Time12" | Wave == "Time13",
       NA,
       ifelse(
         Wave == "Time10" & Attack == 0 |
@@ -554,8 +584,7 @@ table1::table1(
     Y_Warm.Overweight +
     Y_Warm.Pacific# +
   #   Y_Warm.Refugees
-  |
-    Wave * as.factor(As),
+  | Wave * as.factor(As),
   data = dt_five_bind,
   overall = F
 )
@@ -589,8 +618,9 @@ table(dt_five_zero_noimpute$wave)
 dt_five_one_noimpute_temp <- dt_five_bind |>
   filter((As == 1 & Wave == "Time10") |
            (As == 1 & Wave == "Time11") |
-           (As == 1 & Wave == "Time12")|
-           (As == 1 & Wave == "Time13")) %>%
+           (As == 1 & Wave == "Time12") |
+           (As == 1 & Wave == "Time13")
+  ) %>%
   mutate(wave = as.numeric(Wave)) |>
   arrange(Id, Wave)
 
@@ -605,7 +635,7 @@ str(dt_five_one_noimpute)
 
 # Check missing
 library(naniar)
-naniar::gg_miss_var(dt_five_one_noimpute)
+naniar::gg_miss_var(dt_five_zero_noimpute)
 naniar::gg_miss_var(dt_five_one_noimpute)
 
 skimr::skim(dt_five_one_noimpute) %>%
@@ -618,34 +648,32 @@ colnames(dt_five_one_noimpute)
 
 
 ## save data
-arrow::write_parquet(dt_five_zero_noimpute, here::here(push_mods,"dt_five_zero_noimpute-attacks.rds"))
+arrow::write_parquet(
+  dt_five_zero_noimpute,
+  here::here(push_mods, "dt_five_zero_noimpute-attacks.rds")
+)
 
-arrow::write_parquet(dt_five_one_noimpute, here::here(push_mods,"dt_five_one_noimpute-attacks.rds"))
+arrow::write_parquet(dt_five_one_noimpute,
+                     here::here(push_mods, "dt_five_one_noimpute-attacks.rds"))
 
 
 
-dt_five_zero_noimpute <- arrow::read_parquet( here::here(push_mods,"dt_five_zero_noimpute-attacks.rds"))
-dt_five_one_noimpute <-  arrow::read_parquet( here::here(push_mods,"dt_five_one_noimpute-attacks.rds"))
+dt_five_zero_noimpute <-
+  arrow::read_parquet(here::here(push_mods, "dt_five_zero_noimpute-attacks.rds"))
+dt_five_one_noimpute <-
+  arrow::read_parquet(here::here(push_mods, "dt_five_one_noimpute-attacks.rds"))
 
 
 # bayes models ------------------------------------------------------------
 
 
 prior = c(
-  set_prior('normal(0, .25)', class = "b", coef = "wave"),
-  set_prior("student_t(3, 4, 1)", class = "Intercept"),
+  set_prior('normal(0, .25)', class = "b"),
+  set_prior("student_t(3, 4, 1)", class = "Intercept",
+            lb = 1,
+            ub = 7),
   set_prior("cauchy(0, 1)", class = "sigma")
 )
-
-# set N for id counts
-id_0 <- dt_five_zero_noimpute$Id
-id_1 <- dt_five_one_noimpute$Id
-
-
-
-# set name for error
-name_error = "sd"
-
 
 ## impute muslim
 
@@ -660,37 +688,44 @@ options(mc.cores = parallel::detectCores ()) # use all course
 theme_set(theme_pubclean()) # nice theme
 library(cmdstanr)
 
+
 bform_mus <-
   bf(
     Y_Warm.Muslims | mi()  ~  wave  *
-      (AGREEABLENESS_cZ +
-      CONSCIENTIOUSNESS_cZ +
-      OPENNESS_cZ +
-      HONESTY_HUMILITY_cZ +
-      EXTRAVERSION_cZ +
-      NEUROTICISM_cZ +
-      Age_cZ+
-      BornNZ_cZ +
-      Male_cZ +
-      Edu_cZ  +
-      Employed_cZ +
-      EthCat_c  +
-      NZDep.2013_cZ +
-      NZSEI13_cZ  +
-      Parent_cZ  +
-      Partner_cZ +
-      Pol.Orient_cZ+
-      Relid_cZ +
-      RaceRejAnx_cZ +
-      SDO_cZ +
-      RWA_cZ +
-      Urban_cZ )  +
+      (
+        AGREEABLENESS_cZ +
+          CONSCIENTIOUSNESS_cZ +
+          OPENNESS_cZ +
+          HONESTY_HUMILITY_cZ +
+          EXTRAVERSION_cZ +
+          NEUROTICISM_cZ +
+          Age_cZ +
+          HLTH.BMI_cZ +
+          BornNZ_cZ +
+          Male_cZ +
+          Edu_cZ  +
+          Employed_cZ +
+          EthCat_c  +
+          NZDep2013_cZ +
+          NZSEI13_cZ  +
+          Parent_cZ  +
+          Partner_cZ +
+          Pol.Orient_cZ +
+          REGC_2022_c +
+          Rural_GCH2018_c +
+          Relid_cZ +
+          RaceRejAnx_cZ +
+          SDO_cZ +
+          RWA_cZ +
+          Sample
+        #  Urban_cZ
+      )  +
       (1 | Id)
   )
 
 
 
-# test
+# M1
 m_0 <- brm(
   backend = "cmdstanr",
   data = dt_five_zero_noimpute,
@@ -698,10 +733,13 @@ m_0 <- brm(
   bform_mus,
   prior = prior,
   init = 0,
-  file =  here::here(push_mods,"five-zero-MUS-attacks-use.rds")
+  iter = 8000,
+  warmup = 1000,
+  file =  here::here(push_mods, "five-zero-MUS-attacks-use.rds")
 )
 
-# prior only
+
+# M2
 m_1 <- brm(
   backend = "cmdstanr",
   data = dt_five_one_noimpute,
@@ -709,10 +747,10 @@ m_1 <- brm(
   bform_mus,
   prior = prior,
   init = 0,
-  file = here::here(push_mods,"five-one-MUS-attacks-use.rds")
+  file = here::here(push_mods, "five-one-MUS-attacks-use.rds")
 )
 
-
+summary(m_1)
 
 
 # overweight --------------------------------------------------------------
@@ -729,21 +767,25 @@ bform_overweight <-
           EXTRAVERSION_cZ +
           NEUROTICISM_cZ +
           Age_cZ +
+          HLTH.BMI_cZ +
           BornNZ_cZ +
           Male_cZ +
           Edu_cZ  +
           Employed_cZ +
           EthCat_c  +
-          NZDep.2013_cZ +
+          NZDep2013_cZ +
           NZSEI13_cZ  +
           Parent_cZ  +
           Partner_cZ +
           Pol.Orient_cZ +
+          REGC_2022_c +
+          Rural_GCH2018_c +
           Relid_cZ +
           RaceRejAnx_cZ +
           SDO_cZ +
           RWA_cZ +
-          Urban_cZ
+          Sample
+        #  Urban_cZ
       )  +
       (1 | Id)
   )
@@ -756,7 +798,9 @@ m_3 <- brm(
   bform_overweight,
   prior = prior,
   init = 0,
-  file = here::here(push_mods,"five-zero-OVERWEIGHT-attacks-use.rds")
+  iter = 8000,
+  warmup = 1000,
+  file = here::here(push_mods, "five-zero-OVERWEIGHT-attacks-use.rds")
 )
 
 
@@ -767,7 +811,9 @@ m_4 <- brm(
   bform_overweight,
   prior = prior,
   init = 0,
-  file = here::here(push_mods,"five-one-OVERWEIGHT-attacks-use.rds")
+  iter = 4000,
+  warmup = 1000,
+  file = here::here(push_mods, "five-one-OVERWEIGHT-attacks-use.rds")
 )
 
 library(ggeffects)
@@ -778,13 +824,255 @@ summary(m_1)
 summary(m_3)
 summary(m_4)
 
-conditional_smooths()
-p0 <- plot(ggeffects::ggpredict(m_0,terms = c("wave [0:3]", "Pol.Orient_cZ")) ) + scale_y_continuous(limits = c(3,5))
-p1 <- plot(ggeffects::ggpredict(m_1,terms = c("wave [0:3]", "Pol.Orient_cZ")) ) + scale_y_continuous(limits = c(3,5))
-p3 <- plot(ggeffects::ggpredict(m_3,terms = c("wave [0:3]",  "Pol.Orient_cZ")) ) + scale_y_continuous(limits = c(3,5))
-p4 <- plot(ggeffects::ggpredict(m_4,terms = c("wave [0:3]", "Pol.Orient_cZ")) ) + scale_y_continuous(limits = c(3,5))
+p0 <-
+  plot(ggeffects::ggpredict(m_0, terms = c("wave [0:3]", "Pol.Orient_cZ"))) + scale_y_continuous(limits = c(3, 5))
+p1 <-
+  plot(ggeffects::ggpredict(m_1, terms = c("wave [0:3]", "Pol.Orient_cZ"))) + scale_y_continuous(limits = c(3, 5))
+
+p0a <-
+  plot(ggeffects::ggpredict(m_0, terms = c("wave [0:3]"))) + scale_y_continuous(limits = c(3, 5))
+p1b <-
+  plot(ggeffects::ggpredict(m_1, terms = c("wave [0:3]"))) + scale_y_continuous(limits = c(3, 5))
+
+
+p3 <-
+  plot(ggeffects::ggpredict(m_3, terms = c("wave [0:3]",  "Pol.Orient_cZ"))) + scale_y_continuous(limits = c(3, 5))
+p4 <-
+  plot(ggeffects::ggpredict(m_4, terms = c("wave [0:3]", "Pol.Orient_cZ"))) + scale_y_continuous(limits = c(3, 5))
+
+
+p3a <-
+  plot(ggeffects::ggpredict(m_3, terms = c("wave [0:3]"))) + scale_y_continuous(limits = c(3, 5))
+p4b <-
+  plot(ggeffects::ggpredict(m_4, terms = c("wave [0:3]"))) + scale_y_continuous(limits = c(3, 5))
+
+p0a + p1b
+
+summary(m_0)
+
 p0 + p1
+
+
+dev.off()
 p3 + p4
 
+p3a + p4b
 
+
+# save-imputations --------------------------------------------------------
+
+# ------------------------------------------------------------------
+# set name for error
+name_error = "sd"
+
+# set N for id counts
+id_0 <- dt_five_zero_noimpute$Id
+id_1 <- dt_five_one_noimpute$Id
+
+
+# analysis
+name <- "yfit_muslim"
+
+fitted_values_0 <- predict(m_0, ndraws = 50)
+fitted_values_0
+
+
+fitted_values_1 <- predict(m_1,  ndraws = 50)
+fitted_values_3_0 <- predict(m_3,  ndraws = 50)
+fitted_values_4_1 <- predict(m_4,  ndraws = 50)
+
+
+# make df
+fitted_values_0 <- data.frame(fitted_values_0)
+head(fitted_values_0)
+head(fitted_values_0)
+mean(fitted_values_0$Est.Error)
+
+# needs to be df
+yfit <- as.data.frame(fitted_values_0$Estimate)
+sd <- as.data.frame(fitted_values_0$Est.Error)
+# rename
+colnames(yfit) <- name
+colnames(sd) <- name_error
+
+# data frame
+dat_0 <-
+  as.data.frame(cbind(Y_orig = standata(m_0)$Y, standata(m_0)$X, yfit, id_0, sd)) |>
+  mutate(id = as.factor(id_0))
+
+dat_0 <- dat_0 |>
+  mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
+  mutate(as = as.factor(rep(0, nrow(dat_0)))) |>
+  select(-id_0)
+
+head(dat_0)
+
+## Same for 1s
+
+# make df
+fitted_values_1 <- data.frame(fitted_values_1)
+
+# needs to be df
+yfit1 <- as.data.frame(fitted_values_1$Estimate)
+sd <- as.data.frame(fitted_values_1$Est.Error)
+
+# rename
+colnames(yfit1) <- name
+colnames(sd) <- name_error
+
+# data frame
+dat_1 <-
+  as.data.frame(cbind(Y_orig = standata(m_1)$Y, standata(m_1)$X, yfit1, id_1, sd)) |>
+  mutate(id = as.factor(id_1))
+
+dat_1 <- dat_1|>
+  mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
+  mutate(as = as.factor(rep(1, nrow(dat_1)))) |>
+  select(-id_1)
+
+# combine data
+
+dat_combined <- rbind(dat_0, dat_1) |>
+  filter(wave == 0 | wave == 1 | wave == 2) |>
+  mutate(Wave = as.factor(wave),
+        Condition = as)
+
+str(dat_combined)
+
+# save processed data
+saveRDS(dat_combined, here::here(push_mods, "g-comp-processed-muslims-attack"))
+
+# read processed data
+dat_combined_muslim <- readRDS(here::here(push_mods, "g-comp-processed-muslims-attack"))
+
+# read processed data
+head(dat_combined_muslim)
+
+# wrangle for imputed values with errors
+dat_combined_imputed_muslim <- dat_combined_muslim  |>
+  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+                                  yfit_muslim,
+                                  Y_orig)) |>
+  group_by(id) |>
+  mutate(se = if_else(Y_orig != Inf, 0, sd) # it is the error in the mean
+  ) |>
+  ungroup() |>
+  mutate(se = if_else(se <=0, .01, se)) |>
+  mutate(Wave = as.factor(Wave)) |>
+  data.frame()
+
+head(dat_combined_imputed_muslim)
+
+#save imputed values
+saveRDS(dat_combined_imputed_muslim, here::here(push_mods, "dat_combined_imputed_muslim-attack" ))
+
+# check
+dat_combined_imputed_muslim  <- readRDS(here::here(push_mods, "dat_combined_imputed_muslim-attack"))
+
+head(dat_combined_imputed_muslim)
+
+
+library(geepack)
+# arameter     | Coefficient |       SE |         95% CI |  Chi2(1) |      p |
+#   |:-------------|:-----------:|:--------:|:--------------:|:--------:|:------:|
+#   |(Intercept)   |        4.13 | 7.81e-03 |   (4.12, 4.15) | 2.80e+05 | < .001 |
+#   |as (1)        |        0.23 |     0.01 |   (0.21, 0.25) |   502.46 | < .001 |
+#   |wave          |        0.09 | 6.83e-05 |   (0.09, 0.09) | 1.56e+06 | < .001 |
+#   |as (1) * wave |       -0.06 | 9.47e-05 | (-0.06, -0.06) | 4.24e+05 | < .001 |
+#   >
+
+
+model_gee_muslim <-
+  geeglm(
+    data = dat_combined_imputed_muslim,
+    formula = yfit_muslim ~  as.factor(as) * Wave * Pol.Orient_cZ,
+    id = id,
+    corstr = "ar1"
+  )
+
+model_parameters(model_gee_muslim) |>
+  print_md()
+
+gee_muslim <- plot (ggeffects::ggpredict(model_gee_muslim, terms = c('Wave', "as", "Pol.Orient_cZ[-2,0,2]")) ) + scale_y_continuous(limits = c(3,5.5))
+gee_muslim
+
+comparisons(
+  model_gee_muslim ,
+  newdata = datagrid(as = c(0,1), Wave = c(0,2),Pol.Orient_cZ = c(-1,1)),
+  variables = c("as", "Pol.Orient_cZ"))
+
+# muslim gcomp ------------------------------------------------------------
+
+
+
+bform_full_mus  =   bf(yfit_muslim |mi(sd) ~  Condition  *  Wave,# +  (0 + Condition || id),
+                       sigma ~ 0 + Condition, set_rescor(rescor = FALSE))
+
+rm(m_3)
+system.time(
+  m_3 <- brms::brm(
+    backend = "cmdstanr",
+    data = dat_combined,
+    family = "gaussian",
+    bform_full_mus,
+    prior = prior_strong,
+    init = 0,
+    file = here::here(push_mods,"five-one-MUS_full.rds")
+  )
+)
+
+
+# get priors for summaries in manuscript
+prior_summary(m_3)
+
+# alternatively
+stancode(m_3)
+
+pars_muslim <- model_parameters(m_3) |>
+  slice(1:6)
+pars_muslim
+
+
+# Images to use
+muslim_gr  <- plot(
+  conditional_effects(
+    m_3,
+    "Wave:Condition",
+    plot = FALSE),
+  cat_args = c(size = .8))[[1]] +
+  labs(subtitle = "Muslim Warmth",
+       y = "Muslim Warmth (1-7) ",
+       x = "Years: 2018-2020/21; N = 19814") +
+  scale_colour_okabe_ito(alpha =1) +
+  theme_classic()   +
+  scale_y_continuous(limits = c(4.0, 5.6))
+muslim_gr
+
+muslim_in <- plot(
+  conditional_effects(
+    m_3,
+    "Wave:Condition",
+    plot = FALSE),
+  cat_args = c(size = .8))[[1]] +
+  labs(subtitle = "Muslim Warmth",
+       y = "Muslim Warmth (1-7) ",
+       x = "Years: 2018-2020/21; N = 19814") +
+  scale_colour_okabe_ito(alpha =1) +
+  theme_classic()   +
+  scale_y_continuous(limits = c(4, 4.5))
+muslim_in
+
+
+# save image
+ggsave(
+  muslim_in,
+  path = here::here(here::here(push_figs)),
+  width = 12,
+  height = 8,
+  units = "in",
+  filename = "muslim_in.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 600
+)
 

@@ -4,8 +4,9 @@
 
 # .DS_Store
 .DS_Store
-**/.DS_Store
 
+#
+mods/*
 # Session Data files
 .RData
 
