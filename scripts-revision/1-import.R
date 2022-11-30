@@ -10,7 +10,7 @@
 # potentially helpful for brms predict with added noise: https://github.com/paul-buerkner/brms/issues/544
 # see also: https://discourse.mc-stan.org/t/predict-brms-in-multivariate-model-with-imputation/6334
 
-# remove scientific notation
+
 options(scipen = 999)
 #libraries
 source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs.R")
@@ -181,6 +181,10 @@ dat_bayes <- dat |>
   fill(Warm.Muslims_b, .direction = "downup") %>%
   dplyr::mutate(Warm.Overweight_b = if_else(Wave == "2016", (Warm.Overweight), NA_real_)) %>%
   fill(Warm.Overweight_b, .direction = "downup") %>%
+  dplyr::mutate(Warm.Muslims_c = if_else(Wave == "2017", (Warm.Muslims), NA_real_)) %>%
+  fill(Warm.Muslims_c, .direction = "downup") %>%
+  dplyr::mutate(Warm.Overweight_c = if_else(Wave == "2017", (Warm.Overweight), NA_real_)) %>%
+  fill(Warm.Overweight_c, .direction = "downup") %>%
   dplyr::mutate(SampleOriginYear_b = if_else(Wave == "2016", (SampleOriginYear - 1), NA_real_)) %>%
   fill(SampleOriginYear_b, .direction = "downup") %>%
   dplyr::mutate(REGC_2022_c = if_else(Wave == "2017", as.numeric(REGC_2022), NA_real_)) %>%
@@ -329,13 +333,13 @@ dat_bayes <- dat |>
 levels(dat_bayes$Wave) <-
   c("Time8", "Time9", "Time10", "Time11", "Time12", "Time13")
 
-table(dat_bayes$SampleOriginYear)
+table(dat_bayes$Sample)
 
 table1( ~ Sample + factor(SampleOriginYear)|Wave, data = dat_bayes)
 
 summary(lm ( Warm.Muslims ~ Sample + Age + Male + Wave, data = dat_bayes))
 
-length(unique(dat_bayes$Id)) # 13409
+length(unique(dat_bayes$Id)) #
 
 # image
 #modelsummary::datasummary_crosstab(mean(Warm.Muslims) ~ Wave * as.factor(Attack), data = dat_bayes)
@@ -660,8 +664,7 @@ arrow::write_parquet(dt_five_one_noimpute,
 # read-prepared-data ------------------------------------------------------
 
 
-
-dt_five_zero_noimpute <-
+dt_five_zero_noimpute1 <-
   arrow::read_parquet(here::here(push_mods, "dt_five_zero_noimpute-attacks.rds"))
 dt_five_one_noimpute <-
   arrow::read_parquet(here::here(push_mods, "dt_five_one_noimpute-attacks.rds"))
@@ -757,79 +760,79 @@ m_1 <- brm(
 )
 
 summary(m_1)
-
-
-# overweight --------------------------------------------------------------
-
-
-bform_overweight <-
-  bf(
-    Y_Warm.Overweight | mi()  ~     wave  *
-      (
-        AGREEABLENESS_cZ +
-          CONSCIENTIOUSNESS_cZ +
-          OPENNESS_cZ +
-          HONESTY_HUMILITY_cZ +
-          EXTRAVERSION_cZ +
-          NEUROTICISM_cZ +
-          Age_cZ +
-          HLTH.BMI_cZ +
-          BornNZ_cZ +
-          Male_cZ +
-          Edu_cZ  +
-          Employed_cZ +
-          EthCat_c  +
-          NZDep2013_cZ +
-          NZSEI13_cZ  +
-          Parent_cZ  +
-          Partner_cZ +
-          Pol.Orient_cZ +
-          REGC_2022_c +
-          Rural_GCH2018_c +
-          Relid_cZ +
-          RaceRejAnx_cZ +
-          SDO_cZ +
-          RWA_cZ +
-          Sample
-        #  Urban_cZ
-      )  +
-      (1 | Id)
-  )
-
-
-m_3 <- brm(
-  backend = "cmdstanr",
-  data = dt_five_zero_noimpute,
-  family = "gaussian",
-  bform_overweight,
-  prior = prior,
-  init = 0,
-  iter = 8000,
-  warmup = 1000,
-  file = here::here(push_mods, "five-zero-OVERWEIGHT-attacks-use.rds")
-)
-
-
-m_4 <- brm(
-  backend = "cmdstanr",
-  data = dt_five_one_noimpute,
-  family = "gaussian",
-  bform_overweight,
-  prior = prior,
-  init = 0,
-  iter = 4000,
-  warmup = 1000,
-  file = here::here(push_mods, "five-one-OVERWEIGHT-attacks-use.rds")
-)
-
-library(ggeffects)
-library(sjmisc)
-
-summary(m_0)
-summary(m_1)
-summary(m_3)
-summary(m_4)
-
+#
+#
+# # overweight --------------------------------------------------------------
+#
+#
+# bform_overweight <-
+#   bf(
+#     Y_Warm.Overweight | mi()  ~     wave  *
+#       (
+#         AGREEABLENESS_cZ +
+#           CONSCIENTIOUSNESS_cZ +
+#           OPENNESS_cZ +
+#           HONESTY_HUMILITY_cZ +
+#           EXTRAVERSION_cZ +
+#           NEUROTICISM_cZ +
+#           Age_cZ +
+#           HLTH.BMI_cZ +
+#           BornNZ_cZ +
+#           Male_cZ +
+#           Edu_cZ  +
+#           Employed_cZ +
+#           EthCat_c  +
+#           NZDep2013_cZ +
+#           NZSEI13_cZ  +
+#           Parent_cZ  +
+#           Partner_cZ +
+#           Pol.Orient_cZ +
+#           REGC_2022_c +
+#           Rural_GCH2018_c +
+#           Relid_cZ +
+#           RaceRejAnx_cZ +
+#           SDO_cZ +
+#           RWA_cZ +
+#           Sample
+#         #  Urban_cZ
+#       )  +
+#       (1 | Id)
+#   )
+#
+#
+# m_3 <- brm(
+#   backend = "cmdstanr",
+#   data = dt_five_zero_noimpute,
+#   family = "gaussian",
+#   bform_overweight,
+#   prior = prior,
+#   init = 0,
+#   iter = 8000,
+#   warmup = 1000,
+#   file = here::here(push_mods, "five-zero-OVERWEIGHT-attacks-use.rds")
+# )
+#
+#
+# m_4 <- brm(
+#   backend = "cmdstanr",
+#   data = dt_five_one_noimpute,
+#   family = "gaussian",
+#   bform_overweight,
+#   prior = prior,
+#   init = 0,
+#   iter = 4000,
+#   warmup = 1000,
+#   file = here::here(push_mods, "five-one-OVERWEIGHT-attacks-use.rds")
+# )
+#
+# library(ggeffects)
+# library(sjmisc)
+#
+# summary(m_0)
+# summary(m_1)
+# summary(m_3)
+# summary(m_4)
+#
 
 
 # preliminary-inspection-imputations --------------------------------------
@@ -845,17 +848,17 @@ p0a <-
 p1b <-
   plot(ggeffects::ggpredict(m_1, terms = c("wave [0:3]"))) + scale_y_continuous(limits = c(3, 5))
 
-
-p3 <-
-  plot(ggeffects::ggpredict(m_3, terms = c("wave [0:3]",  "Pol.Orient_cZ"))) + scale_y_continuous(limits = c(3, 5))
-p4 <-
-  plot(ggeffects::ggpredict(m_4, terms = c("wave [0:3]", "Pol.Orient_cZ"))) + scale_y_continuous(limits = c(3, 5))
-
-
-p3a <-
-  plot(ggeffects::ggpredict(m_3, terms = c("wave [0:3]"))) + scale_y_continuous(limits = c(3, 5))
-p4b <-
-  plot(ggeffects::ggpredict(m_4, terms = c("wave [0:3]"))) + scale_y_continuous(limits = c(3, 5))
+#
+# p3 <-
+#   plot(ggeffects::ggpredict(m_3, terms = c("wave [0:3]",  "Pol.Orient_cZ"))) + scale_y_continuous(limits = c(3, 5))
+# p4 <-
+#   plot(ggeffects::ggpredict(m_4, terms = c("wave [0:3]", "Pol.Orient_cZ"))) + scale_y_continuous(limits = c(3, 5))
+#
+#
+# p3a <-
+#   plot(ggeffects::ggpredict(m_3, terms = c("wave [0:3]"))) + scale_y_continuous(limits = c(3, 5))
+# p4b <-
+#   plot(ggeffects::ggpredict(m_4, terms = c("wave [0:3]"))) + scale_y_continuous(limits = c(3, 5))
 
 p0a + p1b
 
@@ -869,9 +872,6 @@ p3a + p4b
 
 
 # save-imputations --------------------------------------------------------
-
-# ------------------------------------------------------------------
-# set name for error
 name_error = "sd"
 
 # set N for id counts
@@ -887,8 +887,6 @@ fitted_values_0
 
 
 fitted_values_1 <- predict(m_1,  ndraws = 50)
-fitted_values_3_0 <- predict(m_3,  ndraws = 50)
-fitted_values_4_1 <- predict(m_4,  ndraws = 50)
 
 
 # make df
@@ -907,14 +905,23 @@ colnames(sd) <- name_error
 # data frame
 dat_0 <-
   as.data.frame(cbind(Y_orig = standata(m_0)$Y, standata(m_0)$X, yfit, id_0, sd)) |>
-  mutate(id = as.factor(id_0))
+  mutate(id = as.factor(id_0)) |>
+  arrange(id, wave)
 
 dat_0 <- dat_0 |>
   mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
   mutate(as = as.factor(rep(0, nrow(dat_0)))) |>
   select(-id_0)
 
-head(dat_0)
+
+dat_0_wide = dat_0 |>
+  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+                                  yfit_muslim,
+                                  Y_orig)) |>
+  mutate(yimpute_muslim_lag = dplyr::lag(yimpute_muslim))
+
+
+head(dat_0_wide$yimpute_muslim_lag)
 
 table(dat_0$wave)
 ## Same for 1s
@@ -945,7 +952,7 @@ dat_1 <- dat_1|>
 dat_combined <- rbind(dat_0, dat_1) |>
   filter(wave == 0 | wave == 1 | wave == 2 | wave == 3) |>
   mutate(Wave = as.factor(wave),
-        Condition = as)
+         Condition = as)
 
 str(dat_combined)
 
@@ -983,20 +990,19 @@ dat_combined_imputed_muslim  <- readRDS(here::here(push_mods, "dat_combined_impu
 head(dat_combined_imputed_muslim)
 
 
+
+# gee ---------------------------------------------------------------------
+
+
+
 library(geepack)
-# arameter     | Coefficient |       SE |         95% CI |  Chi2(1) |      p |
-#   |:-------------|:-----------:|:--------:|:--------------:|:--------:|:------:|
-#   |(Intercept)   |        4.13 | 7.81e-03 |   (4.12, 4.15) | 2.80e+05 | < .001 |
-#   |as (1)        |        0.23 |     0.01 |   (0.21, 0.25) |   502.46 | < .001 |
-#   |wave          |        0.09 | 6.83e-05 |   (0.09, 0.09) | 1.56e+06 | < .001 |
-#   |as (1) * wave |       -0.06 | 9.47e-05 | (-0.06, -0.06) | 4.24e+05 | < .001 |
-#   >
+
 
 
 model_gee_muslim <-
   geeglm(
     data = dat_combined_imputed_muslim,
-    formula = yfit_muslim ~  as.factor(as) * Wave * Pol.Orient_cZ,
+    formula = yimpute_muslim ~  as.factor(as) * Wave * Pol.Orient_cZ,
     id = id,
     corstr = "ar1"
   )
@@ -1009,14 +1015,13 @@ gee_muslim
 
 options(scipen = 999)
 
-suma <- comparisons(
+comparisons(
   model_gee_muslim ,
-  newdata = datagrid(as = c(0,1), Wave = c(0,1,2,3),Pol.Orient_cZ = c(-1,1)),
+  newdata = datagrid(as = c(0,1),
+                     Wave = 0:3,
+                     Pol.Orient_cZ = c(-1.86, 0, 2.45)),
   variables = c("as", "Pol.Orient_cZ"))
 
-summary(suma)
-
-dev.off()
 
 plot_cme(
   model_gee_muslim,
@@ -1037,138 +1042,138 @@ plot_cco(
 
 # overweight-contrast -----------------------------------------------------
 
-fitted_values_3_0 <- predict(m_3,  ndraws = 50)
-fitted_values_4_1 <- predict(m_4,  ndraws = 50)
-
-
-# make df
-fitted_values_0 <- data.frame(fitted_values_3_0)
-fitted_values_1 <- data.frame(fitted_values_4_1)
-
-# needs to be df
-yfit <- as.data.frame(fitted_values_0$Estimate)
-sd <- as.data.frame(fitted_values_0$Est.Error)
-# rename
-colnames(yfit) <- "yfit_overweight"
-colnames(sd) <- name_error
-
-# data frame
-dat_0 <-
-  as.data.frame(cbind(Y_orig = standata(m_3)$Y, standata(m_3)$X, yfit, id_0, sd)) |>
-  mutate(id = as.factor(id_0))
-
-dat_0 <- dat_0 |>
-  mutate(yfit_ORD = round(yfit_overweight, digits = 0)) |>
-  mutate(as = as.factor(rep(0, nrow(dat_0)))) |>
-  select(-id_0)
-
-head(dat_0)
-
-table(dat_0$wave)
-## Same for 1s
-
-# make df
-fitted_values_1 <- data.frame(fitted_values_1)
-
-# needs to be df
-yfit1 <- as.data.frame(fitted_values_1$Estimate)
-sd <- as.data.frame(fitted_values_1$Est.Error)
-name
-# rename
-colnames(yfit1) <- "yfit_overweight"
-colnames(sd) <- name_error
-
-# data frame
-dat_1 <-
-  as.data.frame(cbind(Y_orig = standata(m_4)$Y, standata(m_4)$X, yfit1, id_1, sd)) |>
-  mutate(id = as.factor(id_1))
-
-dat_1 <- dat_1|>
-  mutate(yfit_ORD = round(yfit_overweight, digits = 0)) |>
-  mutate(as = as.factor(rep(1, nrow(dat_1)))) |>
-  select(-id_1)
-
-# combine data
-
-dat_combined <- rbind(dat_0, dat_1) |>
-  filter(wave == 0 | wave == 1 | wave == 2 | wave == 3) |>
-  mutate(Wave = as.factor(wave),
-         Condition = as)
-
-str(dat_combined)
-
-# save processed data
-arrow::write_parquet(dat_combined, here::here(push_mods, "g-comp-processed-overweight-attack"))
-
-# read processed data
-dat_combined_overweight <- arrow::read_parquet(here::here(push_mods, "g-comp-processed-overweight-attack"))
-table(dat_combined_overweight$wave)
-
-# read processed data
-head(dat_combined_overweight)
-
-# wrangle for imputed values with errors
-dat_combined_imputed_overweight <- dat_combined_overweight  |>
-  mutate(yimpute_muslim = if_else(Y_orig == Inf,
-                                  yfit_overweight,
-                                  Y_orig)) |>
-  group_by(id) |>
-  mutate(se = if_else(Y_orig != Inf, 0, sd) # it is the error in the mean
-  ) |>
-  ungroup() |>
-  mutate(se = if_else(se <=0, .01, se)) |>
-  mutate(Wave = as.factor(Wave)) |>
-  data.frame()
-
-head(dat_combined_imputed_overweight)
-
-#save imputed values
-saveRDS(dat_combined_imputed_overweight, here::here(push_mods, "dat_combined_imputed_overweight-attack" ))
-
-# check
-dat_combined_imputed_overweight  <- readRDS(here::here(push_mods, "dat_combined_imputed_overweight-attack"))
-
-head(dat_combined_imputed_overweight)
-
-
-library(geepack)
-
-model_gee_ow <-
-  geeglm(
-    data = dat_combined_imputed_overweight,
-    formula = yfit_overweight~  as.factor(as) * Wave * Pol.Orient_cZ,
-    id = id,
-    corstr = "ar1"
-  )
-
-model_parameters(model_gee_ow) |>
-  print_md()
-
-gee_ow<- plot (ggeffects::ggpredict(model_gee_ow, terms = c('Wave', "as"))) + scale_y_continuous(limits = c(3,5.5))
-gee_ow
-
-options(scipen = 999)
-
-comparisons(
-  model_gee_ow ,
-  newdata = datagrid(as = c(0,1), Wave = c(0,1,2,3),Pol.Orient_cZ = c(-1,1)),
-  variables = c("as", "Pol.Orient_cZ"))
-
-
-
-plot_cme(
-  model_gee_ow,
-  effect = "as",
-  condition = c("Wave", "Pol.Orient_cZ"),
-  conf_level = 0.95)
-
-
-plot_cco(
-  model_gee_ow,
-  effect = "as",
-  condition = c("Wave", "Pol.Orient_cZ"),
-  conf_level = 0.95,
-  transform_pre = "ratio")
+# fitted_values_3_0 <- predict(m_3,  ndraws = 50)
+# fitted_values_4_1 <- predict(m_4,  ndraws = 50)
+#
+#
+# # make df
+# fitted_values_0 <- data.frame(fitted_values_3_0)
+# fitted_values_1 <- data.frame(fitted_values_4_1)
+#
+# # needs to be df
+# yfit <- as.data.frame(fitted_values_0$Estimate)
+# sd <- as.data.frame(fitted_values_0$Est.Error)
+# # rename
+# colnames(yfit) <- "yfit_overweight"
+# colnames(sd) <- name_error
+#
+# # data frame
+# dat_0 <-
+#   as.data.frame(cbind(Y_orig = standata(m_3)$Y, standata(m_3)$X, yfit, id_0, sd)) |>
+#   mutate(id = as.factor(id_0))
+#
+# dat_0 <- dat_0 |>
+#   mutate(yfit_ORD = round(yfit_overweight, digits = 0)) |>
+#   mutate(as = as.factor(rep(0, nrow(dat_0)))) |>
+#   select(-id_0)
+#
+# head(dat_0)
+#
+# table(dat_0$wave)
+# ## Same for 1s
+#
+# # make df
+# fitted_values_1 <- data.frame(fitted_values_1)
+#
+# # needs to be df
+# yfit1 <- as.data.frame(fitted_values_1$Estimate)
+# sd <- as.data.frame(fitted_values_1$Est.Error)
+# name
+# # rename
+# colnames(yfit1) <- "yfit_overweight"
+# colnames(sd) <- name_error
+#
+# # data frame
+# dat_1 <-
+#   as.data.frame(cbind(Y_orig = standata(m_4)$Y, standata(m_4)$X, yfit1, id_1, sd)) |>
+#   mutate(id = as.factor(id_1))
+#
+# dat_1 <- dat_1|>
+#   mutate(yfit_ORD = round(yfit_overweight, digits = 0)) |>
+#   mutate(as = as.factor(rep(1, nrow(dat_1)))) |>
+#   select(-id_1)
+#
+# # combine data
+#
+# dat_combined <- rbind(dat_0, dat_1) |>
+#   filter(wave == 0 | wave == 1 | wave == 2 | wave == 3) |>
+#   mutate(Wave = as.factor(wave),
+#          Condition = as)
+#
+# str(dat_combined)
+#
+# # save processed data
+# arrow::write_parquet(dat_combined, here::here(push_mods, "g-comp-processed-overweight-attack"))
+#
+# # read processed data
+# dat_combined_overweight <- arrow::read_parquet(here::here(push_mods, "g-comp-processed-overweight-attack"))
+# table(dat_combined_overweight$wave)
+#
+# # read processed data
+# head(dat_combined_overweight)
+#
+# # wrangle for imputed values with errors
+# dat_combined_imputed_overweight <- dat_combined_overweight  |>
+#   mutate(yimpute_overweight= if_else(Y_orig == Inf,
+#                                   yfit_overweight,
+#                                   Y_orig)) |>
+#   group_by(id) |>
+#   mutate(se = if_else(Y_orig != Inf, 0, sd) # it is the error in the mean
+#   ) |>
+#   ungroup() |>
+#   mutate(se = if_else(se <=0, .01, se)) |>
+#   mutate(Wave = as.factor(Wave)) |>
+#   data.frame()
+#
+# head(dat_combined_imputed_overweight)
+#
+# #save imputed values
+# arrow::write_parquet(dat_combined_imputed_overweight, here::here(push_mods, "dat_combined_imputed_overweight-attack" ))
+#
+# # check
+# dat_combined_imputed_overweight  <- arrow::read_parquet(here::here(push_mods, "dat_combined_imputed_overweight-attack"))
+#
+# head(dat_combined_imputed_overweight)
+#
+#
+# library(geepack)
+#
+# model_gee_ow <-
+#   geeglm(
+#     data = dat_combined_imputed_overweight,
+#     formula = yimpute_overweight ~  as.factor(as) * wave,
+#     id = id,
+#     corstr = "ar1"
+#   )
+#
+# model_parameters(model_gee_ow) |>
+#   print_md()
+#
+# gee_ow<- plot (ggeffects::ggpredict(model_gee_ow, terms = c('Wave', "as"))) + scale_y_continuous(limits = c(3,5.5))
+# gee_ow
+#
+# options(scipen = 999)
+#
+# comparisons(
+#   model_gee_ow ,
+#   newdata = datagrid(as = c(0,1), Wave = c(0,1,2,3),Pol.Orient_cZ = c(-1,1)),
+#   variables = c("as", "Pol.Orient_cZ"))
+#
+#
+#
+# plot_cme(
+#   model_gee_ow,
+#   effect = "as",
+#   condition = c("Wave", "Pol.Orient_cZ"),
+#   conf_level = 0.95)
+#
+#
+# plot_cco(
+#   model_gee_ow,
+#   effect = "as",
+#   condition = c("Wave", "Pol.Orient_cZ"),
+#   conf_level = 0.95,
+#   transform_pre = "ratio")
 
 
 
@@ -1184,8 +1189,12 @@ d_overweight  <-dat_combined_imputed_overweight |>
   mutate(se = if_else(se <=0, .01, se))|>
   mutate(Wave = as.factor(Wave))
 
+head(d_overweight)
 
-# # muslim gcomp ------------------------------------------------------------
+arrow::write_parquet(d_muslim,
+                     here::here(push_mods, "d_muslim.rds"))
+
+# # overweight gcomp ------------------------------------------------------------
 #
 
 prior_muslim = c(
@@ -1247,7 +1256,7 @@ muslim_marg  <- plot(
 plot_muslim <- muslim_marg +
   labs(subtitle = "Muslim Warmth",
        y = "Muslim Warmth (1-7) ",
-       x = "Years: 2018-2022; N = XXX") +
+       x = "Years: 2018-2022; N = 13,409") +
   scale_colour_okabe_ito(alpha =.1) +
   theme_classic()   +
   scale_y_continuous(limits = c(4.0, 4.5))
@@ -1255,7 +1264,7 @@ plot_muslim <- muslim_marg +
 plot_muslim
 
 # effect modification -----------------------------------------------------
-
+summary(m_cond_mus)
 
 bform_mus_cond  =   bf(yimpute_muslim |mi(se) ~  Attack  *  Wave *  Pol.Orient_cZ + (1|id),
                        sigma ~ 0 + as, set_rescor(rescor = FALSE))
@@ -1273,6 +1282,9 @@ prior_re  = c(
 )
 
 
+
+
+
 system.time(
   m_cond_mus <- brms::brm(
     backend = "cmdstanr",
@@ -1287,117 +1299,413 @@ system.time(
 
 
 # Images to use
-muslim_cond  <- plot(
-  conditional_effects(
-    m_cond_mus,
-    "Wave:As",
-    spaghetti = TRUE,
-    ndraws =200,
-    plot = F))[[1]]
+# muslim_cond  <- plot(
+#   conditional_effects(
+#     m_cond_mus,
+#     "Wave:As",
+#     spaghetti = TRUE,
+#     ndraws =200,
+#     plot = F))[[1]]
+#
+
+# brm_muslim <- plot (ggeffects::ggemmeans(m_cond_mus, terms = c('Wave', "Attack", "Pol.Orient_cZ[-1.86, 0, 2.45]"))) +
+#   scale_y_continuous(limits = c(3,5.5))
+#
+# brm_muslim
+
+
+plot_cme(
+  m_cond_mus,
+  effect = "Attack",
+  condition = c("Wave", "Pol.Orient_cZ"),
+  conf_level = 0.95,
+  ndraws = 1000)
+
+
+plot_cco(
+  m_cond_mus,
+  effect = "Attack",
+  condition = c("Wave", "Pol.Orient_cZ"),
+  conf_level = 0.95,
+ # transform_pre = "ratio",
+  ndraws = 1000)
+
+
+plot_cco(
+  m_cond_mus,
+  effect = "Attack",
+  condition = c("Wave", "Pol.Orient_cZ"),
+  conf_level = 0.95,
+ transform_pre = "ratio",
+  ndraws = 1000)
+
+
+
+plot_cco(
+  m_cond_mus,
+  effect = "Attack",
+  condition = c("Wave"),
+  conf_level = 0.95,
+#  transform_pre = "ratio",
+  ndraws = 1000)
+
+pred_marg <- predictions(m_cond_mus,
+                    type = "response",
+                    newdata = datagrid("Attack" = 0:1,
+                                       "Wave" = 0:3
+                                     #  "Pol.Orient_cZ" = c(-1.86, 0, 2.45)
+                                     ),
+                    ndraws = 1000,
+                    re_formula = NA) |>
+  posteriordraws()
+
+
+
+pred_cond <- predictions(m_cond_mus,
+                         type = "response",
+                         newdata = datagrid("Attack" = 0:1,
+                                            "Wave" = 0:3,
+                                            "Pol.Orient_cZ" = c(-1.86, 0, 2.45)
+                         ),
+                         ndraws = 1000,
+                         re_formula = NA) |>
+  posteriordraws()
+
+
+
+library(ggdist)
+
+ggplot(pred_marg, aes(x = Wave, y = draw, fill = factor(Attack))) +
+  stat_halfeye(slab_alpha = 1) +
+  labs(title = "Marginal effect of Attack on Muslim Warmth",
+       x = "Political Right Orientation (SD)",
+       y = "Predicted Response",
+       fill = "Attack") +
+#  facet_grid(.~Wave,   shrink = TRUE) +
+  scale_fill_okabe_ito(alpha = 1)
+
+
+ggplot(pred_cond, aes(x = Pol.Orient_cZ, y = draw, fill = factor(Attack))) +
+  stat_halfeye(slab_alpha = 1) +
+  labs(title = "Conditional effect of Attack on Muslim Warmth",
+       x = "Political Right Orientation (SD)",
+       y = "Predicted Response",
+       fill = "Attack") +
+  facet_grid(.~Wave,   shrink = TRUE) +
+  scale_fill_okabe_ito(alpha = 1)
+
+
+ggplot(pred_cond, aes(x = Pol.Orient_cZ, y = draw, fill = Attack)) +
+  stat_halfeye(slab_alpha = .9) +
+  #  stat_dotsinterval(quantiles = 1000, point_interval = mode_hdci) +
+  # stat_dotsinterval(slab_alpha = .9) +
+  labs(title = "Conditional effect of Attack on Muslim Warmth",
+       x = "Political Right Orientation (SD)",
+       y = "Predicted Response",
+       fill = "Attack") +
+  facet_grid(. ~ Wave,   shrink = TRUE) +
+  scale_fill_okabe_ito()
+
+
+
+cmp <- comparisons(
+  m_cond_mus,
+  newdata = datagrid(
+    Wave = 0:3,
+    Attack = 0:1,
+    Pol.Orient_cZ = c(-1.86, 0, 2.45)),
+  ndraws = 10,
+  re_formula = NA
+)
+cmp
+summary(cmp)
+
+summary(m_cond_mus)
+out_cond_0 <- comparisons(m_cond_mus,
+                         type = "response",
+                         newdata = datagrid("Attack"),
+                         ndraws = 100,
+                         re_formula = NULL) |>
+  dplyr::mutate_if(is.numeric, round, 3)
+
+
+# |>
+#   slice(1:6) |>
+#   select(contrast:conf.high) #|>
+#   dplyr::mutate_if(is.numeric, round, 3)
+
+out_cond_0
+
+out_cond_1 <- comparisons(m_cond_mus,
+                          type = "response",
+                          newdata = datagrid("Attack" = 0:1,
+                                             "Wave" = 1,
+                                             "Pol.Orient_cZ" = c(-1.86, 0, 2.45)),
+                          ndraws = 10,
+                          re_formula = NULL)|>
+  tidy()
+
+out_cond_1
+
+out_cond_1 <- comparisons(m_cond_mus,
+                          type = "response",
+                          newdata = datagrid("Attack" = 0:1,
+                                             "Wave" = 1,
+                                             "Pol.Orient_cZ" = c(-1.86, 0, 2.45)),
+                          ndraws = 10,
+                          re_formula = NULL)|>
+  tidy()
+
+out_cond_0
+
+
+
+# compare
+
+model_parameters(model_gee_muslim) |>
+  print_md()
+
+
+model_parameters(m_cond_mus) |>
+  print_md()
+
+
+gee_comp <- comparisons(model_gee_muslim,
+                          type = "response",
+                          newdata = datagrid("as")) |>
+  dplyr::mutate_if(is.numeric, round, 3)
+
+
+gee_comp
+
+plot_cco(
+  effect = "as",
+  cp
+)
+
+
+# d-muslims-wide ----------------------------------------------------------
+
+# ------------------------------------------------------------------
+# set name for error
+name_error = "sd"
+
+# set N for id counts
+id_0 <- dt_five_zero_noimpute$Id
+id_1 <- dt_five_one_noimpute$Id
+
+
+
+# analysis
+name <- "yfit_muslim"
+
+fitted_values_0 <- predict(m_0, ndraws = 50)
+fitted_values_0
+
+
+fitted_values_1 <- predict(m_1,  ndraws = 50)
+
+
+# make df
+fitted_values_0 <- data.frame(fitted_values_0)
+head(fitted_values_0)
+head(fitted_values_0)
+mean(fitted_values_0$Est.Error)
+
+# needs to be df
+yfit <- as.data.frame(fitted_values_0$Estimate)
+sd <- as.data.frame(fitted_values_0$Est.Error)
+# rename
+colnames(yfit) <- name
+colnames(sd) <- name_error
+
+# data frame
+dat_0 <-
+  as.data.frame(cbind(Y_orig = standata(m_0)$Y, standata(m_0)$X, yfit, id_0, sd)) |>
+  mutate(id = as.factor(id_0)) |>
+  arrange(id, wave)
+
+dat_0_wide <- dat_0 |>
+  # note changes
+  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+                                  yfit_muslim,
+                                  Y_orig)) |>
+  mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
+  mutate(as = as.factor(rep(0, nrow(dat_0)))) |>
+  arrange(id_0, wave) |>
+  mutate(yimpute_muslim_lag = dplyr::lag(yimpute_muslim))
+
+
+yimpute_muslim_lag <- dat_0_wide |>
+  filter(wave == 0) |>
+  select(yimpute_muslim_lag, id_0)
+
+
+
+dat_0_wide_u<- dat_0_wide |>
+  select(-yimpute_muslim_lag) |>
+  select(-id_0)
+
+## Same for 1s
+
+# make df
+fitted_values_1 <- data.frame(fitted_values_1)
+
+# needs to be df
+yfit1 <- as.data.frame(fitted_values_1$Estimate)
+sd <- as.data.frame(fitted_values_1$Est.Error)
+
+# rename
+colnames(yfit1) <- name
+colnames(sd) <- name_error
+
+# data frame
+dat_1 <-
+  as.data.frame(cbind(Y_orig = standata(m_1)$Y, standata(m_1)$X, yfit1, id_1, sd)) |>
+  mutate(id = as.factor(id_1))
+
+dat_1_wide <- dat_1|>
+  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+                                  yfit_muslim,
+                                  Y_orig)) |>
+  mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
+  mutate(as = as.factor(rep(1, nrow(dat_1)))) |>
+  arrange(id_0, wave) |>
+  select(-id_1)
+
+
+dat_0_wide_u
+# combine data
+
+dat_combined_u  <- rbind(dat_0_wide_u, dat_1_wide) |>
+  filter(wave == 0 | wave == 1 | wave == 2 | wave == 3) |>
+  mutate(Wave = as.factor(wave),
+         Condition = as)
+
+str(dat_combined_u)
+
+# save processed data
+saveRDS(dat_combined_u, here::here(push_mods, "dat_combined_u-muslims-attack"))
+
+# read processed data
+dat_combined_u <- readRDS(here::here(push_mods,  "dat_combined_u-muslims-attack"))
 
 
 
 
-plot_muslim <- muslim_gr +
-  labs(subtitle = "Muslim Warmth",
-       y = "Muslim Warmth (1-7) ",
-       x = "Years: 2018-2022; N = XXX") +
-  scale_colour_okabe_ito(alpha =1) +
-  theme_classic()   +
-  scale_y_continuous(limits = c(4.0, 6))
+test1 <- dat_combined_u |>
+  select(wave, as, yimpute_muslim, Pol.Orient_cZ,   id)
 
+
+shown <- test1|>
+  pivot_wider(names_from = wave,
+              values_from = c(yimpute_muslim),
+              names_glue = "{.value}_{wave}")
+
+
+nbind <- rbind(yimpute_muslim_lag, yimpute_muslim_lag)
+
+shown_df <- cbind(nbind,shown)
+
+shown_df <- shown_df |>
+  mutate(yimpute_muslim_lag_c = scale(yimpute_muslim_lag, center = TRUE, scale = FALSE))
+
+head(shown_df)
+tail(shown_df)
+
+summary( glm(yimpute_muslim_0 ~ as  +  yimpute_muslim_lag, data = shown_df ) )
+
+
+# p <- predictions(fit, newdata = datagrid(qsmk = 0:1, grid_type = "counterfactual"))
+# aggregate(predicted ~ qsmk, data = p, FUN = mean)
 
 
 
 # overweight --------------------------------------------------------------
-
-prior_ow = c(
-  set_prior("normal(0,.5)",  class = "b"),
-  set_prior("normal(0,1)", class = "b", dpar = "sigma"),
-  set_prior(
-    "student_t(3, 4, 2)",
-    class = "Intercept",
-    lb = 1,
-    ub = 7
-  ),
-  set_prior("exponential(1)", class = "sd")  # only for raneffs
-)
-
-
-
-
-bform_marg_ow  =   bf(yimpute_overweight |mi(se) ~  as  *  wave  + (1|id),
-                       sigma ~ 0 + as, set_rescor(rescor = FALSE))
-
-prior_re  = c(
-  set_prior("normal(0,.5)",  class = "b"),
-  set_prior("normal(0,1)", class = "b", dpar = "sigma"),
-  set_prior(
-    "student_t(3, 4, 2)",
-    class = "Intercept",
-    lb = 1,
-    ub = 7
-  ),
-  set_prior("exponential(1)", class = "sd")  # only for raneffs
-)
-
-
-system.time(
-  m_marg_ow <- brms::brm(
-    backend = "cmdstanr",
-    data = d_muslim,
-    family = "gaussian",
-    bform_marg_ow,
-    prior_re,
-    init = 0,
-    file = here::here(push_mods,"m_marg_ow.rds")
-  )
-)
-
-
-# Images to use
-muslim_marg  <- plot(
-  conditional_effects(
-    m_marg_ow,
-    "wave:as",
-    spaghetti = TRUE,
-    ndraws =200,
-    plot = F))[[1]]
-
-
+#  Not run
+# prior_ow = c(
+#   set_prior("normal(0,.5)",  class = "b"),
+#   set_prior("normal(0,1)", class = "b", dpar = "sigma"),
+#   set_prior(
+#     "student_t(3, 4, 2)",
+#     class = "Intercept",
+#     lb = 1,
+#     ub = 7
+#   ),
+#   set_prior("exponential(1)", class = "sd")  # only for raneffs
+# )
+#
+#
+#
+# bform_marg_ow  =   bf(yimpute_overweight |mi(se) ~  as  *  wave  + (1|id),
+#                        sigma ~ 0 + as, set_rescor(rescor = FALSE))
+#
+# prior_re  = c(
+#   set_prior("normal(0,.5)",  class = "b"),
+#   set_prior("normal(0,1)", class = "b", dpar = "sigma"),
+#   set_prior(
+#     "student_t(3, 4, 2)",
+#     class = "Intercept",
+#     lb = 1,
+#     ub = 7
+#   ),
+#   set_prior("exponential(1)", class = "sd")  # only for raneffs
+# )
+#
+#
+# system.time(
+#   m_marg_ow <- brms::brm(
+#     backend = "cmdstanr",
+#     data = d_overweight,
+#     family = "gaussian",
+#     bform_marg_ow,
+#     prior_re,
+#     init = 0,
+#     file = here::here(push_mods,"m_marg_ow.rds")
+#   )
+# )
+#
+#
+# # Images to use
+# m_marg_ow  <- plot(
+#   conditional_effects(
+#     m_marg_ow,
+#     "wave:as",
+#     spaghetti = TRUE,
+#     ndraws =200,
+#     plot = F))[[1]]
+#
+#
 
 # comparison marginal graph -----------------------------------------------
-
-
-
-plot_muslim <- muslim_gr +
-  labs(subtitle = "Muslim Warmth",
-       y = "Muslim Warmth (1-7) ",
-       x = "Years: 2018-2022; N = XXX") +
-  scale_colour_okabe_ito(alpha =1) +
-  theme_classic()   +
-  scale_y_continuous(limits = c(4.0, 6))
-
-
-plot_overweight <- ov_gr +
-  labs(subtitle = "Overweight Warmth",
-       y = "Overweight Warmth (1-7) ",
-       x = "Years: 2018-2020/21; N = 19814") +
-  #scale_colour_viridis_d(alpha =.4, name = "attack condition") +
-  scale_colour_okabe_ito(alpha =.4) +
-  # scale_colour_viridis_d(alpha =.4) +
-  theme_classic()   +
-  scale_y_continuous(limits = c(4.0, 6))
-
-plot_overweight
-
-combined_plot <- plot_muslim + plot_overweight + plot_annotation(tag_levels = "A",
-                                                                 title = "Comparison of Warm trajectories: (A) Muslims; (B) Overweight") + plot_layout(guides = 'collect')
-
-combined_plot
-dev.off()
-
-plot_muslim + plot_overweight
+# plot_muslim <- muslim_gr +
+#   labs(subtitle = "Muslim Warmth",
+#        y = "Muslim Warmth (1-7) ",
+#        x = "Years: 2018-2022; N = XXX") +
+#   scale_colour_okabe_ito(alpha =1) +
+#   theme_classic()   +
+#   scale_y_continuous(limits = c(4.0, 6))
+#
+#
+# plot_overweight <- ov_gr +
+#   labs(subtitle = "Overweight Warmth",
+#        y = "Overweight Warmth (1-7) ",
+#        x = "Years: 2018-2020/21; N = 19814") +
+#   #scale_colour_viridis_d(alpha =.4, name = "attack condition") +
+#   scale_colour_okabe_ito(alpha =.4) +
+#   # scale_colour_viridis_d(alpha =.4) +
+#   theme_classic()   +
+#   scale_y_continuous(limits = c(4.0, 6))
+#
+# plot_overweight
+#
+# combined_plot <- plot_muslim + plot_overweight + plot_annotation(tag_levels = "A",
+#                                                                  title = "Comparison of Warm trajectories: (A) Muslims; (B) Overweight") + plot_layout(guides = 'collect')
+#
+# combined_plot
+# dev.off()
+#
+# plot_muslim + plot_overweight
 
 
 
