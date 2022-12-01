@@ -27,6 +27,16 @@ Yannis C. Yortsos
 PNAS Nexus Interim Editor-in-Chief 
 
 
+# 
+
+Dear Dr Yortsos & Colleagues
+
+Below we describe how we have addressed questions and concerns raised during review of our manuscript.  Doing so has resulted in a stronger manuscript. We are therefore grateful to you, the Associate Editor and the three anonymous referees.  
+
+Our responses are in **bold**. 
+
+# 
+
 ********************* 
 Associate Editor Comments: 
 
@@ -35,26 +45,24 @@ I, along with the three reviewers, commend your work on this important question,
 1. More attention needs to be paid to theoretical expectations. Through which mechanism(s) do we expect the attack to influence attitudes? Which attitudes, specifically? And who is expected to be most affected? You'll see that answers to the last two questions may help you address items (2) and (3) below. 
 
 
-**In the revised manuscript, we examine effect modification by levels of political identification.**
+**We have clarified that our main interest is in whether the boost to Muslim acceptance following the attacks persists or regresses to a mean. Our original manuscript focussed on the marginal effect of the attacks. In the revised manuscript, we examine effect-modification of the attacks by levels of political identification.**
 
 
 
 2. Both Reviewers #1 and #3 suggest looking at additional attitudes, either as alternative outcomes or look for placebo effects. I would encourage you to explore both, but the latter warrants particular attention. Depending on your theory (see (1)), you may expect the effect to spill-over to attitudes towards other groups. Alternatively, you may expect that only attitudes towards Muslims will be affected. Either way, you should find an attitude (or set of attitudes) that you think will not be affected and use these to test for a placebo effect. 
 
 
-**Potential negative controls in the NZAVS are as follows: warmth toward those with mental illness (introduced in Time 9); warmth toward elderly people (Time 9); warmth toward LGBTQ+ people (introduced in Time 12); Warmth toward People with a disability (Time 12);  Warmth toward Overweight people (Time 1). Because we need at least 2 x waves to estimate a slope, only warmth toward overweight people can be used as a negative control.  We include this analysis in the revised manuscript.*** 
+**Potential negative controls in the NZAVS are as follows (1) warmth toward those with mental illness (introduced in Time 9); (2) warmth toward elderly people (Time 9); warmth toward Overweight people (Time 1). A new appendix tests whether the attacks affected acceptance in these outcomes, and reports no evidence for such effects.*** 
 
 3. Reviewer #2 raises critical questions about your application of the imputation method to this particular case, where the entire population is treated. They are skeptical that you will be able to take population-wide confounders into account but want to remain open-minded, and I encourage you to take their concerns to heart. Although not directly related to the methodology -- more to the conclusions that we may draw from your results -- but you should also consider the question raised by Reviewer #1. Your treatment may in fact be a "bundle" -- not just the attack itself, but also a host of reactions to it. You may be unable to identify what exactly is doing the work here, but you need to at least acknowledge the realities of this particular treatment (and others like it). 
 
-**We too are skeptical. Our reasons differ. The occurence of the attacks are random with respect to data collection. For this reason there are only three possible pathways for confounding. Mediation bias would occur were to to condition on an effect of the attacks that is an intermediary of the effect of warmth to Muslims. Collider bias would occur were we to condition on the effect of the effect of both the attacks and warmth to Muslims. An example of collider bias would be attrition, if attrition were affected by both the attacks and warmth to Muslims. The reviewer is concerned that warmth might have been affected by other conditions following the attacks, such as COVID. This concern is analagous to intention to treat and per-protocol estimands. This is a valid concern. Another concern, and more worrying perhaps, is that the effect of the **
-
-**Include comment about the effect early**
+**Attack bundle: it is a good point. We have included the following statement in our conclusions " ..."  Confounding: Because the attacks were random, we do not have confounding for the effect of A on Y. The problem here is model misspecification for the imputations, particularly for the counterfactual contrast.  We have included the following statement in our conclusions. **
 
 
 4. Finally, I encourage you to take Reviewer #1's suggestion to consider the effect of COVID-19 more seriously in your analysis and discussion. As population-wide treatments go, it's a pretty significant one. 
 
 
-**Intention to treat not per protocol**
+**We have included the following statement: "xxx" **
 
 
 We look forward to seeing the revised manuscript. 
@@ -68,13 +76,38 @@ I read the paper with great interest. I appreciate the attempt to quantify the l
 
 One strategy of inferring the causal effect in the study involved the use of multiple imputation. To that aim, the authors utilized data from the previous waves to impute the missing values for the condition that was not observed (i.e., a terrorist attack did not happen). While I understand the general logic of this strategy, I was wondering to what extent it was informative during this particular period of time, namely one that overlapped with the global pandemic. Specifically, I was wondering whether imputing values on the basis of relationships established before the attack (and before the pandemic) was appropriate strategy to predict attitudes toward Muslims in an alternative world in which attack did not happen (but the pandemic happened). I could imagine that the effects of some of the variables used for MI on attitudes could be different before and during the pandemic. Maybe the method used by the authors can address this problem but it would be good to clarify that. More generally, a more thorough discussion of the uniqueness of the period studied would be helpful. 
 
+
+***This is a good point.  Muslim Acceptance during the following year may have been affected by the Global pandemic and New Zealand's severe COVID-19 lockdown. Indeed in the new analysis we find some evidence for diminished acceptance. The imputations in the Attack condition borrow from information both within persons and within waves.  The challenge comes to imputing responses in the no-attack condition. We have revised the manuscript to reflect that steady linear increase in the counterfactual no-attack condition presents a "worst case" scenario for regression to the mean. We focussed on presenting the "worst case" scenerio to avoid the interpretation that we have indeed recovered the counterfactual no-attack trend.**
+
+
+
+
 My second question is related to the issue of variables used for MI. The authors write “To multiply impute missing values (k = −6 . . . 0, A|a = 0), we used baseline responses for Z = {age, education, ethnicity, has-partner, identity-male, is-employed, is-parent, NZ-deprivation, religious identification, resides-urban}..” However, I was not sure which wave the values of these variables were taken from (i.e., what does “baseline” refer to?). Does it mean that e.g. for a person who was low on NZ-deprivation in 2018/19 but high in 2020/21 the imputed value of their attitudes for 2021 will use their higher level of deprivation as the input? It would be good to clarify that. 
+
+
+**In the original manuscript baseline is an individual's first observation in the study. We see this as doubly unclear. It is unclear for the reasons the reviewer emphasises. Each individual's baseline will differ. Additionally, we do not have a clearly defined target population. We address these issues by focussing on a single population, described as follows: ...."** 
+
+
+
 
 Third, I was wondering whether the observed effect was specific to Muslims as a group targeted by the attack or it generalized across other groups as well. It could be that after the attack positivity of attitudes to other social groups increased as well (e.g., due to a desire for social cohesion). Given that participants rated their feelings toward several groups, a similar analysis using items measuring attitudes toward other groups could show whether the effect was unique to Muslims or not. If yes, this could strengthen the interpretation of the authors. One could expect that some of the groups could experience a decrease in positive attitudes after the attack. Again, if confirmed that could strengthen the interpretation. 
 
+
+**Prejudice to other minorities: this is the topic of our next manuscript, where we investigate effects on prototypical and non-prototypical minorities. We considered focusing on all prejudice effects, however the resulting manuscript becomes unweildy. Our interest here is whether increased acceptance of the target community is short lived. Even under the "worst case" scenario we see that it was not short lived.  Additionally, the revised manuscript focuses on whether effects were modified depending on one's political orientation. This adds additional burdens on the audiences attention.  That sai, it is a good point to include negative controls. The revised manuscript includes the three non ethnic prejudice indicators, overweight people, mentally ill people, and the elderly, and finds no evidence for an attack affect.  We're grateful for the reviewers suggestion to include a negative control.**
+
+
+
 More generally, given that the focus of the paper is on the causal analysis of the effect of the attack, a discussion of possible explanations and boundary conditions would be useful as it might suggest psychological mechanisms of this effect. For instance, it seems to me that it is not possible (?) to distinguish between the explanation that is focused on the occurrence of the attack and the explanation that attributes the effect to the responses to attack, which might be more specific to the socio-political context of New Zealand. It could be that it was something about the reaction to the attack (e.g., by politicians in NZ, etc.) that facilitated positive attitudes toward Muslims in society rather than the fact that this group was targeted in the attack. While the authors mention the issue of (limited) generality in the discussion I think it should be discussed more extensively. A minor comment: I would also suggest editing the title of the paper (“Long-term causal effect of radical white terrorism”) to be more specific as it currently suggests the level of generalizability that goes beyond the findings. 
 
+**Another excellent point. Thank you. We have revised the manuscript as follows...**
+
+
+
 Moreover, in the studied sample attitudes toward Muslims at the beginning of the study were just below the mid-point and they were becoming more positive over time. Should a similar effect be expected if the attitudes toward a group were more negative to begin with? How could different pre-existing norms change the perception of the attack (as more or less immoral) and as a consequence the perception of and attitudes toward the targeted group? I do not mean to question the importance of the study and the analyses, which I consider to be very useful and inspiring. I would just like to suggest developing the theoretical discussion of the results in a direction that might inspire more research on this topic. At this point, the theoretical interpretation of the obtained results is largely missing from the paper. 
+
+
+**This is related to the previous points. It is a good comment.  We have revised the manuscript as follows...**
+
 
 
 
@@ -88,10 +121,19 @@ However, I have one really big issue with the identification strategy. It could 
 I think there is a confusion about what the imputation method is able to achieve. The imputation method is interesting, but in essence, it can only give us counterfactual trends if it adjusts for confounding. Note that also in the Westreich paper cited in the manuscript, Westreich et al. use imputation to adjust for confounding variables Z. 
 So what are the relevant confounding variables in a setting where the treatment is assigned to a whole population (on a macro level) exogenously (individuals do not have control over it)? 
 
+
+
 The authors rely on pre-attack trajectories of the outcome and stable individual-level variables to impute the counterfactual outcome that would have occurred if the attack did not happen. The problem is that these variables are not the relevant confounding variables that might bias our causal effect estimate in this setting. This is because individuals do not select (or are assigned) into the post-attack phase based on these variables. This is because the treatment in this study is something that happens independently of individual level factors (it is outside of individual control). Another way to put this is that the variables that the authors use for their imputation do not help to make the conditional exchangeability assumption more credible. 
+
+
 
 The variables that might bias causal inference in a setting where the treatment is assigned on the macro level (and we are interested in long-term effects) are other time-varying macro conditions. For example, the effect one year after the attack might be confounded by the fact that the overall discourse on immigration changed (because of other reasons than the attack), because macro-economic conditions changed, or, maybe even another terrorist attack happened in the post-period etc. 
 Now, usually we would deal with this type of confounding by comparing the treated country to another similar country; or individuals who were exposed to others who did not know of the terror attack. This would allow to control for period effects to some extent. 
+
+
+
+**We agree with the skepticism, although for someone different reasons. The problem is not one of confounding or of treatment assignment. We see a problem. with model specification. Imputing a counterfactual outcome relies on strong assumptions.**
+
 
 Of course, this is not possible with the data at hand. This is why a regression-discontinuity-in-time design (as presented in this analysis) focuses on the period directly before and directly after the attack. This is not a drawback of the method of regression discontinuity, but an essential limitation of the data available in research on the effects of terrorist attacks on one country. Again, controlling for or imputing based on individual level variables does nothing to adjust for these types of time-varying macro shocks (even if the models are as complex as the ones presented in the paper). That being said, it might be that the method could be used to model confounding macro shocks as well, and I am looking forward to the author’s response. 
 
