@@ -1,5 +1,5 @@
 ## What
-This is a repository for investigating "Causal Effects of Terroris on Acceptance" study.
+This is a repository for investigating "Causal Effects of Terrorism on Acceptance" study.
 
 ## Where
 The orginal analysis scripts for this study can be found in the "old" directory. No attempt has been made to edit or document these materials for clarity. These are for archival purposes only. 

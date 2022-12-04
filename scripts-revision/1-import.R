@@ -13,7 +13,7 @@
 
 options(scipen = 999)
 #libraries
-source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs.R")
+source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs2.R")
 
 # read functions
 source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/funs.R")
@@ -37,6 +37,15 @@ pull_path
 #time13 <- read_parquet( (here::here("data", "time13")))
 
 dat <- arrow::read_parquet(pull_path)
+
+head(dat)
+
+library(dplyr)
+
+mar <- dat|>
+  dplyr::filter(EthnicCats == "Maori")
+
+length(unique(mar$Id))
 
 df <- dat |>
   filter(YearMeasured == 1)
@@ -1193,6 +1202,9 @@ head(d_overweight)
 
 arrow::write_parquet(d_muslim,
                      here::here(push_mods, "d_muslim.rds"))
+
+d_muslim <- arrow::read_parquet(d_muslim,
+                     here::here(push_mods))
 
 # # overweight gcomp ------------------------------------------------------------
 #
