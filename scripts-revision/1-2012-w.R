@@ -1203,8 +1203,6 @@ muslim_marg  <- plot(conditional_effects(
 ))[[1]]
 
 
-
-
 plot_muslim <- muslim_marg +
   labs(subtitle = "Muslim Warmth",
        y = "Muslim Warmth (1-7) ",

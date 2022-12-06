@@ -31,9 +31,25 @@ PNAS Nexus Interim Editor-in-Chief
 
 Dear Dr Yortsos & Colleagues
 
-Below we describe how we have addressed questions and concerns raised during review of our manuscript.  Doing so has resulted in a stronger manuscript. We are therefore grateful to you, the Associate Editor and the three anonymous referees.  
+Below we describe how we have addressed question raised during review of our manuscript.  Doing so has resulted in a stronger manuscript. We are grateful for your 
 
-Our responses are in **bold**. 
+There are three general areas of improvement. 
+
+First, the new manuscript clarifies the target population for whom the analysis is meant to generalise. In the previous manuscript we combined participants from multiple boosters in the study. We did not follow the same cohort. Our previous strategy resulted in a larger sample with greater power. However, the larger combined sample introduces addditional assumptions and potential for confusion.  Our entirely new analysis follows people from Wave 5.  This results in a smaller sample. 
+
+Second, we examine effect modification of the attack-complex by differences in political orientation. We agree with the reviewers who think the study would be of greater interest if we were to include a conditional analysis. This analysis also helps to clarify the benefits of a potential outcomes approach to Regression Discontinuity. As part of this analysis we have better clarified the estimands of interest. We have also added the two negative controls that reviewer 1 suggests. 
+
+Third, we have completed the processing of Time 13 2021-2022 data we have included a third wave post-attack Wave. We allow for pre-attack time X political orientation interaction when predicting the missing counterfactual outcomes had the attacks not occurred. As with any model, we must assume conditional exchangeability for our conterfactual contrasts.  In observational research, the assumption of conditional exchangeability is always a strong one.   any obsevational research this is 
+
+
+
+
+
+
+Second, 
+
+
+Our responses to specific points are in **bold**. 
 
 # 
 
