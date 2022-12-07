@@ -36,19 +36,27 @@ df <- readRDS(here::here("data", "df_s"))
 #rarep <- df %>%
 rarep <- dat %>%
   dplyr::filter(YearMeasured == 1) %>%
-  dplyr::filter(Wave == 2018 | Wave == 2019 | Wave == 2020|  Wave == 2021) %>%
+  dplyr::filter(Wave == 2013 |
+                  Wave == 2014 |
+                  Wave == 2015 |
+                  Wave == 2016 |
+                  Wave == 2017 |
+                  Wave == 2018 |
+                  Wave == 2019 |
+                  Wave == 2020|
+                  Wave == 2021) %>%
   droplevels() %>%
-  dplyr::mutate(org2018 =  ifelse(Wave == 2018 &
+  dplyr::mutate(org2013 =  ifelse(Wave == 2013 &
                                     YearMeasured == 1, 1, 0)) %>%
   group_by(Id) %>%
-  dplyr::mutate(hold = mean(org2018, na.rm = TRUE)) %>%  # Hack
+  dplyr::mutate(hold = mean(org2013, na.rm = TRUE)) %>%  # Hack
   filter(hold > 0) %>% # hack!
   ungroup(Id) %>%
   dplyr::mutate(timeline = make_date(year = 2009, month = 6, day = 30) + TSCORE) %>%
   dplyr:::count(day = floor_date(timeline, "day")) %>%
   dplyr::mutate(Condition = factor(
     ifelse(
-      day >= "2018-06-18" & day < "2019-03-15",
+      day >= "2013-09-18" & day < "2019-03-15",
       0,
       ifelse(
         day >= "2019-03-15" & day < "2019-06-18",
@@ -89,7 +97,7 @@ dates_vline5b <- which(rarep$day %in% dates_vline5)
 lds2 <- ggplot(rarep, aes(day, n)) +
   geom_col(aes(fill = Condition)) +
   scale_x_date(date_labels = "%b/%Y",
-               limits = c(as.Date("2018-06-01"), as.Date("2022-10-16")))  +
+               limits = c(as.Date("2013-06-01"), as.Date("2022-10-16")))  +
   scale_y_continuous(expand = c(0, 0), limits = c(0, NA)) +
   geom_vline(xintercept = as.numeric(rarep$day[dates_vline2b]),
              col = "red",
@@ -101,7 +109,7 @@ lds2 <- ggplot(rarep, aes(day, n)) +
     xmin = dates_vline2,
     xmax = dates_vline3,
     ymin = 0,
-    ymax = 2000,
+    ymax = 1000,
     alpha = .3,
     fill = "darkred"
   ) +
@@ -110,7 +118,7 @@ lds2 <- ggplot(rarep, aes(day, n)) +
     xmin = dates_vline3,
     xmax = as.Date("2020-10-15"),
     ymin = 0,
-    ymax = 2000,
+    ymax = 1000,
     alpha = .05,
     fill = "orange"
   ) +
@@ -119,7 +127,7 @@ lds2 <- ggplot(rarep, aes(day, n)) +
     xmin = as.Date("2020-10-15"),
     xmax = as.Date("2021-10-15"),
     ymin = 0,
-    ymax = 2000,
+    ymax = 1000,
     alpha = .05,
     fill = "yellow"
   ) +
@@ -128,94 +136,94 @@ lds2 <- ggplot(rarep, aes(day, n)) +
     xmin = as.Date("2021-10-15"),
     xmax = as.Date("2022-10-15"),
     ymin = 0,
-    ymax = 2000,
+    ymax = 1000,
     alpha = .05,
     fill = "Green"
   ) +
+  # annotate("text",
+  #          x = as.Date("2018-10-15"),
+  #          y = 2600,
+  #          label = "Time 10\npre-attacks") +
   annotate("text",
-           x = as.Date("2018-10-15"),
-           y = 2600,
-           label = "Time 10\npre-attacks") +
-  annotate("text",
-           x = as.Date("2019-01-01"),
-           y = 2950,
-           label = "**attack**") +
-  annotate("text",
-           x = as.Date("2019-06-15"),
-           y = 2600,
-           label = "Time 10\npost-attacks") +
-  annotate("text",
-           x = as.Date("2020-03-01"),
-           y = 2600,
-           label = "Time 11 Year\nFollowing") +
-  annotate("text",
-           x = as.Date("2021-03-01"),
-           y = 2600,
-           label = "Time 12 2 years \nFollowing") +
-  annotate("text",
-           x = as.Date("2022-03-01"),
-           y = 2600,
-           label = "Time 12 3 years \nFollowing") +
-  annotate(
-    geom = "curve",
-    x = as.Date("2018-11-15"),
-    y = 2000,
-    xend = as.Date("2020-02-15"),
-    yend = 2000,
-    curvature = -.3,
-    arrow = arrow(length = unit(2, "mm"))
-  ) +
-  annotate(
-    geom = "curve",
-    x = as.Date("2018-02-15"),
-    y = 2300,
-    xend = as.Date("2018-5-15"),
-    yend = 2300,
-    curvature = -.3,
-    arrow = arrow(length = unit(2, "mm"))
-  ) +
-  annotate(
-    geom = "curve",
-    x = as.Date("2018-02-15"),
-    y = 2000,
-    xend = as.Date("2019-01-01"),
-    yend = 2000,
-    curvature = -.3,
-    arrow = arrow(length = unit(2, "mm"))
-  ) +
-  annotate(
-    geom = "curve",
-    x = as.Date("2019-01-01"),
-    y = 2000,
-    xend = as.Date("2020-10-15"),
-    yend = 2000,
-    curvature = -.3,
-    arrow = arrow(length = unit(2, "mm"))
-  ) +
-  annotate(
-    geom = "curve",
-    x = as.Date("2019-01-01"),
-    y = 2000,
-    xend = as.Date("2021-06-15"),
-    yend = 2000,
-    curvature = -.3,
-    arrow = arrow(length = unit(2, "mm"))
-  ) +
-  annotate(
-    geom = "curve",
-    x = as.Date("2019-01-01"),
-    y = 2000,
-    xend = as.Date("2022-06-15"),
-    yend = 2000,
-    curvature = -.3,
-    arrow = arrow(length = unit(2, "mm"))
-  ) +
+           x = as.Date("2018-08-01"),
+           y = 1050,
+           label = "Attack") +
+  # annotate("text",
+  #          x = as.Date("2019-06-15"),
+  #          y = 2600,
+  #          label = "Time 10\npost-attacks") +
+  # annotate("text",
+  #          x = as.Date("2020-03-01"),
+  #          y = 2600,
+  #          label = "Time 11 Year\nFollowing") +
+  # annotate("text",
+  #          x = as.Date("2021-03-01"),
+  #          y = 2600,
+  #          label = "Time 12 2 years \nFollowing") +
+  # annotate("text",
+  #          x = as.Date("2022-03-01"),
+  #          y = 2600,
+  #          label = "Time 12 3 years \nFollowing") +
+  # annotate(
+  #   geom = "curve",
+  #   x = as.Date("2018-11-15"),
+  #   y = 2000,
+  #   xend = as.Date("2020-02-15"),
+  #   yend = 2000,
+  #   curvature = -.3,
+  #   arrow = arrow(length = unit(2, "mm"))
+  # ) +
+  # annotate(
+  #   geom = "curve",
+  #   x = as.Date("2018-02-15"),
+  #   y = 2300,
+  #   xend = as.Date("2018-5-15"),
+  #   yend = 2300,
+  #   curvature = -.3,
+  #   arrow = arrow(length = unit(2, "mm"))
+  # ) +
+  # annotate(
+  #   geom = "curve",
+  #   x = as.Date("2018-02-15"),
+  #   y = 2000,
+  #   xend = as.Date("2019-01-01"),
+  #   yend = 2000,
+  #   curvature = -.3,
+  #   arrow = arrow(length = unit(2, "mm"))
+  # ) +
+  # annotate(
+  #   geom = "curve",
+  #   x = as.Date("2019-01-01"),
+  #   y = 2000,
+  #   xend = as.Date("2020-10-15"),
+  #   yend = 2000,
+  #   curvature = -.3,
+  #   arrow = arrow(length = unit(2, "mm"))
+  # ) +
+  # annotate(
+  #   geom = "curve",
+  #   x = as.Date("2019-01-01"),
+  #   y = 2000,
+  #   xend = as.Date("2021-06-15"),
+  #   yend = 2000,
+  #   curvature = -.3,
+  #   arrow = arrow(length = unit(2, "mm"))
+  # ) +
+  # annotate(
+  #   geom = "curve",
+  #   x = as.Date("2019-01-01"),
+  #   y = 2000,
+  #   xend = as.Date("2022-06-15"),
+  #   yend = 2000,
+  #   curvature = -.3,
+  #   arrow = arrow(length = unit(2, "mm"))
+  # ) +
   theme(
     legend.position = "top",
     legend.text = element_text(size = 6),
     legend.title = element_text(color = "Black", size = 8)
   ) +  scale_fill_viridis_d(option = "plasma") +
-  scale_y_continuous(limits = c(0, 2950))
+  scale_y_continuous(limits = c(0, 1050))
 #theme(legend.position="none")
 
 

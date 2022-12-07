@@ -2,16 +2,9 @@
 # joseph.bulbulia
 
 
-# bayesian approach
-# impute religious identification
-# see this https://github.com/paul-buerkner/brms/issues/1385
-# perfect impute
-# note:
-# potentially helpful for brms predict with added noise: https://github.com/paul-buerkner/brms/issues/544
-# see also: https://discourse.mc-stan.org/t/predict-brms-in-multivariate-model-with-imputation/6334
-
-
+# set digits
 options(scipen = 999)
+
 #libraries
 source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs2.R")
 
@@ -19,34 +12,26 @@ source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs
 source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/funs.R")
 
 # for saving models (bulbulia only - use own paths for simulated data)
+
+# set paths for JB** YOU NEED TO SET YOUR OWN **
 push_mods <-
   fs::path_expand("~/The\ Virtues\ Project\ Dropbox/outcomewide/attacks/mods")
 push_figs <-
   fs::path_expand("~/The\ Virtues\ Project\ Dropbox/outcomewide/attacks/figs")
 
-# install.packages("arrow", repos = c(arrow = "https://nightlies.apache.org/arrow/r", getOption("repos")))
-# read data (again bulbulia only) If replicating use the jittered data in the data folder
 pull_path <-
   fs::path_expand(
     "/Users/joseph/The\ Virtues\ Project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/time13"
   )
 
-pull_path
-#arrow::write_parquet(time13, (here::here("data", "time13")))
-# wow this is fast
-#time13 <- read_parquet( (here::here("data", "time13")))
 
+# Read data
 dat <- arrow::read_parquet(pull_path)
 
-max(dat$SampleOriginYear)
 
-df <- dat |>
-  filter(YearMeasured == 1)
-table1::table1(~ as.factor(BornTerritorialAuthority) + Warm.Muslims |
-                 Wave,
-               data = df)
-# wrangle data
-# create basic outcomewide dataframe from which we will select the a small dataframe.
+
+# select waves from t5 to t13
+
 dat_bayes <- dat |>
   arrange(Id, Wave) |>
   mutate(Male = if_else(GendAll == 1, 1, 0)) |>
@@ -63,7 +48,7 @@ dat_bayes <- dat |>
     REGC_2022,
     Rural_GCH2018,
     SampleOriginYear,
-    #  BornTerritorialAuthority,
+    #  BornTerritorialAuthority, # Not coded.
     REGC_2022,
     Age,
     Male,
@@ -83,20 +68,18 @@ dat_bayes <- dat |>
     TSCORE,
     Warm.Asians,
     Warm.Chinese,
-    #Warm.Disabled, #only in wave12
-    #Warm.Elderly,
+    #Warm.Disabled, # begins wave12
+    #Warm.Elderly,  # begins wave 10
     Warm.Immigrants,
     Warm.Indians,
     Warm.Maori,
-    #  Warm.MentalIllness,
-    # not in 8
+    #  Warm.MentalIllness, begins wave 9
     Warm.Muslims,
     Warm.NZEuro,
     Warm.Overweight,
     Warm.Pacific,
     RaceRejAnx,
-    #   Warm.Refugees,
-    # not in 8
+    #   Warm.Refugees, begins wave9
     TSCORE,
     YearMeasured
   ) |>
@@ -120,7 +103,7 @@ dat_bayes <- dat |>
     lag_overweight = dplyr::lag(Warm.Overweight)
   ) |>
   #  dplyr::mutate(org2012 =  ifelse(Wave == 2012 &
-  #                                    YearMeasured == 1, 1, 0)) %>%
+  #                                    YearMeasured == 1, 1, 0)) %>%  # low N.  use the Time 5 cohort to double
   dplyr::mutate(org2013 =  ifelse(Wave == 2013 &
                                     YearMeasured == 1, 1, 0)) %>%
   dplyr::mutate(org2014 =  ifelse(Wave == 2014 &
