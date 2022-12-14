@@ -490,8 +490,8 @@ rdd
 lds2
 
 
-rdd2 <-
-  ggplot(tl, aes(x = timeline, y = Warm.Muslims, color = Condition)) +
+rdd <-
+  ggplot(tl, aes(x = timeline, y = Warm.Muslims, color = Attack_Condition)) +
   geom_jitter(alpha = .05, width = 1) +
   stat_smooth(method = "gam") +
   labs(
@@ -511,7 +511,7 @@ rdd2 <-
 
 
 # rdd for 2013 cohort
-rdd2
+rdd
 
 # graph
 fig_1_rev <- lds2/ rdd + plot_annotation(tag_levels = "A")
@@ -523,8 +523,8 @@ fig_1_rev
 ggsave(
   fig_1_rev,
   path = here::here(here::here("figs")),
-  width = 10,
-  height = 10,
+  width = 12,
+  height = 12,
   units = "in",
   filename = "fig_1_rev.jpg",
   device = 'jpeg',
@@ -691,6 +691,8 @@ rdd_all2 <-
 rdd_all2
 
 
+
+
 # save graph
 ggsave(
   rdd_all,
@@ -709,7 +711,7 @@ ggsave(
 
 rdd_all <-
   ggplot(tl, aes(x = timeline, y = Warm.Muslims, color = Attack_Condition)) +
-  geom_jitter(alpha = .03, width = 1) +
+  geom_jitter(alpha = .01, width = 1) +
   stat_smooth(method = "gam") +
   theme(legend.position = "bottom") +
   labs(
@@ -722,15 +724,17 @@ rdd_all <-
 
 rdd_all
 
+S_fig_1_rev <- lds_all/ rdd_all + plot_annotation(tag_levels = "A")
+S_fig_1_rev
 
 # save graph
 ggsave(
-  rdd_all2,
+  S_fig_1_rev,
   path = here::here(here::here("figs")),
-  width = 10,
-  height = 5,
+  width = 12,
+  height = 12,
   units = "in",
-  filename = "s_timeline_all_rev2.jpg",
+  filename = "s_timeline_all_rev.jpg",
   device = 'jpeg',
   limitsize = FALSE,
   dpi = 600

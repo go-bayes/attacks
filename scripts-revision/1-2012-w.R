@@ -643,8 +643,8 @@ dt_bind <-  dat_bayes %>%
 
 
 # Test NAs = Correct
-table1::table1(
-  ~ Y_Warm.Muslims +
+t_1 <- table1::table1(
+  ~ Y_Warm.Muslims
     # Y_Warm.Chinese +
     # # Warm.Disabled, only in wave12
     # #  Y_Warm.Elderly +
@@ -654,13 +654,57 @@ table1::table1(
     # #   Y_Warm.MentalIllness +  # not in 8
     # Y_Warm.Muslims +
     # Y_Warm.NZEuro +
-    Y_Warm.Overweight #+
+ #   Y_Warm.Overweight #+
   #  Y_Warm.Pacific# +
   #   Y_Warm.Refugees
   | Wave * as.factor(As),
   data = dt_bind,
   overall = F
 )
+
+t_1
+
+
+# select only waves used
+dt_bind_sub <- dt_bind |>
+  filter(Wave == "Time10" |
+           Wave == "Time11" |
+           Wave == "Time12" |
+           Wave == "Time13" )
+
+
+
+t_1 <- table1::table1(
+  ~ Y_Warm.Muslims|  Wave * as.factor(As),
+  data = dt_bind_sub,
+  overall = F
+)
+t_1
+
+library(kableExtra)
+# latex
+kable(t_1, format = "latex", booktabs = TRUE)
+
+
+t13 <-
+  table1::table1(~ Warm.Muslims |
+                   as.factor(Attack) * Wave,
+                 data = km_all3,
+                 overall = FALSE)
+t13
+
+# latex
+kable(t13, format = "latex", booktabs = TRUE)
+#table
+t13 <-
+  table1::table1(~ Warm.Muslims |
+                   as.factor(Attack) * Wave,
+                 data = dt_bind_sub,
+                 overall = FALSE)
+t13
+
+# latex
+kable(t13, format = "latex", booktabs = TRUE)
 
 
 #  data wrangle

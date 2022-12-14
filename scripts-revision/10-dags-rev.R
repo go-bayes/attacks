@@ -38,13 +38,13 @@ source(here::here("R", "libs.R"))
 
 a0 <-
   image_ggplot(image_read(here::here("figs", "a0_rev.tiff")),
-               interpolate = T)
+               interpolate = F)
 
 a0
 
 a1 <-
   image_ggplot(image_read(here::here("figs", "a1_rev.tiff")),
-               interpolate = T)
+               interpolate = F)
 
 a1
 
@@ -55,8 +55,8 @@ onlydags <- ggarrange(
   a1,
   a0,
   labels = c("A", "B"),
-  #  widths = c(1, 1),
-  heights = c(1, 1.5),
+  widths = c(2, 2),
+  heights = c(.25, .25),
   # ncol = 2,
   nrow = 2
 )
@@ -67,13 +67,13 @@ onlydags
 ggsave(
   onlydags,
   path = here::here("figs"),
-  width = 6,
-  height = 6,
+  width = 8,
+  height = 4,
   units = "in",
   filename = "onlydags_rev.jpg",
   device = "jpeg",
   limitsize = FALSE,
-  dpi = 800
+  dpi = 1000
 )
 
 #USED
