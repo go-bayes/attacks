@@ -75,11 +75,11 @@ dat_bayes <- dat |>
     Warm.Asians,
     Warm.Chinese,
     #Warm.Disabled, # begins wave12
-    #Warm.Elderly,  # begins wave 10
+    Warm.Elderly,  # begins wave 10
     Warm.Immigrants,
     Warm.Indians,
     Warm.Maori,
-    #  Warm.MentalIllness, begins wave 9
+    Warm.MentalIllness,# begins wave 9
     Warm.Muslims,
     Warm.NZEuro,
     Warm.Overweight,
@@ -95,7 +95,7 @@ dat_bayes <- dat |>
       (Wave ==   2014 & YearMeasured == 1) |
       (Wave ==   2015 & YearMeasured == 1) |
       (Wave ==   2016 & YearMeasured == 1) |
-      (Wave ==  2017 & YearMeasured != -1) |
+      (Wave ==  2017 & YearMeasured  == 1) |
       (Wave ==  2018 & YearMeasured != -1) |
       (Wave ==  2019 & YearMeasured != -1) |
       (Wave ==  2020 & YearMeasured != -1) |
@@ -103,10 +103,6 @@ dat_bayes <- dat |>
   ) %>%
   droplevels() |>
   dplyr::filter(YearMeasured != -1) %>% # remove people who passed away
-  # dplyr::mutate(
-  #   lag_warm.muslims = dplyr::lag(Warm.Muslims),
-  #   lag_overweight = dplyr::lag(Warm.Overweight)
-  # ) |>
   #  dplyr::mutate(org2012 =  ifelse(Wave == 2012 &
   #                                    YearMeasured == 1, 1, 0)) %>%  # low N.  use the Time 5 cohort to double
   dplyr::mutate(org2013 =  ifelse(Wave == 2013 &
@@ -119,8 +115,6 @@ dat_bayes <- dat |>
                                     YearMeasured == 1, 1, 0)) %>%
   dplyr::mutate(org2017 =  ifelse(Wave == 2017 &
                                     YearMeasured == 1, 1, 0)) %>%
-  # dplyr::mutate(org2018 =  ifelse(Wave == 2018 &
-  #                                   YearMeasured == 1, 1, 0)) %>%
   group_by(Id) %>%
   # dplyr::mutate(hold12 = mean(org2012, na.rm = TRUE)) %>%  # Hack
   # dplyr::filter(hold12 > 0) %>%
@@ -164,24 +158,24 @@ dat_bayes <- dat |>
     )
   )) %>%
   dplyr::mutate(Attack = as.numeric((ifelse(
-    (TSCORE_i >= 3545 &
-       Wave == 2018) |
-      (Wave == 2019 |
-         Wave == 2020 |
+      TSCORE_i >= 3545 &
+       (Wave == 2018 |
+      Wave == 2019 |
+      Wave == 2020 |
          Wave == 2021),
     1,
     0
-  )))) %>% # All 2019s even if NA need to be 1
+  ))))%>% # All 2019s even if NA need to be 1
   #dplyr::mutate(dys = (TSCORE_i - min(TSCORE_i))) %>%
   dplyr::mutate(
     Y_Warm.Asians = Warm.Asians,
     Y_Warm.Chinese = Warm.Chinese,
     # Warm.Disabled, only in wave12
-    # Y_Warm.Elderly = Warm.Elderly,
+    Y_Warm.Elderly = Warm.Elderly,
     Y_Warm.Immigrants = Warm.Immigrants,
     Y_Warm.Indians = Warm.Indians,
     Y_Warm.Maori = Warm.Maori,
-    #  Y_Warm.MentalIllness = Warm.MentalIllness,
+    Y_Warm.MentalIllness = Warm.MentalIllness,
     # not in 8
     Y_Warm.Muslims = Warm.Muslims,
     Y_Warm.NZEuro = Warm.NZEuro,
@@ -353,10 +347,19 @@ levels(dat_bayes$Wave) <-
     "Time12",
     "Time13")
 
-table(dat_bayes$Sample)
+# save data
+saveRDS(dat_bayes, here::here(push_mods, "2013_cohort_attacks"))
 
-length(unique(dat_bayes$Id)) #8179 7809
+#length(unique(dat_bayes$Id))
 
+dat_bayes <- readRDS(here::here(push_mods, "2013_cohort_attacks"))
+
+
+# works
+table(dat_bayes_test$Sample)
+
+
+# N = 7727
 
 table1(
   ~ Sample + Warm.Muslims + Male + Age + EthCat +
@@ -372,10 +375,10 @@ summary(lm (
   ),
   data = dat_bayes
 ))
+min(dat_bayes$TSCORE)
 
 length(unique(dat_bayes$Id)) #8179
 
-dat_bayes[, c("lag_warm.muslims", "Warm.Muslims")]
 
 # image
 #modelsummary::datasummary_crosstab(mean(Warm.Muslims) ~ Wave * as.factor(Attack), data = dat_bayes)

@@ -13,7 +13,7 @@
 # remove scientific notation
 options(scipen = 999)
 #libraries
-source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs.R")
+source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs2.R")
 
 # read functions
 source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/funs.R")
@@ -43,10 +43,12 @@ table(dat$BornTerritorialAuthority)
 
 df <- dat |>
   filter(YearMeasured == 1)
-table1::table1(~ as.factor(BornTerritorialAuthority) + Warm.Muslims | Wave, data = df)
+table1::table1( ~ as.factor(BornTerritorialAuthority) + Warm.Muslims |
+                  Wave,
+                data = df)
 # wrangle data
 # create basic outcomewide dataframe from which we will select the a small dataframe.
-dat_anova <- dat |>
+dat_anova  <- dat |>
   arrange(Id, Wave) |>
   mutate(Male = if_else(GendAll == 1, 1, 0)) |>
   dplyr::select(
@@ -62,7 +64,7 @@ dat_anova <- dat |>
     REGC_2022,
     Rural_GCH2018,
     SampleOriginYear,
-    #  BornTerritorialAuthority,
+    #  BornTerritorialAuthority, # Not coded.
     REGC_2022,
     Age,
     Male,
@@ -82,54 +84,70 @@ dat_anova <- dat |>
     TSCORE,
     Warm.Asians,
     Warm.Chinese,
-    #Warm.Disabled, #only in wave12
+    #Warm.Disabled, # begins wave12
     Warm.Elderly,
+    # begins wave 10
     Warm.Immigrants,
     Warm.Indians,
     Warm.Maori,
     Warm.MentalIllness,
-    # not in 8
+    # begins wave 9
     Warm.Muslims,
     Warm.NZEuro,
     Warm.Overweight,
     Warm.Pacific,
     RaceRejAnx,
-    #   Warm.Refugees,
-    # not in 8
+    #   Warm.Refugees, begins wave9
     TSCORE,
     YearMeasured
   ) |>
   dplyr::mutate(Employed = as.numeric(Employed)) |>
   dplyr::filter(
-    (Wave ==    2016 & YearMeasured == 1) |
-      (Wave ==  2017 & YearMeasured != -1) |
+    (Wave ==   2013 & YearMeasured == 1) |
+      (Wave ==   2014 & YearMeasured == 1) |
+      (Wave ==   2015 & YearMeasured == 1) |
+      (Wave ==   2016 & YearMeasured == 1) |
+      (Wave ==  2017 & YearMeasured  == 1) |
       (Wave ==  2018 & YearMeasured != -1) |
       (Wave ==  2019 & YearMeasured != -1) |
       (Wave ==  2020 & YearMeasured != -1) |
-      (Wave ==  2021 & YearMeasured != -1)
+      (Wave == 2021 & YearMeasured != -1)
   ) %>%
   droplevels() |>
   dplyr::filter(YearMeasured != -1) %>% # remove people who passed away
-  ungroup() %>%
+  #  dplyr::mutate(org2012 =  ifelse(Wave == 2012 &
+  #                                    YearMeasured == 1, 1, 0)) %>%  # low N.  use the Time 5 cohort to double
+  dplyr::mutate(org2013 =  ifelse(Wave == 2013 &
+                                    YearMeasured == 1, 1, 0)) %>%
+  dplyr::mutate(org2014 =  ifelse(Wave == 2014 &
+                                    YearMeasured == 1, 1, 0)) %>%
+  dplyr::mutate(org2015 =  ifelse(Wave == 2015 &
+                                    YearMeasured == 1, 1, 0)) %>%
   dplyr::mutate(org2016 =  ifelse(Wave == 2016 &
                                     YearMeasured == 1, 1, 0)) %>%
   dplyr::mutate(org2017 =  ifelse(Wave == 2017 &
                                     YearMeasured == 1, 1, 0)) %>%
-  dplyr::mutate(org2018 =  ifelse(Wave == 2018 &
-                                    YearMeasured == 1, 1, 0)) %>%
   group_by(Id) %>%
+  # dplyr::mutate(hold12 = mean(org2012, na.rm = TRUE)) %>%  # Hack
+  # dplyr::filter(hold12 > 0) %>%
+  dplyr::mutate(hold13 = mean(org2013, na.rm = TRUE)) %>%  # Hack
+  dplyr::filter(hold13 > 0) %>%
+  dplyr::mutate(hold14 = mean(org2014, na.rm = TRUE)) %>%  # Hack
+  dplyr::filter(hold14 > 0) %>%
+  dplyr::mutate(hold15 = mean(org2015, na.rm = TRUE)) %>%  # Hack
+  dplyr::filter(hold15 > 0) %>%
   dplyr::mutate(hold = mean(org2016, na.rm = TRUE)) %>%  # Hack
   dplyr::filter(hold > 0) %>%
   dplyr::mutate(hold2 = mean(org2017, na.rm = TRUE)) %>%  # Hack
   dplyr::filter(hold2 > 0) %>%
-  dplyr::mutate(hold3 = mean(org2018, na.rm = TRUE)) %>%  # Hack
-  dplyr::filter(hold3 > 0) %>%
+  # dplyr::mutate(hold3 = mean(org2018, na.rm = TRUE)) %>%  # Hack
+  # dplyr::filter(hold3 > 0) %>%
   ungroup(Id) |>
   dplyr::mutate(Edu = as.numeric(Edu)) |>
   arrange(Id, Wave) %>%
   group_by(Id) |>
   dplyr::mutate(TSCORE_b = ifelse(Wave == "2016", (TSCORE), NA_real_)) %>%
-  fill(TSCORE_b) %>%
+  fill(TSCORE_b,  .direction = "downup") %>%
   dplyr::mutate(TSCORE_i = ifelse(
     YearMeasured == 0 & Wave == 2017,
     TSCORE_b + 365,
@@ -150,7 +168,7 @@ dat_anova <- dat |>
         )
       )
     )
-  ))  %>%
+  )) %>%
   dplyr::mutate(Attack = as.numeric((ifelse(
     (TSCORE_i >= 3545 &
        Wave == 2018) |
@@ -160,10 +178,11 @@ dat_anova <- dat |>
     1,
     0
   )))) %>% # All 2019s even if NA need to be 1
-  dplyr::mutate(dys = (TSCORE_i - min(TSCORE_i))) %>%
+  #dplyr::mutate(dys = (TSCORE_i - min(TSCORE_i))) %>%
   dplyr::mutate(
     Y_Warm.Asians = Warm.Asians,
     Y_Warm.Chinese = Warm.Chinese,
+    # Warm.Disabled, only in wave12
     Y_Warm.Elderly = Warm.Elderly,
     Y_Warm.Immigrants = Warm.Immigrants,
     Y_Warm.Indians = Warm.Indians,
@@ -177,8 +196,6 @@ dat_anova <- dat |>
     #  Y_Warm.Refugees = Warm.Refugees,
     As = Attack
   ) %>%
-  dplyr::mutate(dys = (TSCORE_i - min(TSCORE_i))) %>%
-  dplyr::mutate(yrs =  (dys / 365)) %>%
   dplyr::mutate(Warm.Muslims_b = if_else(Wave == "2016", (Warm.Muslims), NA_real_)) %>%
   fill(Warm.Muslims_b, .direction = "downup") %>%
   dplyr::mutate(Warm.Overweight_b = if_else(Wave == "2016", (Warm.Overweight), NA_real_)) %>%
@@ -187,12 +204,6 @@ dat_anova <- dat |>
   fill(Warm.Muslims_c, .direction = "downup") %>%
   dplyr::mutate(Warm.Overweight_c = if_else(Wave == "2017", (Warm.Overweight), NA_real_)) %>%
   fill(Warm.Overweight_c, .direction = "downup") %>%
-  dplyr::mutate(Warm.MentalIllness_c = if_else(Wave == "2017", (Warm.MentalIllness), NA_real_)) %>%
-  fill(Warm.MentalIllness_c, .direction = "downup") %>%
-  dplyr::mutate(Warm.Elderly_c = if_else(Wave == "2017", (Warm.Elderly), NA_real_)) %>%
-  fill(Warm.Elderly_c, .direction = "downup") %>%
-  dplyr::mutate(Warm.Overweight_b = if_else(Wave == "2016", (Warm.Overweight), NA_real_)) %>%
-  fill(Warm.Overweight_b, .direction = "downup") %>%
   dplyr::mutate(SampleOriginYear_b = if_else(Wave == "2016", (SampleOriginYear - 1), NA_real_)) %>%
   fill(SampleOriginYear_b, .direction = "downup") %>%
   dplyr::mutate(REGC_2022_c = if_else(Wave == "2017", as.numeric(REGC_2022), NA_real_)) %>%
@@ -243,6 +254,10 @@ dat_anova <- dat |>
   fill(RWA_c,  .direction = "downup") %>%
   dplyr::mutate(NZSEI13_c = if_else(Wave == "2017", (as.numeric(NZSEI13)), NA_real_)) %>%
   fill(NZSEI13_c,  .direction = "downup") |>
+  dplyr::mutate(Warm.Elderly_c = if_else(Wave == "2017", (as.numeric(Warm.Elderly)), NA_real_)) %>%
+  fill(Warm.Elderly_c,  .direction = "downup") |>
+  dplyr::mutate(Warm.MentalIllness_c = if_else(Wave == "2017", (as.numeric(Warm.MentalIllness)), NA_real_)) %>%
+  fill(Warm.MentalIllness_c,  .direction = "downup") |>
   ungroup() %>%
   # select(
   #   -c(
@@ -277,10 +292,6 @@ dat_anova <- dat |>
 # ) |>
 dplyr::mutate(EthCat_c = as.factor(EthCat_c)) |>
   dplyr::filter(
-    !is.na(Warm.Elderly_c),
-    !is.na(Warm.MentalIllness_c),
-    !is.na(Warm.Muslims_b),
-    !is.na(Warm.Overweight_b),
     !is.na(Age_c),
     !is.na(HLTH.BMI_c),
     !is.na(BornNZ_c),
@@ -293,18 +304,16 @@ dplyr::mutate(EthCat_c = as.factor(EthCat_c)) |>
     !is.na(Relid_c),
     !is.na(RaceRejAnx_c),
     !is.na(Pol.Orient_c),
-    !is.na(REGC_2022_c),
-    !is.na(Rural_GCH2018_c),
-    !is.na(SDO_c),
-    !is.na(RWA_c),
-    !is.na(NZDep2013_c),
-    !is.na(NZSEI13_c),
-    !is.na(AGREEABLENESS_c),
-    !is.na(CONSCIENTIOUSNESS_c),
-    !is.na(OPENNESS_c),
-    !is.na(HONESTY_HUMILITY_c),
-    !is.na(EXTRAVERSION_c),
-    !is.na(NEUROTICISM_c)
+    !is.na(REGC_2022),
+    !is.na(Rural_GCH2018),
+    !is.na(NZDep2013),
+    !is.na(NZSEI13),
+    !is.na(REGC_2022),
+    !is.na(Rural_GCH2018),
+    !is.na(EthCat),
+    !is.na(Pol.Orient_c),
+    !is.na(NZDep2013),
+    !is.na(Edu_c)
   ) |>
   dplyr::mutate(
     Rural_GCH2018_c = as.factor(Rural_GCH2018_c),
@@ -333,21 +342,39 @@ dplyr::mutate(EthCat_c = as.factor(EthCat_c)) |>
     OPENNESS_cZ = scale(OPENNESS_c),
     HONESTY_HUMILITY_cZ = scale(HONESTY_HUMILITY_c),
     EXTRAVERSION_cZ = scale(EXTRAVERSION_c),
-    NEUROTICISM_cZ = scale(NEUROTICISM_c)
+    NEUROTICISM_cZ = scale(NEUROTICISM_c),
+    Warm.MentalIllness_cZ = scale(Warm.MentalIllness_c),
+    Warm.Elderly_cZ = scale(Warm.MentalIllness_c),
+    Warm.Overweight_cZ = scale(Warm.Overweight_c)
   ) %>%
-  mutate(Sample = as.factor(if_else(SampleOriginYear <= 4,  1,
-                                    if_else(SampleOriginYear >4  & SampleOriginYear < 8, 2, 3))) )|>
+  # dplyr::filter(Wave != 2012) |>
+  dplyr::filter(
+    !is.na(Age),!is.na(Male),!is.na(EthCat_c),!is.na(REGC_2022),!is.na(Rural_GCH2018),!is.na(Edu_cZ),!is.na(Pol.Orient_cZ),!is.na(NZDep2013),!is.na(NZSEI13)
+  ) |>
+  droplevels() |>
+  mutate(Sample = as.factor(if_else(
+    SampleOriginYear < 2,
+    0,
+    if_else(
+      SampleOriginYear >= 2  &
+        SampleOriginYear < 4,
+      1,
+      if_else(SampleOriginYear == 4, 2, 3)
+    )
+  ))) |>
+  droplevels() |>
   dplyr::arrange(Id, Wave) |>
   dplyr::filter(Wave == 2018)
 
 
 
+# negative control
+parameters::model_parameters(lm (Warm.Overweight ~ Attack + Warm.Overweight_cZ, data = dat_anova)) |>
+  print_md()
 
-summary(lm (Warm.Overweight~ Attack + Warm.Overweight_c, data = dat_anova))
-summary(lm (Warm.MentalIllness ~ Attack + Warm.MentalIllness_c, data = dat_anova))
-summary(lm (Warm.Muslims ~ Attack + Warm.Muslims_b, data = dat_anova))
+summary(lm (Warm.MentalIllness ~ Attack + Warm.MentalIllness_cZ, data = dat_anova))
 
+summary(lm (Warm.Overweight ~ Attack + Warm.Overweight_c, data = dat_anova))
+summary(lm (Warm.MentalIllness ~ Attack + Warm.MentalIllness_cZ, data = dat_anova))
 
-
-
-
+summary(lm (Warm.Muslims ~ Attack + Warm.Muslims_cZ, data = dat_anova))

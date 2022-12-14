@@ -87,9 +87,9 @@ rdd <-
   theme(legend.position = "bottom") +
   labs(
     title = "Discontinuity at attacks (GAM)",
-    subtitle = "Strong & apparently growing increase in acceptace after attacks",
+    subtitle = "Boost to Warmth increase in the years following the attacks",
     y = "Muslim Warmth",
-    x = "NZAVS Time 4 - 12 (2012-2022)"
+    x = "NZAVS Time 4 - 12 (2012-2022), N = 67858"
   ) +
   scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic()
 
