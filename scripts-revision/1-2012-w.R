@@ -683,7 +683,9 @@ t_1
 
 library(kableExtra)
 # latex
-kable(t_1, format = "latex", booktabs = TRUE)
+
+table1::t1kable(t_1, booktabs = TRUE, format = "latex")
+
 
 
 t13 <-
@@ -826,6 +828,22 @@ bform_mus <-
 
 
 
+bform_mus_impute_2 <-
+  bf(
+    Y_Warm.Muslims | mi()  ~ wave * (
+      Sample +
+      Age +
+      Male +
+      EthCat_c +
+      REGC_2022 +
+      Rural_GCH2018 +
+      Edu_cZ +
+      Pol.Orient_cZ +
+      NZDep2013 +
+      NZSEI13 +
+    Pol.Orient_cZ) +
+      (1 + wave | Id)
+  )
 
 
 
@@ -854,6 +872,32 @@ m_1 <- brm(
 )
 summary(m_1)
 
+
+
+m_0a <- brm(
+  backend = "cmdstanr",
+  data = dt_ni,
+  family = "gaussian",
+  bform_mus_impute_2,
+  prior = prior,
+  init = 0,
+  file =  here::here(push_mods, "impute-2012-zero-MUS-attacks-use-interaction.rds")
+)
+
+
+summary(m_0)
+
+
+m_1a <- brm(
+  backend = "cmdstanr",
+  data = dt_ni1,
+  family = "gaussian",
+  bform_mus_impute_2,
+  prior = prior,
+  init = 0,
+  file = here::here(push_mods, "impute-2012-one-MUS-attacks-use-2.rds")
+)
+summary(m_1)
 
 
 

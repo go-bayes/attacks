@@ -343,9 +343,10 @@ dplyr::mutate(EthCat_c = as.factor(EthCat_c)) |>
     HONESTY_HUMILITY_cZ = scale(HONESTY_HUMILITY_c),
     EXTRAVERSION_cZ = scale(EXTRAVERSION_c),
     NEUROTICISM_cZ = scale(NEUROTICISM_c),
-    Warm.MentalIllness_cZ = scale(Warm.MentalIllness_c),
-    Warm.Elderly_cZ = scale(Warm.MentalIllness_c),
-    Warm.Overweight_cZ = scale(Warm.Overweight_c)
+    Warm.MentalIllness_baselineZ = scale(Warm.MentalIllness_c),
+    Warm.Elderly_baselineZ = scale(Warm.Elderly_c),
+    Warm.Overweight_baselineZ = scale(Warm.Overweight_c),
+    Warm.Muslims_baselineZ = scale(Warm.Muslims_c)
   ) %>%
   # dplyr::filter(Wave != 2012) |>
   dplyr::filter(
@@ -369,12 +370,50 @@ dplyr::mutate(EthCat_c = as.factor(EthCat_c)) |>
 
 
 # negative control
-parameters::model_parameters(lm (Warm.Overweight ~ Attack + Warm.Overweight_cZ, data = dat_anova)) |>
-  print_md()
+m_ov<- parameters::model_parameters(lm (Warm.Overweight ~ Attack + Warm.Overweight_baselineZ, data = dat_anova))
 
-summary(lm (Warm.MentalIllness ~ Attack + Warm.MentalIllness_cZ, data = dat_anova))
+m_ov|>
+  print_md(select = "minimal", title = "Effect of Attacks on Warmth towards Overweight")
 
-summary(lm (Warm.Overweight ~ Attack + Warm.Overweight_c, data = dat_anova))
-summary(lm (Warm.MentalIllness ~ Attack + Warm.MentalIllness_cZ, data = dat_anova))
 
-summary(lm (Warm.Muslims ~ Attack + Warm.Muslims_cZ, data = dat_anova))
+
+m_ov[,c(1:6)]  %>%
+  # print_md()%>%
+  kbl("markdown", booktabs = TRUE, digits = 2,
+      caption = "Effect of Attacks on Warmth towards Overweight")
+
+
+m_m <- parameters::model_parameters(lm (Warm.MentalIllness ~ Attack + Warm.MentalIllness_baselineZ, data = dat_anova))
+
+m_m|>
+  print_md(select = "minimal", title = "Effect of Attacks on Warmth towards MentalIllness")
+
+
+
+m_m[,c(1:6)]  %>%
+  kbl("markdown", booktabs = TRUE, digits = 2,
+      caption = "Effect of Attacks on Warmth towards MentalIllness")
+
+
+m_e <-  parameters::model_parameters(lm (Warm.Elderly ~ Attack + Warm.Elderly_baselineZ, data = dat_anova))
+
+m_e |>
+  print_html(select = "minimal", title = "Effect of Attacks on Warmth towards Elderly")
+
+m_e[,c(1:6)]  %>%
+  # print_md()%>%
+  kbl("markdown", booktabs = TRUE, digits = 2,
+      caption = "Effect of Attacks on Warmth towards Elderly")
+
+
+
+m_wm<- parameters::model_parameters(lm (Warm.Muslims ~ Attack + Warm.Muslims_baselineZ, data = dat_anova))
+
+m_wm|>
+  print_html(select = "minimal", title = "Effect of Attacks on Warmth towards Muslims")
+
+m_wm[,c(1:6)]  %>%
+  # print_md()%>%
+  kbl("markdown", booktabs = TRUE, digits = 2,
+      caption = "Effect of Attacks on Warmth towards Muslims")
+
