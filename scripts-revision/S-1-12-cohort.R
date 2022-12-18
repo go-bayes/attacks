@@ -1076,7 +1076,7 @@ m_gee <- modelsummary::modelsummary(models,
 m_gee
 
 
-p_gee <- modelsummary::modelplot(models, coef_omit = 'Interc') + scale_color_okabe_ito()
+p_gee <- modelsummary::modelplot( models, coef_omit = 'Interc') + scale_color_okabe_ito()
 
 p_gee
 
@@ -1097,8 +1097,8 @@ ggsave(
 
 g_mod <- geeglm(
   data = d_muslim,
-#  formula = yfit_ORD ~  Attack * Wave * Pol.Orient_cZ,
-  formula = yfit_muslim ~  Attack * Wave * Pol.Orient_cZ,
+ formula = yfit_ORD ~  Attack * Wave * Pol.Orient_cZ,
+# formula = yfit_muslim ~  Attack * Wave * Pol.Orient_cZ,
 #  formula = yimpute_muslim ~  Attack * Wave * Pol.Orient_cZ,
   #  yfit_muslim
   id = id,
@@ -1106,35 +1106,46 @@ g_mod <- geeglm(
   corstr = "ar1"
 )
 
+#
+# plot_cap(
+#   g_mod,
+#   condition = c("Wave",
+#                 "Attack",
+#                 Pol.Orient_cZ = range),
+#  # vcov =  FALSE,
+# ) +  scale_color_okabe_ito()
 
 
-plot_cme(
-  g_mod,
-  condition = c( "Wave", "Attack"),
-  vcov = "HC0"
-) +  scale_color_okabe_ito()
-
-
-gee_cco <- plot_cco(
-  g_mod,
-  effect = "Attack",
-  condition = c("Wave",
-                "Pol.Orient_cZ"),
-  conf_level = 0.95,
-  transform_pre = "difference",
-)# |>
-# print_html()
+plot ( ggeffects::ggpredict(g_mod, terms = c("Wave", "Attack", "Pol.Orient_cZ[-1,0,1]"))  )
 
 
 plot_cco(
   g_mod,
   effect = "Attack",
-  condition = c("Wave",
-                "Pol.Orient_cZ"),
+  condition = list("Wave",
+                   Pol.Orient_cZ = "minmax"),
   conf_level = 0.95,
   transform_pre = "difference",
-)# |>
-# print_html()
+  draw = TRUE
+)
+
+
+
+plot_cco(
+  g_mod,
+  effect = "Attack",
+  # condition = c("Wave",
+  #               "Pol.Orient_cZ"),
+  condition = list("Wave",
+                 Pol.Orient_cZ = "minmax"),
+  conf_level = 0.95,
+  transform_pre = "difference",
+  draw = FALSE
+)|>
+ select(-id) |>
+ mutate(condition2 = factor(condition2, labels = c("pol_conserve_low", "pol_conserve_high")))|>
+ kbl(format = "markdown", booktabs = TRUE)
+dev.off()
 
 
 gee_mar_eff <- plot_cco(
