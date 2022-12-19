@@ -263,29 +263,7 @@ dat_bayes <- dat |>
   ungroup() %>%
   dplyr::mutate(EthCat_c = as.factor(EthCat_c)) |>
   dplyr::filter(
-    !is.na(Age_c),
-    !is.na(BornNZ_c),
-    !is.na(Male_c),
-    !is.na(Edu_c),
-    !is.na(Employed_c),
-    !is.na(EthCat_c),
-    !is.na(Parent_c),
-    !is.na(Partner_c),
-    !is.na(Relid_c),
-    !is.na(RaceRejAnx_c),
-    !is.na(Pol.Orient_c),
-    !is.na(NZDep2013_c),
-    !is.na(REGC_2022_c),
-    !is.na(NZSEI13_c),
-    !is.na(Rural_GCH2018_c),
-    !is.na(EthCat_c),
-    !is.na(Pol.Orient_c),
-    !is.na(AGREEABLENESS_c),
-    !is.na(CONSCIENTIOUSNESS_c),
-    !is.na(OPENNESS_c),
-    !is.na(HONESTY_HUMILITY_c),
-    !is.na(EXTRAVERSION_c),
-    !is.na(NEUROTICISM_c)
+    !is.na(Age_c),!is.na(BornNZ_c),!is.na(Male_c),!is.na(Edu_c),!is.na(Employed_c),!is.na(EthCat_c),!is.na(Parent_c),!is.na(Partner_c),!is.na(Relid_c),!is.na(RaceRejAnx_c),!is.na(Pol.Orient_c),!is.na(NZDep2013_c),!is.na(REGC_2022_c),!is.na(NZSEI13_c),!is.na(Rural_GCH2018_c),!is.na(EthCat_c),!is.na(Pol.Orient_c),!is.na(AGREEABLENESS_c),!is.na(CONSCIENTIOUSNESS_c),!is.na(OPENNESS_c),!is.na(HONESTY_HUMILITY_c),!is.na(EXTRAVERSION_c),!is.na(NEUROTICISM_c)
   ) |>
   dplyr::mutate(
     Rural_GCH2018_c = as.factor(Rural_GCH2018_c),
@@ -398,22 +376,20 @@ kable(x, format = "latex", booktabs = TRUE)
 
 
 # check
-x <- table1::table1(
-  ~ Y_Warm.Muslims + Y_Warm.Overweight |
-    factor(Wave) * factor(As),
-  data = dat_bayes,
-  overall = F
-)
+x <- table1::table1(~ Y_Warm.Muslims  |
+                      factor(Wave) * factor(As),
+                    data = dat_bayes,
+                    overall = F)
 x
 
 kable(x, format = "latex", booktabs = TRUE)
 t1kable(x, format = "latex")
 
 # Missing data problem
-t2 <- table1::table1( ~ Y_Warm.Muslims |
-                        Wave * as.factor(As),
-                      data = dat_bayes,
-                      overall = F)
+t2 <- table1::table1(~ Y_Warm.Muslims |
+                       Wave * as.factor(As),
+                     data = dat_bayes,
+                     overall = F)
 t2
 # data prep
 
@@ -481,9 +457,9 @@ dt_bind <-  dat_bayes %>%
 
 
 # Test NAs = Correct
-t_1 <- table1::table1(~ Y_Warm.Muslims | Wave * as.factor(As),
-                      data = dt_bind,
-                      overall = F)
+t_1 <- table1::table1( ~ Y_Warm.Muslims | Wave * as.factor(As),
+                       data = dt_bind,
+                       overall = F)
 
 t_1
 
@@ -497,9 +473,9 @@ dt_bind_sub <- dt_bind |>
 
 
 
-t_1 <- table1::table1(~ Y_Warm.Muslims |  Wave * as.factor(As),
-                      data = dt_bind_sub,
-                      overall = F)
+t_1 <- table1::table1( ~ Y_Warm.Muslims |  Wave * as.factor(As),
+                       data = dt_bind_sub,
+                       overall = F)
 
 
 # latex
@@ -949,7 +925,7 @@ ggsave(
 g_mod <- geeglm(
   data = d_muslim,
   formula = yfit_ORD ~  Attack * Wave * Pol.Orient_cZ,
- # formula = yfit_muslim ~  Attack * Wave * Pol.Orient_cZ,
+  # formula = yfit_muslim ~  Attack * Wave * Pol.Orient_cZ,
   # formula = yimpute_muslim ~  Attack * Wave * Pol.Orient_cZ,
   id = id,
   wave = wave,
@@ -957,15 +933,18 @@ g_mod <- geeglm(
 )
 
 
-
 # conditional predictions
+theme_set(theme_pubclean()) # nice theme
+
 gee_exp_con <-
-  plot (ggeffects::ggpredict(g_mod, terms = c(
-    "Wave", "Attack", "Pol.Orient_cZ[-1,0,1]"
-  )))  +
+  plot (ggeffects::ggpredict(
+    g_mod,
+    terms = c("Wave", "Attack", "Pol.Orient_cZ[-1.91,  0, 2.46]")
+  ))  +
   scale_color_okabe_ito()  +  labs(title = "Expected Muslim Warmth by Political Orientation (avg, =1/+1 SD)",
-                                   subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
-                                   y = "Warmth to Mulsims (1-7 (ordinal)")
+                                   subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,854",
+                                   y = "Warmth to Mulsims (1-7 (ordinal)") +
+  scale_y_continuous(limits = c(3.0, 5.2)) + theme_pubclean()
 
 
 
@@ -994,7 +973,7 @@ plot_cco(
   conf_level = 0.95,
   transform_pre = "difference",
   draw = TRUE
-)
+) + theme_pubclean()
 
 
 
@@ -1025,9 +1004,9 @@ gee_mar_eff <- plot_cco(
 ) +
   scale_y_continuous(limits = c(-.05, .41)) +
   labs(title = "Marginal counterfactual contrasts in effect magnitude",
-       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,854",
        y = "Conterfactual contrasts: Warmth to Muslims on difference scale") +
-  scale_color_viridis_d()
+  scale_color_viridis_d() +  theme_pubclean()
 
 
 gee_mar_eff
@@ -1036,19 +1015,20 @@ gee_con_eff <- plot_cco(
   g_mod,
   effect = "Attack",
   condition = list("Wave",
-               #    Pol.Orient_cZ = "fivenum"),
+                   #                  #    Pol.Orient_cZ = "fivenum"),
                    Pol.Orient_cZ = c(-1.91,-1, 0, 1, 2.46)),
-  #  Pol.Orient_cZ = "threenum"),
+  # #  Pol.Orient_cZ = "threenum"),
   conf_level = 0.95,
   transform_pre = "difference"
 ) +
   scale_y_continuous(limits = c(-.05, .41)) +
-  labs(title = "Conditional counterfactual contrasts: Political Orientation",
-       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+  labs(title = "Conditional counterfactual contrasts by political Orientation",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,854",
        y = "Conterfactual contrasts: Warmth to Muslims on difference scale") +
-  scale_color_okabe_ito()
+  scale_color_okabe_ito() + theme_pubclean()
 
 gee_con_eff
+
 gee_plots <-
   gee_mar_eff + gee_con_eff + plot_annotation(tag_levels = "A")
 
@@ -1069,6 +1049,74 @@ ggsave(
 
 
 
+## GEE PLOTS
+
+# gee
+pl_a_gee <- plot (ggeffects::ggpredict(g_mod, terms = c("Wave", "Attack")))  +
+  scale_color_okabe_ito()  +
+  labs(title = "Expected Muslim Warmth by Wave (GEE)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)")  +
+  scale_fill_okabe_ito() + theme_pubclean()
+
+# check
+pl_a_gee
+
+
+
+ggsave(
+  pl_a_gee,
+  path = here::here(here::here("figs")),
+  width = 12,
+  height = 8,
+  units = "in",
+  filename = "gee_ord_pred.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 1200
+)
+
+
+
+pl_b_gee <- plot (ggeffects::ggpredict(
+  g_mod,
+  terms = c("Wave",
+            "Attack",
+            "Pol.Orient_cZ[-1.91, -1,  0, 1, 2.46]")
+),  one.plot = TRUE) +
+  scale_color_okabe_ito()  +
+  labs(title = "Expected Muslim Warmth by Political Orientation (GEE)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)") +
+  scale_y_continuous(limits = c(3.0, 5.2)) +
+  scale_fill_okabe_ito(alpha = 1)  +
+  facet_wrap( ~ facet, ncol = 5) + theme_pubclean()
+
+pl_b_gee
+
+gee_mar_eff + gee_con_eff
+# graph model
+gee_4 <-
+  (pl_a_gee + gee_mar_eff) / (pl_b_gee + gee_con_eff) + plot_annotation(tag_levels = "A")
+gee_4
+bayes_4
+
+
+
+dev.off()
+
+ggsave(
+  gee_4,
+  path = here::here(here::here("figs")),
+  width = 16,
+  height = 12,
+  units = "in",
+  filename = "gee_4.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 1200
+)
+
 
 #
 # # This is good
@@ -1083,20 +1131,19 @@ ggsave(
 #        subtitle = "Effect modification by political orientation\n(liberal/conservative, standardised units)",
 #        y = "Conterfactual contrasts, difference scale") +
 #   scale_color_okabe_ito()
-
-gee_pl
-
-ggsave(
-  p_gee,
-  path = here::here(here::here("figs")),
-  width = 10,
-  height = 5,
-  units = "in",
-  filename = "gee_coef_rev.jpg",
-  device = 'jpeg',
-  limitsize = FALSE,
-  dpi = 1200
-)
+#
+#
+# ggsave(
+#   p_gee,
+#   path = here::here(here::here("figs")),
+#   width = 10,
+#   height = 5,
+#   units = "in",
+#   filename = "gee_coef_rev.jpg",
+#   device = 'jpeg',
+#   limitsize = FALSE,
+#   dpi = 1200
+# )
 
 
 # BAYESIAN MODEL ----------------------------------------------------------
@@ -1119,6 +1166,9 @@ bform_mus_cond_sim  =   bf(
   set_rescor(rescor = FALSE)
 )
 
+bform_mus_cond_sim  =   bf(yimpute_muslim |
+                             mi(se) ~  Attack  *  Wave *  Pol.Orient_cZ + (1 | id))
+
 
 # ord
 bform_mus_cond_ord  =   bf(yfit_ORD ~  Attack  *  Wave *  Pol.Orient_cZ + (1 |
@@ -1134,14 +1184,14 @@ bform_mus_cond_ord_REAL  =   bf(
 )
 
 
-bform_mus_cond_fit  =   bf(yfit_muslim |
-                             mi(sd) ~  Attack  *  Wave *  Pol.Orient_cZ + (1 |
-                                                                             id))
+bform_mus_cond_fit  =   bf(
+  yfit_muslim ~  Attack  *  Wave *  Pol.Orient_cZ + (1 |
+                                                       id),
+  sigma ~ 0 + as,
+  set_rescor(rescor = FALSE)
+)
 
 head(d_muslim)
-
-#,
-# family = cumulative(link = "logit"), #  unnecessarily complex, but doable
 
 # priors
 prior_mus_cond  = c(
@@ -1156,57 +1206,74 @@ prior_mus_cond  = c(
   set_prior("exponential(1)", class = "sd")  # only for raneffs
 )
 
-prior_mus_cond1  = c(
+prior_mus_cond_simple  = c(
   set_prior("normal(0,.5)",  class = "b"),
+  #  set_prior("normal(0,1)", class = "b", dpar = "sigma"),
   set_prior(
     "student_t(3, 4, 2)",
     class = "Intercept",
     lb = 1,
     ub = 7
   ),
-  set_prior("exponential(1)", class = "sd")  # only for raneffs
+  # set_prior("exponential(1)", class = "sd")  # only for raneffs
 )
-
 
 # not used -- same result as correlated intercept, which we anyway ignore
-system.time(
-  m_cond_mus_org <- brms::brm(
-    backend = "cmdstanr",
-    data = d_muslim,
-    family = "gaussian",
-    bform_mus_cond,
-    prior_mus_cond,
-    init = 0,
-    file = here::here(push_mods, "m_cond_mus-2013-use.rds")
-  )
+# system.time(
+#   m_cond_mus_org <- brms::brm(
+#     backend = "cmdstanr",
+#     data = d_muslim,
+#     family = "gaussian",
+#     bform_mus_cond,
+#     prior_mus_cond,
+#     init = 0,
+#     file = here::here(push_mods, "m_cond_mus-2013-use.rds")
+#   )
+# )
+
+
+
+# not used, apple organes comparison of data/imputed data
+
+# system.time(
+#   m_cond_mus <- brms::brm(
+#     backend = "cmdstanr",
+#     data = d_muslim,
+#     family = "gaussian",
+#     bform_mus_cond_sim,
+#     prior_mus_cond,
+#     init = 0,
+#     file = here::here(push_mods, "m_cond_mus-2013-use-simple.rds")
+#   )
 )
 
 
-system.time(
-  m_cond_mus <- brms::brm(
-    backend = "cmdstanr",
-    data = d_muslim,
-    family = "gaussian",
-    bform_mus_cond_sim,
-    prior_mus_cond,
-    init = 0,
-    file = here::here(push_mods, "m_cond_mus-2013-use-simple.rds")
-  )
-)
 
-summary(m_cond_mus)
-# default priors here
-system.time(
-  m_cond_mus <- brms::brm(
-    backend = "cmdstanr",
-    data = d_muslim,
-    family = "gaussian",
-    bform_mus_cond_ord_REAL,
-    init = 0,
-    file = here::here(push_mods, "m_cond_mus-2013-use-ord-REAL.rds")
-  )
-)
+# Appropriate model for ordinal data, not used because can't get contrasts using marginaleffects
+# system.time(
+#   m_cond_mus <- brms::brm(
+#     backend = "cmdstanr",
+#     data = d_muslim,
+#     family = "gaussian",
+#     bform_mus_cond_ord_REAL,
+#     init = 0,
+#     file = here::here(push_mods, "m_cond_mus-2013-use-ord-REAL.rds")
+#   )
+# )
 
+#not used, E(E(y1) - E(yO)) -- people not familiar with G-comp
+# G-comp
+# system.time(
+#   m_cond_mus <- brms::brm(
+#     backend = "cmdstanr",
+#     data = d_muslim,
+#     family = "gaussian",
+#     bform_mus_cond_fit,
+#     prior_mus_cond,
+#     init = 0,
+#     file = here::here(push_mods, "m_cond_mus-2013-fit.rds")
+#   )
+# )
 
 
 ## USE
@@ -1221,33 +1288,10 @@ system.time(
     file = here::here(push_mods, "m_cond_mus-2013-use-ord.rds")
   )
 )
-
-
-
-# prior ordinal
-# G-comp
-
-system.time(
-  m_cond_mus <- brms::brm(
-    backend = "cmdstanr",
-    data = d_muslim,
-    family = "gaussian",
-    bform_mus_cond_fit,
-    prior_mus_cond1,
-    init = 0,
-    file = here::here(push_mods, "m_cond_mus-2013-fit.rds")
-  )
-)
-
-
-
-
-
-
-summary(m_cond_mus)
-
-
-summary(m_cond_mus)
+#
+#
+#
+# summary(m_cond_mus)
 
 # not run
 m_bayes <- modelsummary::modelsummary(
@@ -1261,6 +1305,7 @@ m_bayes <- modelsummary::modelsummary(
   # output = "latex",
   title = "Bayesian Multi-Level Model"
 )
+
 
 options("modelsummary_format_numeric_latex" = "plain")
 
@@ -1276,31 +1321,26 @@ m_bayes_latex <- modelsummary::modelsummary(
   title = "Bayesian Multi-Level Model"
 )
 
-m_bayes_latex
 
-
-saveRDS(m_bayes,
+# save table
+saveRDS(m_bayes_latex,
         here::here(push_mods, "m_bayes-attacks"))
 
 saveRDS(m_bayes_latex,
         here::here(push_mods, "m_bayes_latex-attacks"))
 
+
+
+# posterior checks
 pp_check(m_cond_mus)
 plot(m_cond_mus)
 summary(m_cond_mus)
 
-launch_shinystan(m_cond_mus)
 
 
+# another table
 parms <- model_parameters(m_cond_mus,   test = "pd")
-parms
 
-
-#parms_z <- model_parameters(m_cond_mus, standardize = "pseudo")
-
-arrow::write_parquet(parms, here::here(push_mods, "parms"))
-
-parms <- arrow::read_parquet(here::here(push_mods, "parms"))
 parms |>
   kbl(format = "latex", booktabs = TRUE)
 
@@ -1308,82 +1348,11 @@ parms |>
 
 
 
-# Images to use
-muslim_marg  <- plot(conditional_effects(
-  m_cond_mus,
-  "Wave:Attack",
-  spaghetti = TRUE,
-  ndraws = 200,
-  plot = F
-))[[1]]
-
-
-plot_muslim <- muslim_marg +
-  labs(subtitle = "Muslim Warmth",
-       y = "Muslim Warmth (1-7) ",
-       x = "Years: 2018-2022; N = 13,409") +
-  scale_colour_okabe_ito(alpha = .1) +
-  theme_classic()   +
-  scale_y_continuous(limits = c(4.0, 4.5))
-
-plot_muslim
-
-
-
-gee_mar_eff <- plot_cco(
-  g_mod,
-  effect = "Attack",
-  condition = c("Wave"),
-  conf_level = 0.95,
-  transform_pre = "difference",
-) + scale_y_continuous(limits = c(-.02, .4)) +
-  labs(title = "Counterfactual contrasts in effect magnitude by N =7,824",
-       subtitle = "Contrast of attack effect by wave shows diminishing effects",
-       y = "Conterfactual contrasts, difference scale") +
-  scale_color_okabe_ito()
-
-
 
 # BAYES-GRAPHS ------------------------------------------------------------
 
-# bayes marg
-
-bayes_mar_eff <- plot_cco(
-  m_cond_mus,
-  effect = "Attack",
-  condition = c("Wave"),
-  conf_level = 0.95,
-  transform_pre = "difference",
-) + scale_y_continuous(limits = c(-.02, .4)) +
-  labs(title = "Counterfactual contrasts in effect magnitude by N =7,824",
-       subtitle = "Contrast of attack effect by wave shows diminishing effects",
-       y = "Conterfactual contrasts, difference scale") +
-  scale_color_okabe_ito()
-# difference scale
-bayes_con_eff <- plot_cco(
-  m_cond_mus,
-  effect = "Attack",
-  condition = list("Wave",
-                   Pol.Orient_cZ = "threenum"),
-  conf_level = 0.95,
-  transform_pre = "difference"
-) + scale_y_continuous(limits = c(-.02, .45)) +
-  labs(title = "Counterfactual contrasts in effect magnitude by N =7,824",
-       subtitle = "Effect modification by political orientation (liberal/conservative, standardised units)",
-       y = "Conterfactual contrasts, difference scale") +
-  scale_color_okabe_ito()
-
-bayes_con_eff
-
-bayes_plots <-
-  bayes_mar_eff + bayes_con_eff + plot_annotation(tag_levels = "A")
-
-bayes_plots / gee_plots
 
 
-
-
-## FOR HALFEYE PLOTS
 
 pred_draws <- predictions(
   m_cond_mus,
@@ -1393,126 +1362,34 @@ pred_draws <- predictions(
   re_formula = NA
 )
 
-condition = c("Wave", "Attack", "Pol.Orient_cZ"),
-ndraws = 1000)
-pred_draws
+
 
 pred_draws <- posteriordraws(pred_draws)
 
 head(pred_draws)
 
-ggplot(pred_draws, aes(x = draw, fill = factor(Attack))) +
-  geom_density() +
-  facet_grid(~ Wave, labeller = label_both) +
-  labs(x = "Predicted probability of survival", y = "", fill = "Woman")
 
-plot_cap(
+
+
+pred_mar <- predictions(
   m_cond_mus,
-  condition = c("Wave",
-                "Attack",
-                "Pol.Orient_cZ"),
-  ndraws = 1000,
-  re_formula = NA,
-) +  scale_color_okabe_ito()
-
-dev.off()
-
-plot_cap(
-  m_cond_mus,
-  condition = c("Wave", "Attack"),
-  ndraws = 1000,
-  re_formula = NA,
-) +  scale_color_okabe_ito()
-
-
-plot_cap(
-  m_cond_mus,
-  condition = c("Wave", "Attack"),
-  ndraws = 100,
-  re_formula = NA
-)
-
-plot_cap(
-  m_cond_mus,
-  condition = c("Wave", "Attack",  "Pol.Orient_cZ"),
-  ndraws = 100,
-  re_formula = NA
-)
-
-
-
-
-# plot_cme(
-#   m_cond_mus,
-#   effect = "Attack",
-#   condition = c("Wave", "Pol.Orient_cZ"),
-#   conf_level = 0.95,
-#   ndraws = 1000
-# )
-#
-bayes_cco <- plot_cco(
-  m_cond_mus,
-  effect = "Attack",
-  condition = c("Wave", "Pol.Orient_cZ"),
   conf_level = 0.95,
-  transform_pre = "difference",
-  ndraws = 1000
-) + labs(title = "Predicted Values of Prejudice by Attack Condition, N = 7,727",
-         subtitle = "Contrasts in attack effect by post-attack year and political orientation (SD)",
-         ylab = "difference scale") +  scale_y_continuous(limits = c(-.02, .4)) +
-  scale_color_okabe_ito()
-
-
-bayes_cco
-
-
-plot_cco(
-  m_cond_mus,
-  effect = "Attack",
-  condition = c("Wave", "Pol.Orient_cZ"),
-  conf_level = 0.95,
-  transform_pre = "ratio",
-  ndraws = 1000
-) + labs(title = "Predicted Values of Prejudice by Attack Condition, N = 7,727",
-         subtitle = "Contrasts in attack effect by post-attack year and political orientation (SD)",
-         ylab = "ratio scale")
-
-
-
-plot_cco(
-  m_cond_mus,
-  effect = "Attack",
-  condition = c("Wave"),
-  conf_level = 0.95,
-  #  transform_pre = "ratio",
-  ndraws = 1000
-)
-
-pred_marg <- predictions(
-  m_cond_mus,
   type = "response",
   newdata = datagrid("Attack" = 0:1,
                      "Wave" = 0:3),
-  #  "Pol.Orient_cZ" = c(-1.86, 0, 2.45)),
   ndraws = 1000,
   re_formula = NA
 ) |>
   posteriordraws()
 
-
-pred_marg
-
-
-
-### TRY THIS
-
 pred_cond <- predictions(
   m_cond_mus,
+  conf_level = 0.95,
   type = "response",
   newdata = datagrid(
     "Attack" = 0:1,
     "Wave" = 0:3,
-    "Pol.Orient_cZ" = c(-1.91, -1, 0, 1, 2.46)
+    "Pol.Orient_cZ" = c(-1.91,-1, 0, 1, 2.46)
   ),
   ndraws = 1000,
   re_formula = NA
@@ -1523,321 +1400,152 @@ pred_cond <- predictions(
 
 library(ggdist)
 
-pl_a <- ggplot(pred_cond, aes(
-  x = Wave,
-  y = draw,
-  fill = factor(Attack)
-))  + # + scale_y_continuous(limits = c(3, 5.2)) +
+pl_a <- ggplot(pred_mar, aes(x = Wave,
+                             y = draw,
+                             fill = Attack))  + # + scale_y_continuous(limits = c(3, 5.2)) +
   stat_halfeye(slab_alpha = .8) +
-  labs(
-    title = "Marginal effect of attacks on Muslim Warmth, N = 7,727",
-    subtitle = "Marginal contrasts by post-attack wave",
-    x = "Wave (annual)",
-    y = "Predicted Warmth to Muslims (1-7)",
-    fill = "Attack"
-  ) +  scale_fill_okabe_ito(alpha = 1)
+  labs(title = "Predicted Muslim Warmth by condition and wave (Bayesian)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)")  +
+  scale_fill_okabe_ito()
 
 # check
 pl_a
 
-# plot
+
+
+ggsave(
+  pl_a,
+  path = here::here(here::here("figs")),
+  width = 12,
+  height = 8,
+  units = "in",
+  filename = "bayes_ord_pred.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 1200
+)
+
+
+# plot # use
 pl_b <- ggplot(pred_cond, aes(
   x = Wave,
   y = draw,
   fill = factor(Attack)
 ))  + scale_y_continuous(limits = c(3, 5.2)) +
   stat_halfeye(slab_alpha = .8) +
-  labs(
-    title = "Conditional effects of attacks on Muslim Warmth, N = 7,727",
-    subtitle = "Effect modification by political orientation (liberal/conservative, standardised units)\nfaceted by wave",
-    x = "Political orientation (liberal/conservative, standardised units)",
-    y = "Predicted Warmth to Muslims (1-7)",
-    fill = "Attack"
-  ) +
+  labs(title = "Predicted Muslim Warmth by condition and wave: effect modification by political orientation (Bayesian)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)") +
+  #  scale_y_continuous(limits = c(3.0,5.2)) +
   facet_grid(. ~ Pol.Orient_cZ,   shrink = T) +
   scale_fill_okabe_ito(alpha = 1)
 
 pl_b
 
 
-# plot
-pl_c <- plot_cco(
+
+
+
+# bayes marg
+
+bayes_mar_eff <- plot_cco(
   m_cond_mus,
   effect = "Attack",
-  condition = c("Wave", "Pol.Orient_cZ"),
+  condition = c("Wave"),
   conf_level = 0.95,
-  # transform_pre = "ratio",
-  ndraws = 1000
-) + labs(title = "Counterfactual contrasts in effect magnitude by N = 7,727",
-         subtitle = "Effect modification by political orientation (liberal/conservative, standardised units)",
-         y = "Conterfactual contrasts, difference scale") +   scale_color_okabe_ito()
+  transform_pre = "difference",
+) +
+  #  scale_y_continuous(limits = c(-.05, .41)) +
+  labs(title = "Marginal contrasts (Bayesian) ",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Difference in Warmth to Muslims") +
+  scale_color_okabe_ito()
 
-# view
-pl_c
-
-
-# not use
-pl_r <- plot_cco(
+# difference scale
+bayes_con_eff <- plot_cco(
   m_cond_mus,
   effect = "Attack",
-  condition = c("Wave", "Pol.Orient_cZ"),
+  condition = list("Wave",
+                   #    Pol.Orient_cZ = "fivenum"),
+                   Pol.Orient_cZ = c(-1.91,-1, 0, 1, 2.46)),
+  #  Pol.Orient_cZ = "threenum"),
   conf_level = 0.95,
-  transform_pre = "ratio",
-  ndraws = 1000
-) + labs(title = "Counterfactual contrasts in effect magnitude by N = 7,727",
-         subtitle = "Effect modification by political orientation (liberal/conservative, standardised units)",
-         y = "Conterfactual contrasts, ratio scale") +   scale_color_okabe_ito()
+  transform_pre = "difference"
+) +
+  scale_y_continuous(limits = c(-.05, .41)) +
+  labs(title = "Conditional contrasts: effect-modification by political conservativism (Bayesian)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Difference in Warmth to Muslims") +
+  scale_color_okabe_ito()
 
-pl_r
 
+bayes_con_eff
 
 
 # graph model
-(pl_a + pl_b) / pl_c
+bayes_4 <-
+  (pl_a + bayes_mar_eff) / (pl_b + bayes_con_eff) + plot_annotation(tag_levels = "A")
+
+bayes_marg_2panel <-
+  (pl_a / bayes_mar_eff)  + plot_annotation(tag_levels = "A")
+
+
+bayes_con_2panel <-
+  (pl_b / bayes_con_eff)  + plot_annotation(tag_levels = "A")
+
+
+ggsave(
+  bayes_4,
+  path = here::here(here::here("figs")),
+  width = 16,
+  height = 12,
+  units = "in",
+  filename = "bayes_4.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 600
+)
+
+
+
+
+ggsave(
+  bayes_marg_2panel,
+  path = here::here(here::here("figs")),
+  width = 12,
+  height = 12,
+  units = "in",
+  filename = "bayes_marg_2panel.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 600
+)
+
+
+ggsave(
+  bayes_con_2panel,
+  path = here::here(here::here("figs")),
+  width = 12,
+  height = 12,
+  units = "in",
+  filename = "bayes_con_2panel.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 600
+)
 
 
 
 
 
-# d_anc_muslim <- d_muslim |>
-# #  dplyr::mutate(yfit_muslim_lag = dplyr::lag(yfit_muslim, n =1)) |>
-#   dplyr::mutate(yfit_muslim_lead1 = dplyr::lead(yfit_muslim, n =1)) |>
-#   dplyr::mutate(yfit_muslim_lead2 = dplyr::lead(yfit_muslim, n =2)) |>
-#   dplyr::mutate(yfit_muslim_lead3 = dplyr::lead(yfit_muslim, n =3)) |>
-#   dplyr::filter(wave == 0)
-#
-#
-#
-# lm(data = d_anc_muslim,
-#    yfit_muslim ~ Attack ) |>
-#   model_parameters()
-#
-#
-# lm(data = d_anc_muslim,
-#    yfit_muslim_lead1 ~ Attack ) |>
-#   model_parameters()
-#
-# lm(data = d_anc_muslim,
-#    yfit_muslim_lead2 ~ Attack) |>
-#   model_parameters()
-#
-#
-#
-# lm(data = d_anc_muslim,
-#    yfit_muslim_lead3 ~ Attack ) |>
-#   model_parameters()
 
 
 
 
 
-# ancova ------------------------------------------------------------------
-# see https://arelbundock.com/posts/regression_adjustment/
-
-
 #
 #
-# ## compare gee
-#
-# pl_cc <- plot_cco(
-#   m_cond_mus,
-#   effect = "Attack",
-#   condition = c("Wave", "Pol.Orient_cZ"),
-#   conf_level = 0.95,
-#   # transform_pre = "ratio",
-#   ndraws = 1000
-# ) +  scale_y_continuous(limits = c(0, .4)) +
-#   labs(title = "Counterfactual contrasts in effect magnitude by N = 7,727",
-#        subtitle = "Effect modification by political orientation (liberal/conservative, standardised units)",
-#        y = "Conterfactual contrasts, difference scale") +   scale_color_okabe_ito()
-#
-# gee_pl + pl_cc
-#
-#
-# cmp <- comparisons(
-#   m_cond_mus,
-#   newdata = datagrid(
-#     Wave = 0:3,
-#     Attack = 0:1,
-#     Pol.Orient_cZ = c(-1.86, 0, 2.45)
-#   ),
-#   ndraws = 10,
-#   re_formula = NA
-# )
-# cmp
-# summary(cmp)
-#
-# summary(m_cond_mus)
-#
-#
-# out_cond_0 <- comparisons(
-#   m_cond_mus,
-#   type = "response",
-#   newdata = datagrid("Attack"),
-#   ndraws = 100,
-#   re_formula = NULL
-# ) |>
-#   dplyr::mutate_if(is.numeric, round, 3)
-#
-# out_cond_0
-# # |>
-# #   slice(1:6) |>
-# #   select(contrast:conf.high) #|>
-# #   dplyr::mutate_if(is.numeric, round, 3)
-#
-# out_cond_0
-#
-# out_cond_1 <- comparisons(
-#   m_cond_mus,
-#   type = "response",
-#   newdata = datagrid(
-#     "Attack" = 0:1,
-#     "Wave" = 1,
-#     "Pol.Orient_cZ" = c(-1.86, 0, 2.45)
-#   ),
-#   ndraws = 10,
-#   re_formula = NULL
-# ) |>
-#   tidy()
-#
-# out_cond_1
-#
-# out_cond_1 <- comparisons(
-#   m_cond_mus,
-#   type = "response",
-#   newdata = datagrid(
-#     "Attack" = 0:1,
-#     "Wave" = 1,
-#     "Pol.Orient_cZ" = c(-1.86, 0, 2.45)
-#   ),
-#   ndraws = 10,
-#   re_formula = NULL
-# ) |>
-#   tidy()
-#
-# out_cond_1
-#
-#
-#
-# # compare
-# model_parameters(model_gee_muslim) |>
-#   print_md()
-#
-#
-# model_parameters(m_cond_mus) |>
-#   print_md()
-#
-#
-# gee_comp <- comparisons(model_gee_muslim,
-#                         type = "response",
-#                         newdata = datagrid("as")) |>
-#   dplyr::mutate_if(is.numeric, round, 3)
-#
-#
-# gee_comp
-#
-# plot_cco(effect = "as",
-#          cp)
-#
-# head(d_muslim)
-#
-#
-# pred_cond <- predictions(
-#   m_cond_mus_2,
-#   type = "response",
-#   newdata = datagrid(
-#     "Attack" = 0:1,
-#     "Wave" = 0:3,
-#     "Pol.Orient_cZ" = c(-1.86, 0, 2.45)
-#   ),
-#   ndraws = 1000,
-#   re_formula = NA
-# ) |>
-#   posteriordraws()
-#
-#
-#
-# library(ggdist)
-#
-# pl_a <- ggplot(pred_marg, aes(
-#   x = Wave,
-#   y = draw,
-#   fill = factor(Attack)
-# ))  +
-#   #+ scale_y_continuous(limits = c(3, 5.2)) +
-#   stat_halfeye(slab_alpha = .8) +
-#   labs(
-#     title = "Marginal effect of attacks on Muslim Warmth, N = 7,727",
-#     subtitle = "Marginal contrasts by post-attack wave",
-#     x = "Wave (annual)",
-#     y = "Predicted Warmth to Muslims (1-7)",
-#     fill = "Attack"
-#   ) +  scale_fill_okabe_ito(alpha = 1)
-#
-# # check
-# pl_a
-#
-# # plot
-# pl_b <- ggplot(pred_cond, aes(
-#   x = Pol.Orient_cZ,
-#   y = draw,
-#   fill = factor(Attack)
-# ))  + scale_y_continuous(limits = c(3, 5.2)) +
-#   stat_halfeye(slab_alpha = .8) +
-#   labs(
-#     title = "Conditional effects of attacks on Muslim Warmth, N = 7,727",
-#     subtitle = "Effect modification by political orientation (liberal/conservative, standardised units)\nfaceted by wave",
-#     x = "Political orientation (liberal/conservative, standardised units)",
-#     y = "Predicted Warmth to Muslims (1-7)",
-#     fill = "Attack"
-#   ) +
-#   facet_grid(. ~ Wave,   shrink = T) +
-#   scale_fill_okabe_ito(alpha = 1)
-#
-#
-# # plot
-# pl_c <- plot_cco(
-#   m_cond_mus,
-#   effect = "Attack",
-#   condition = c("Wave", "Pol.Orient_cZ"),
-#   conf_level = 0.95,
-#   # transform_pre = "ratio",
-#   ndraws = 1000
-# ) + labs(title = "Counterfactual contrasts in effect magnitude by N = 7,727",
-#          subtitle = "Effect modification by political orientation (liberal/conservative, standardised units)",
-#          y = "Conterfactual contrasts, difference scale") +   scale_color_okabe_ito()
-#
-# # view
-# pl_c
-#
-#
-# # not use
-# pl_r <- plot_cco(
-#   m_cond_mus,
-#   effect = "Attack",
-#   condition = c("Wave", "Pol.Orient_cZ"),
-#   conf_level = 0.95,
-#   transform_pre = "ratio",
-#   ndraws = 1000
-# ) + labs(title = "Counterfactual contrasts in effect magnitude by N = 7,727",
-#          subtitle = "Effect modification by political orientation (liberal/conservative, standardised units)",
-#          y = "Conterfactual contrasts, ratio scale") +   scale_color_okabe_ito()
-#
-# pl_r
-#
-#
-#
-# # graph model
-# (pl_a + pl_b) / pl_c
-#
-#
-#
-#
-#
-#
-#
-
-
 #
 # # d-muslims-wide ----------------------------------------------------------
 #
@@ -1846,9 +1554,9 @@ pl_r
 # name_error = "sd"
 #
 # # set N for id counts
-# id_0 <- dt_five_zero_noimpute$Id
-# id_1 <- dt_five_one_noimpute$Id
-#
+id_0 <- dt_five_zero_noimpute$Id
+id_1 <- dt_five_one_noimpute$Id
+
 #
 #
 # # analysis
@@ -1861,41 +1569,52 @@ pl_r
 # fitted_values_1 <- predict(m_1,  ndraws = 50)
 #
 #
-# # make df
-# fitted_values_0 <- data.frame(fitted_values_0)
-# head(fitted_values_0)
-# head(fitted_values_0)
-# mean(fitted_values_0$Est.Error)
-#
-# # needs to be df
-# yfit <- as.data.frame(fitted_values_0$Estimate)
-# sd <- as.data.frame(fitted_values_0$Est.Error)
-# # rename
-# colnames(yfit) <- name
-# colnames(sd) <- name_error
-#
-# # data frame
-# dat_0 <-
-#   as.data.frame(cbind(Y_orig = standata(m_0)$Y, standata(m_0)$X, yfit, id_0, sd)) |>
-#   mutate(id = as.factor(id_0)) |>
-#   arrange(id, wave)
-#
-# dat_0_wide <- dat_0 |>
-#   # note changes
-#   mutate(yimpute_muslim = if_else(Y_orig == Inf,
-#                                   yfit_muslim,
-#                                   Y_orig)) |>
-#   mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
-#   mutate(as = as.factor(rep(0, nrow(dat_0)))) |>
-#   arrange(id_0, wave) |>
-#   mutate(yimpute_muslim_lag = dplyr::lag(yimpute_muslim))
-#
-#
-# yimpute_muslim_lag <- dat_0_wide |>
-#   filter(wave == 0) |>
-#   select(yimpute_muslim_lag, id_0)
-#
-#
+# make df
+fitted_values_0 <- data.frame(fitted_values_0)
+head(fitted_values_0)
+head(fitted_values_0)
+mean(fitted_values_0$Est.Error)
+
+# needs to be df
+yfit <- as.data.frame(fitted_values_0$Estimate)
+sd <- as.data.frame(fitted_values_0$Est.Error)
+# rename
+colnames(yfit) <- name
+colnames(sd) <- name_error
+
+# data frame
+dat_0 <-
+  as.data.frame(cbind(Y_orig = standata(m_0)$Y, standata(m_0)$X, yfit, id_0, sd)) |>
+  mutate(id = as.factor(id_0)) |>
+  arrange(id, wave)
+
+
+
+head(dat_0_wide)
+dat_0_wide <- dat_0 |>
+  # note changes
+  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+                                  yfit_muslim,
+                                  Y_orig)) |>
+  mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
+  mutate(as = as.factor(rep(0, nrow(dat_0)))) |>
+  arrange(id_0, wave) |>
+  mutate(
+    yfit_ORD_lagS = scale (dplyr::lag(yfit_ORD)),
+    yfit_ORD_lead1 =  dplyr::lead(yfit_ORD, n = 1),
+    yfit_ORD_lead2 =  dplyr::lead(yfit_ORD, n = 2),
+    yfit_ORD_lead3 =  dplyr::lead(yfit_ORD, n = 3)
+  ) |>
+  filter(wave == 0)
+
+nrow(dat_0_wide)
+
+
+
+yfit_ORD_lagS <- dat_0_wide |>
+  dplyr::select(yfit_ORD_lagS, id)
+
+
 #
 # dat_0_wide_u <- dat_0_wide |>
 #   select(-yimpute_muslim_lag) |>
@@ -1904,42 +1623,213 @@ pl_r
 # ## Same for 1s
 #
 # # make df
-# fitted_values_1 <- data.frame(fitted_values_1)
-#
-# # needs to be df
-# yfit1 <- as.data.frame(fitted_values_1$Estimate)
-# sd <- as.data.frame(fitted_values_1$Est.Error)
+fitted_values_1 <- data.frame(fitted_values_1)
+
+# needs to be df
+yfit1 <- as.data.frame(fitted_values_1$Estimate)
+sd <- as.data.frame(fitted_values_1$Est.Error)
 #
 # # rename
-# colnames(yfit1) <- name
-# colnames(sd) <- name_error
+colnames(yfit1) <- name
+colnames(sd) <- name_error
 #
 # # data frame
-# dat_1 <-
-#   as.data.frame(cbind(Y_orig = standata(m_1)$Y, standata(m_1)$X, yfit1, id_1, sd)) |>
-#   mutate(id = as.factor(id_1))
+dat_1 <-
+  as.data.frame(cbind(Y_orig = standata(m_1a)$Y, standata(m_1a)$X, yfit1, id_1, sd)) |>
+  mutate(id = as.factor(id_1)) |>
+  select(-id_1)
+
+
+
+
+
 #
-# dat_1_wide <- dat_1 |>
-#   mutate(yimpute_muslim = if_else(Y_orig == Inf,
-#                                   yfit_muslim,
-#                                   Y_orig)) |>
-#   mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
-#   mutate(as = as.factor(rep(1, nrow(dat_1)))) |>
-#   arrange(id_0, wave) |>
-#   select(-id_1)
+dat_1_wide <- dat_1 |>
+  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+                                  yfit_muslim,
+                                  Y_orig)) |>
+  mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
+  mutate(as = as.factor(rep(1, nrow(dat_1)))) |>
+  arrange(id, wave) |>
+  mutate(
+    yfit_ORD_lead1 =  dplyr::lead(yfit_ORD, n = 1),
+    yfit_ORD_lead2 =  dplyr::lead(yfit_ORD, n = 2),
+    yfit_ORD_lead3 =  dplyr::lead(yfit_ORD, n = 3)
+  ) |>
+  filter(wave == 0)
+
+rm(temp_df)
+temp_df  <-
+  inner_join(dat_1_wide, yfit_ORD_lagS, by = "id") |> as.data.frame()
+
+temp_df
+
 #
 #
 # dat_0_wide_u
 # # combine data
 #
-# dat_combined_u  <- rbind(dat_0_wide_u, dat_1_wide) |>
-#   filter(wave == 0 |
-#            wave == 1 | wave == 2 | wave == 3) |>
-#   mutate(Wave = as.factor(wave),
-#          Condition = as)
-#
-# str(dat_combined_u)
-#
+names(dat_0_wide)
+
+dat_combined_u  <- rbind(dat_0_wide, temp_df) |>
+  mutate(attack = as.factor(as))
+
+str(dat_combined_u)
+
+
+dat_combined_u <-
+  dat_combined_u |>  mutate(yfit_ORD_lagS = as.numeric (yfit_ORD_lagS)) |> mutate_if(is.matrix, as.vector)
+
+
+anco_0 <- lm(yfit_ORD ~ attack * Pol.Orient_cZ +  yfit_ORD_lagS , data = dat_combined_u)
+anco_0 |>
+  model_parameters()
+
+anco_1 <-
+  lm(yfit_ORD_lead1 ~ attack * Pol.Orient_cZ +  yfit_ORD_lagS , data = dat_combined_u)
+
+anco_1 |>
+  model_parameters()
+
+anco_2 <-
+  lm(yfit_ORD_lead2 ~ attack * Pol.Orient_cZ +  yfit_ORD_lagS , data = dat_combined_u)
+
+anco_2 |>
+  model_parameters()
+
+anco_3 <-
+  lm(yfit_ORD_lead3 ~ attack * Pol.Orient_cZ +  yfit_ORD_lagS , data = dat_combined_u)
+
+anco_3 |>
+  model_parameters()
+
+p_0 <-
+  plot(ggeffects::ggpredict(anco_0, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_fill_okabe_ito(alpha = 1)
+
+p_1 <-
+  plot(ggeffects::ggpredict(anco_1, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_colour_okabe_ito(alpha = 1)
+p_2 <-
+  plot(ggeffects::ggpredict(anco_2, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_colour_okabe_ito(alpha = 1)
+p_3 <-
+  plot(ggeffects::ggpredict(anco_3, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_colour_okabe_ito(alpha = 1)
+
+
+p_0 + p_1 + p_2 + p_3 + plot_layout(nrow = 1)
+
+
+
+plot_cco(anco_0, effect = "attack", condition = list(
+                                                Pol.Orient_cZ = c(-1.91,-1, 0, 1, 2.46)))
+
+
+#  Pol.Orient_cZ = "threenum"),
+
+
+d0 <- ggeffects::ggpredict(anco_0, terms = "as") |>
+  as.data.frame() |>
+  mutate(condition = rep(0, 2))
+
+d1 <- ggeffects::ggpredict(anco_1, terms = "as") |>
+  as.data.frame() |>
+  mutate(condition = rep(1, 2))
+
+d2 <- ggeffects::ggpredict(anco_2, terms = "as") |>
+  as.data.frame() |>
+  mutate(condition = rep(2, 2))
+
+d3 <- ggeffects::ggpredict(anco_3, terms = "as") |>
+  as.data.frame() |>
+  mutate(condition = rep(3, 2))
+
+
+bound <- rbind(d0, d1, d2, d3) |>
+  mutate(
+    lower = conf.low,
+    upper = conf.high,
+    wave = factor(condition),
+    Attack =  factor(x),
+    Muslim.Warmth = predicted
+  )
+
+
+bound
+pl_anco <- ggplot(bound, aes(x = wave,
+                             y = Muslim.Warmth,
+                             color = Attack))  +
+  geom_pointrange(
+    data = bound,
+    mapping = aes(
+      x = wave,
+      y = Muslim.Warmth,
+      ymin = lower,
+      ymax = upper
+    )
+  ) +
+  labs(title = "Predicted Muslim Warmth by condition and wave (ANCOVA)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)")  +
+  scale_fill_okabe_ito() #+  facet_wrap(~ condition)
+
+
+# compare with other estimators
+
+pl_anco + pl_a_gee + pl_a
+
+
+
+
+d0a <- ggeffects::ggpredict(anco_0, terms = c("as", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(0, 10))
+
+d1a <- ggeffects::ggpredict(anco_1, terms = c("as", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(1, 10))
+
+d2a <- ggeffects::ggpredict(anco_2, terms = c("as", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(2, 10))
+
+d3a <- ggeffects::ggpredict(anco_3,terms = c("as", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(3, 10))
+
+
+bounda <- rbind(d0a, d1a, d2a, d3a) |>
+  mutate(
+    lower = conf.low,
+    upper = conf.high,
+    wave = factor(condition),
+    Attack =  factor(x),
+    Muslim.Warmth = predicted,
+    Pol.Orient_cZ = factor(group)
+  )
+bounda
+
+pl_b_ancova <- ggplot(bounda, aes(
+  x = wave,
+  y = Muslim.Warmth,
+  fill = Attack
+))  + scale_y_continuous(limits = c(3, 5.2)) +
+  geom_pointrange(
+    data = bounda,
+    mapping = aes(
+      x = wave,
+      y = Muslim.Warmth,
+      ymin = lower,
+      ymax = upper
+    )
+  ) +
+  labs(title = "Predicted Muslim Warmth by condition and wave: effect modification by political orientation (Bayesian)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)") +
+  #  scale_y_continuous(limits = c(3.0,5.2)) +
+  facet_grid(. ~ Pol.Orient_cZ,   shrink = T) +
+  scale_fill_okabe_ito(alpha = 1)
+
+
+
+# str(dat_combined_u#
 # # save processed data
 # saveRDS(dat_combined_u,
 #         here::here(push_mods, "dat_combined_u-muslims-attack"))
