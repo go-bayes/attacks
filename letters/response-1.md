@@ -31,25 +31,9 @@ PNAS Nexus Interim Editor-in-Chief
 
 Dear Dr Yortsos & Colleagues
 
-Below we describe how we have addressed question raised during review of our manuscript.  Doing so has resulted in a stronger manuscript. We are grateful for your 
+Below we describe how we have addressed questions and concerns raised during review of our manuscript.  Doing so has resulted in a stronger manuscript. We are therefore grateful to you, the Associate Editor and the three anonymous referees.  
 
-There are three general areas of improvement. 
-
-First, the new manuscript clarifies the target population for whom the analysis is meant to generalise. In the previous manuscript we combined participants from multiple boosters in the study. We did not follow the same cohort. Our previous strategy resulted in a larger sample with greater power. However, the larger combined sample introduces addditional assumptions and potential for confusion.  Our entirely new analysis follows people from Wave 5.  This results in a smaller sample. 
-
-Second, we examine effect modification of the attack-complex by differences in political orientation. We agree with the reviewers who think the study would be of greater interest if we were to include a conditional analysis. This analysis also helps to clarify the benefits of a potential outcomes approach to Regression Discontinuity. As part of this analysis we have better clarified the estimands of interest. We have also added the two negative controls that reviewer 1 suggests. 
-
-Third, we have completed the processing of Time 13 2021-2022 data we have included a third wave post-attack Wave. We allow for pre-attack time X political orientation interaction when predicting the missing counterfactual outcomes had the attacks not occurred. As with any model, we must assume conditional exchangeability for our conterfactual contrasts.  In observational research, the assumption of conditional exchangeability is always a strong one.   any obsevational research this is 
-
-
-
-
-
-
-Second, 
-
-
-Our responses to specific points are in **bold**. 
+Our responses are in **bold**. 
 
 # 
 
@@ -148,7 +132,7 @@ Now, usually we would deal with this type of confounding by comparing the treate
 
 
 
-**We agree with the skepticism, although for someone different reasons. The problem is not one of confounding or of treatment assignment. We see a problem. with model specification. Imputing a counterfactual outcome relies on strong assumptions.**
+**The problem is not one of confounding or of treatment assignment. We see a problem. with model specification. Imputing a counterfactual outcome relies on strong assumptions... **
 
 
 Of course, this is not possible with the data at hand. This is why a regression-discontinuity-in-time design (as presented in this analysis) focuses on the period directly before and directly after the attack. This is not a drawback of the method of regression discontinuity, but an essential limitation of the data available in research on the effects of terrorist attacks on one country. Again, controlling for or imputing based on individual level variables does nothing to adjust for these types of time-varying macro shocks (even if the models are as complex as the ones presented in the paper). That being said, it might be that the method could be used to model confounding macro shocks as well, and I am looking forward to the author’s response. 

@@ -39,7 +39,9 @@ sadi <- dat %>%
                   (Wave == 2016 &  YearMeasured == 1) |
                   (Wave == 2017 &  YearMeasured == 1) |
                   (Wave == 2018 &  YearMeasured == 1) |
-                  (Wave = 2019 & YearMeasured == 1)
+                  (Wave = 2019 & YearMeasured == 1)|
+                  (Wave = 2020 & YearMeasured == 1)|
+                  (Wave = 2021 & YearMeasured == 1)
   ) %>%
   droplevels() %>%
   select(Warm.Muslims, TSCORE, Id) %>%
@@ -64,7 +66,9 @@ ids <- df %>%
                   (Wave == 2016 &  YearMeasured == 1) |
                   (Wave == 2017 &  YearMeasured == 1) |
                   (Wave == 2018 &  YearMeasured == 1) |
-                  (Wave = 2019 & YearMeasured == 1)
+                  (Wave = 2019 & YearMeasured == 1)|
+                  (Wave = 2020 & YearMeasured == 1)|
+                  (Wave = 2021 & YearMeasured == 1)
   ) %>%
   group_by(Id, Wave) %>%
   select(Id, Wave)
@@ -80,39 +84,73 @@ length(unique(ids$Id))
 table1::table1(~ Attack_Condition, data = sadi)
 
 library(ggsci)
-rdd <-
+rdd_adj_rev <-
   ggplot(sadi, aes(x = timeline, y = Warm.Muslims, color = Attack_Condition)) +
   geom_jitter(alpha = .01, width = 1) +
   stat_smooth(method = "gam") +
   theme(legend.position = "bottom") +
   labs(
-    title = "Discontinuity at attacks (GAM)",
-    subtitle = "Boost to Warmth increase in the years following the attacks",
+    title = "NZAVS Muslim Warmth Responses (GAM)",
+    subtitle = "Adjusting for attacks",
     y = "Muslim Warmth",
-    x = "NZAVS Time 4 - 12 (2012-2022), N = 67858"
+    x = "NZAVS Time 4 - Time 13 (Years= 2012-2022, N = 47948)"
   ) +
   scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic()
 
 # graph
-rdd
-# combine graph
-library(patchwork)
-comb_sens_graph3 <- ldsA / rdd  + plot_annotation(tag_levels = "A")
+rdd_adj_rev
 
-# check
-comb_sens_graph3
+library(ggsci)
+rdd_no_adj_rev <-
+  ggplot(sadi, aes(x = timeline, y = Warm.Muslims)) +
+  geom_jitter(alpha = .01, width = 1) +
+  stat_smooth(method = "gam") +
+  theme(legend.position = "bottom") +
+  labs(
+    title = "NZAVS Muslim Warmth Responses (GAM)",
+    subtitle = "Not adjusting for attacks",
+    y = "Muslim Warmth",
+    x = "NZAVS Time 4 - Time 13 (Years= 2012-2022, N = 47948)"
+  ) +
+  scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic()
+
+# graph
+rdd_no_adj_rev
+
 
 ggsave(
-  comb_sens_graph3,
+  rdd_adj_rev,
   path = here::here(here::here("figs")),
   width = 9,
   height = 9,
   units = "in",
-  filename = "comb_sens_graph3.jpg",
+  filename = "rdd_adj_rev.jpg",
   device = 'jpeg',
   limitsize = FALSE,
   dpi = 1000
 )
+
+
+
+
+ggsave(
+  rdd_no_adj_rev,
+  path = here::here(here::here("figs")),
+  width = 9,
+  height = 9,
+  units = "in",
+  filename = "rdd_no_adj_rev.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 1000
+)
+
+# combine graph
+library(patchwork)
+
+rdd_adj_rev/rdd_no_adj_rev
+
+
 citation("rdrobust")
 
 
@@ -198,7 +236,6 @@ rdr_export(outr, prec = 3) %>%
   slice(1:2)
 
 
-# graph
 rdplot(
   y = sadi3$Warm.Muslims,
   x = sadi3$timeline,
@@ -214,7 +251,6 @@ rdplot(
 
 
 
-
 # another approach
 yola
 outr_simple <-
@@ -222,9 +258,8 @@ outr_simple <-
 summary(outr_simple)
 
 gab <- model_parameters(outr_simple)
-tablex
 
-%>%
+gab%>%
   kbl("latex", booktabs = TRUE, digits = 2)
 
 
@@ -288,17 +323,17 @@ rdd_graph
 
 # zero table --------------------------------------------------------------
 
-
-zt_s <-
-  table1::table1(~ Ys |
-                   As * Wave,
-                 data = bind_zero1_s,
-                 overall = F,
-                 transpose = F)
-
-t1kable(zt_s, format = "latex")
-
-zt_s
+#
+# zt_s <-
+#   table1::table1(~ Ys |
+#                    As * Wave,
+#                  data = bind_zero1_s,
+#                  overall = F,
+#                  transpose = F)
+#
+# t1kable(zt_s, format = "latex")
+#
+# zt_s
 
 
 
