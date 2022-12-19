@@ -1,20 +1,23 @@
 # revision conducted on 24 Nov 2022.
 # joseph.bulbulia
-
+library(fs)
 
 # set digits
 options(scipen = 999)
 
 #libraries
 source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs2.R")
+
 library("modelsummary")
 options("modelsummary_format_numeric_latex" = "plain")
 
+conflict_prefer("filter", "dplyr")
+conflict_prefer("lag", "dplyr")
+conflict_prefer("lead", "dplyr")
 
 # additional (add to libs later)
 library(ggdist)
 library(geepack)
-
 
 # read functions (most not used here)
 source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/funs.R")
@@ -31,13 +34,16 @@ library(cmdstanr)
 
 # set paths for JB** YOU NEED TO SET YOUR OWN **
 push_mods <-
-  fs::path_expand("~/The\ Virtues\ Project\ Dropbox/outcomewide/attacks/mods")
+  fs::path_expand("Users/joseph/v-project\ Dropbox/outcomewide/attacks/mods")
+
+pull_mods <-  fs::path_expand("Users/joseph/v-project\ Dropbox/outcomewide/attacks/mods")
+
 push_figs <-
-  fs::path_expand("~/The\ Virtues\ Project\ Dropbox/outcomewide/attacks/figs")
+  fs::path_expand("/Users/joseph/v-project\ Dropbox/outcomewide/attacks/mods")
 
 pull_path <-
   fs::path_expand(
-    "/Users/joseph/The\ Virtues\ Project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/time13"
+    "/Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/time13"
   )
 
 
@@ -366,7 +372,6 @@ x <- table1(
   overall = FALSE,
   transpose = F
 )
-)
 
 kable(x, format = "latex", booktabs = TRUE)
 
@@ -466,7 +471,7 @@ t_1
 
 # select only waves used
 dt_bind_sub <- dt_bind |>
-  filter(Wave == "Time10" |
+  dplyr::filter(Wave == "Time10" |
            Wave == "Time11" |
            Wave == "Time12" |
            Wave == "Time13")
@@ -532,21 +537,20 @@ naniar::gg_miss_var(dt_ni1)
 
 ## save data
 
-arrow::write_parquet(dt_ni,
-                     here::here(push_mods, "dt_ni-attacks.rds"))
-arrow::write_parquet(dt_ni1,
-                     here::here(push_mods, "dt_ni1-attacks.rds"))
-
+saveRDS(dt_ni, here::here(push_mods, "dt_ni-attacks.rds"))
+saveRDS(dt_ni1, here::here(push_mods, "dt_ni1-attacks.rds"))
 
 
 
 # read-prepared-data ------------------------------------------------------
 
-dt_ni <-
-  arrow::read_parquet(here::here(push_mods, "dt_ni-attacks.rds"))
-dt_ni1 <-
-  arrow::read_parquet(here::here(push_mods, "dt_ni1-attacks.rds"))
+here::here(push_mods, "dt_ni-attacks.rds")
+fs::path_expand
 
+dt_ni <- readRDS( here::here(push_mods, "dt_ni-attacks.rds"))
+dt_ni1 <-readRDS( fs::path_expand("~/The Virtues Project Dropbox/outcomewide/attacks/mods/dt_ni1-attacks.rds"))
+
+here::here(push_mods, "dt_ni1-attacks.rds")
 # check
 table(dt_ni$wave)
 table(dt_ni1$wave)
@@ -1616,6 +1620,15 @@ str(dat_combined_u)
 
 dat_combined_u <-
   dat_combined_u |>  mutate(yfit_ORD_lagS = as.numeric (yfit_ORD_lagS)) |> mutate_if(is.matrix, as.vector)
+
+
+
+## Save data
+arrow::write_parquet(dat_combined_u, here::here(push_mods, "dat_combined_u.rds"))
+
+# read data
+dat_combined_u <-
+  arrow::read_parquet(here::here(push_mods, "dat_combined_u.rds"))
 
 
 anco_0 <- lm(yfit_ORD ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
