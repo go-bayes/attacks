@@ -936,62 +936,6 @@ g_mod <- geeglm(
 # conditional predictions
 theme_set(theme_pubclean()) # nice theme
 
-gee_exp_con <-
-  plot (ggeffects::ggpredict(
-    g_mod,
-    terms = c("Wave", "Attack", "Pol.Orient_cZ[-1.91,  0, 2.46]")
-  ))  +
-  scale_color_okabe_ito()  +  labs(title = "Expected Muslim Warmth by Political Orientation (avg, =1/+1 SD)",
-                                   subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,854",
-                                   y = "Warmth to Mulsims (1-7 (ordinal)") +
-  scale_y_continuous(limits = c(3.0, 5.2)) + theme_pubclean()
-
-
-
-
-gee_exp_con
-
-
-
-ggsave(
-  gee_exp_con,
-  path = here::here(here::here("figs")),
-  width = 12,
-  height = 8,
-  units = "in",
-  filename = "gee_ord_pred.jpg",
-  device = 'jpeg',
-  limitsize = FALSE,
-  dpi = 1200
-)
-
-plot_cco(
-  g_mod,
-  effect = "Attack",
-  condition = list("Wave",
-                   Pol.Orient_cZ = "minmax"),
-  conf_level = 0.95,
-  transform_pre = "difference",
-  draw = TRUE
-) + theme_pubclean()
-
-
-
-plot_cco(
-  g_mod,
-  effect = "Attack",
-  # condition = c("Wave",
-  #               "Pol.Orient_cZ"),
-  condition = list("Wave",
-                   Pol.Orient_cZ = c("minmax")),
-  conf_level = 0.95,
-  transform_pre = "difference",
-  draw = FALSE
-) |>
-  select(-id) |>
-  mutate(condition2 = factor(condition2, labels = c("pol_conserve_low", "pol_conserve_high"))) |>
-  kbl(format = "markdown", booktabs = TRUE)
-dev.off()
 
 
 
@@ -1022,7 +966,7 @@ gee_con_eff <- plot_cco(
   transform_pre = "difference"
 ) +
   scale_y_continuous(limits = c(-.05, .41)) +
-  labs(title = "Conditional counterfactual contrasts by political Orientation",
+  labs(title = "Conditional counterfactual contrasts by political conservativism",
        subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,854",
        y = "Conterfactual contrasts: Warmth to Muslims on difference scale") +
   scale_color_okabe_ito() + theme_pubclean()
@@ -1054,10 +998,10 @@ ggsave(
 # gee
 pl_a_gee <- plot (ggeffects::ggpredict(g_mod, terms = c("Wave", "Attack")))  +
   scale_color_okabe_ito()  +
-  labs(title = "Expected Muslim Warmth by Wave (GEE)",
+  labs(title = "Predicted Muslim Warmth by condition and wave (GEE)",
        subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
        y = "Warmth to Mulsims (1-7 (ordinal)")  +
-  scale_fill_okabe_ito() + theme_pubclean()
+  scale_fill_okabe_ito() + theme_pubclean() +  scale_y_continuous(limits = c(4, 4.5))
 
 # check
 pl_a_gee
@@ -1085,7 +1029,7 @@ pl_b_gee <- plot (ggeffects::ggpredict(
             "Pol.Orient_cZ[-1.91, -1,  0, 1, 2.46]")
 ),  one.plot = TRUE) +
   scale_color_okabe_ito()  +
-  labs(title = "Expected Muslim Warmth by Political Orientation (GEE)",
+  labs(title = "Predicted Muslim Warmth effect modification by political conservativism (GEE)",
        subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
        y = "Warmth to Mulsims (1-7 (ordinal)") +
   scale_y_continuous(limits = c(3.0, 5.2)) +
@@ -1099,9 +1043,6 @@ gee_mar_eff + gee_con_eff
 gee_4 <-
   (pl_a_gee + gee_mar_eff) / (pl_b_gee + gee_con_eff) + plot_annotation(tag_levels = "A")
 gee_4
-bayes_4
-
-
 
 dev.off()
 
@@ -1118,37 +1059,7 @@ ggsave(
 )
 
 
-#
-# # This is good
-# gee_pl <- plot_cco(
-#   model_gee_muslim,
-#   effect = "Attack",
-#   condition = c("Wave", "Pol.Orient_cZ"),
-#   conf_level = 0.95,
-#   transform_pre = "difference"
-# ) +
-#   labs(title = "Counterfactual contrasts in effect magnitude by N = 7,727",
-#        subtitle = "Effect modification by political orientation\n(liberal/conservative, standardised units)",
-#        y = "Conterfactual contrasts, difference scale") +
-#   scale_color_okabe_ito()
-#
-#
-# ggsave(
-#   p_gee,
-#   path = here::here(here::here("figs")),
-#   width = 10,
-#   height = 5,
-#   units = "in",
-#   filename = "gee_coef_rev.jpg",
-#   device = 'jpeg',
-#   limitsize = FALSE,
-#   dpi = 1200
-# )
-
-
 # BAYESIAN MODEL ----------------------------------------------------------
-
-head(d_muslim)
 # Not used
 bform_mus_cond  =   bf(
   yimpute_muslim |
@@ -1205,6 +1116,15 @@ prior_mus_cond  = c(
   ),
   set_prior("exponential(1)", class = "sd")  # only for raneffs
 )
+
+
+# ord
+bform_mus_cond_ord  =   bf(yfit_ORD ~  Attack  *  Wave *  Pol.Orient_cZ + (1 |
+                                                                             id),
+                           sigma ~ 0 + as,
+                           set_rescor(rescor = FALSE))
+
+
 
 prior_mus_cond_simple  = c(
   set_prior("normal(0,.5)",  class = "b"),
@@ -1277,6 +1197,27 @@ prior_mus_cond_simple  = c(
 
 
 ## USE
+
+prior_mus_cond  = c(
+  set_prior("normal(0,.5)",  class = "b"),
+  set_prior("normal(0,1)", class = "b", dpar = "sigma"),
+  set_prior(
+    "student_t(3, 4, 2)",
+    class = "Intercept",
+    lb = 1,
+    ub = 7
+  ),
+  set_prior("exponential(1)", class = "sd")  # only for raneffs
+)
+
+
+# ord
+bform_mus_cond_ord  =   bf(yfit_ORD ~  Attack  *  Wave *  Pol.Orient_cZ + (1 |
+                                                                             id),
+                           sigma ~ 0 + as,
+                           set_rescor(rescor = FALSE))
+
+
 system.time(
   m_cond_mus <- brms::brm(
     backend = "cmdstanr",
@@ -1288,10 +1229,6 @@ system.time(
     file = here::here(push_mods, "m_cond_mus-2013-use-ord.rds")
   )
 )
-#
-#
-#
-# summary(m_cond_mus)
 
 # not run
 m_bayes <- modelsummary::modelsummary(
@@ -1407,7 +1344,7 @@ pl_a <- ggplot(pred_mar, aes(x = Wave,
   labs(title = "Predicted Muslim Warmth by condition and wave (Bayesian)",
        subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
        y = "Warmth to Mulsims (1-7 (ordinal)")  +
-  scale_fill_okabe_ito()
+  scale_fill_okabe_ito() + scale_y_continuous(limits = c(4, 4.5))
 
 # check
 pl_a
@@ -1431,10 +1368,10 @@ ggsave(
 pl_b <- ggplot(pred_cond, aes(
   x = Wave,
   y = draw,
-  fill = factor(Attack)
+  fill = Attack
 ))  + scale_y_continuous(limits = c(3, 5.2)) +
   stat_halfeye(slab_alpha = .8) +
-  labs(title = "Predicted Muslim Warmth by condition and wave: effect modification by political orientation (Bayesian)",
+  labs(title = "Predicted Muslim Warmth effect modification by political conservativism (Bayesian)",
        subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
        y = "Warmth to Mulsims (1-7 (ordinal)") +
   #  scale_y_continuous(limits = c(3.0,5.2)) +
@@ -1474,7 +1411,7 @@ bayes_con_eff <- plot_cco(
   transform_pre = "difference"
 ) +
   scale_y_continuous(limits = c(-.05, .41)) +
-  labs(title = "Conditional contrasts: effect-modification by political conservativism (Bayesian)",
+  labs(title = "Conditional contrasts by political conservativism (Bayesian)",
        subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
        y = "Difference in Warmth to Muslims") +
   scale_color_okabe_ito()
@@ -1681,24 +1618,24 @@ dat_combined_u <-
   dat_combined_u |>  mutate(yfit_ORD_lagS = as.numeric (yfit_ORD_lagS)) |> mutate_if(is.matrix, as.vector)
 
 
-anco_0 <- lm(yfit_ORD ~ attack * Pol.Orient_cZ +  yfit_ORD_lagS , data = dat_combined_u)
+anco_0 <- lm(yfit_ORD ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
 anco_0 |>
   model_parameters()
 
 anco_1 <-
-  lm(yfit_ORD_lead1 ~ attack * Pol.Orient_cZ +  yfit_ORD_lagS , data = dat_combined_u)
+  lm(yfit_ORD_lead1 ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
 
 anco_1 |>
   model_parameters()
 
 anco_2 <-
-  lm(yfit_ORD_lead2 ~ attack * Pol.Orient_cZ +  yfit_ORD_lagS , data = dat_combined_u)
+  lm(yfit_ORD_lead2 ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
 
 anco_2 |>
   model_parameters()
 
 anco_3 <-
-  lm(yfit_ORD_lead3 ~ attack * Pol.Orient_cZ +  yfit_ORD_lagS , data = dat_combined_u)
+  lm(yfit_ORD_lead3 ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
 
 anco_3 |>
   model_parameters()
@@ -1725,19 +1662,19 @@ plot_cco(anco_0, effect = "attack", condition = list(
 #  Pol.Orient_cZ = "threenum"),
 
 
-d0 <- ggeffects::ggpredict(anco_0, terms = "as") |>
+d0 <- ggeffects::ggpredict(anco_0, terms = "attack") |>
   as.data.frame() |>
   mutate(condition = rep(0, 2))
 
-d1 <- ggeffects::ggpredict(anco_1, terms = "as") |>
+d1 <- ggeffects::ggpredict(anco_1, terms = "attack") |>
   as.data.frame() |>
   mutate(condition = rep(1, 2))
 
-d2 <- ggeffects::ggpredict(anco_2, terms = "as") |>
+d2 <- ggeffects::ggpredict(anco_2, terms = "attack") |>
   as.data.frame() |>
   mutate(condition = rep(2, 2))
 
-d3 <- ggeffects::ggpredict(anco_3, terms = "as") |>
+d3 <- ggeffects::ggpredict(anco_3, terms = "attack") |>
   as.data.frame() |>
   mutate(condition = rep(3, 2))
 
@@ -1764,33 +1701,46 @@ pl_anco <- ggplot(bound, aes(x = wave,
       ymin = lower,
       ymax = upper
     )
-  ) +
+  ) + scale_y_continuous(limits = c(4, 4.5)) +
   labs(title = "Predicted Muslim Warmth by condition and wave (ANCOVA)",
        subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
        y = "Warmth to Mulsims (1-7 (ordinal)")  +
   scale_fill_okabe_ito() #+  facet_wrap(~ condition)
 
+pl_anco
 
 # compare with other estimators
 
-pl_anco + pl_a_gee + pl_a
+ancova_plot_marg<- pl_anco + pl_a_gee + pl_a + plot_annotation(tag_levels = "A")
 
+ancova_plot_marg
 
+# save plot
+ggsave(
+  ancova_plot_marg,
+  path = here::here(here::here("figs")),
+  width = 24,
+  height = 12,
+  units = "in",
+  filename = "ancova_plot_marg.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 800
+)
 
-
-d0a <- ggeffects::ggpredict(anco_0, terms = c("as", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+d0a <- ggeffects::ggpredict(anco_0, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
   as.data.frame() |>
   mutate(condition = rep(0, 10))
 
-d1a <- ggeffects::ggpredict(anco_1, terms = c("as", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+d1a <- ggeffects::ggpredict(anco_1, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
   as.data.frame() |>
   mutate(condition = rep(1, 10))
 
-d2a <- ggeffects::ggpredict(anco_2, terms = c("as", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+d2a <- ggeffects::ggpredict(anco_2, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
   as.data.frame() |>
   mutate(condition = rep(2, 10))
 
-d3a <- ggeffects::ggpredict(anco_3,terms = c("as", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+d3a <- ggeffects::ggpredict(anco_3,terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
   as.data.frame() |>
   mutate(condition = rep(3, 10))
 
@@ -1809,7 +1759,7 @@ bounda
 pl_b_ancova <- ggplot(bounda, aes(
   x = wave,
   y = Muslim.Warmth,
-  fill = Attack
+  colour = Attack
 ))  + scale_y_continuous(limits = c(3, 5.2)) +
   geom_pointrange(
     data = bounda,
@@ -1820,12 +1770,32 @@ pl_b_ancova <- ggplot(bounda, aes(
       ymax = upper
     )
   ) +
-  labs(title = "Predicted Muslim Warmth by condition and wave: effect modification by political orientation (Bayesian)",
+  labs(title = "Predicted Muslim Warmth effect modification by political orientation (ANCOVA)",
        subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
        y = "Warmth to Mulsims (1-7 (ordinal)") +
   #  scale_y_continuous(limits = c(3.0,5.2)) +
-  facet_grid(. ~ Pol.Orient_cZ,   shrink = T) +
-  scale_fill_okabe_ito(alpha = 1)
+  facet_grid(. ~ Pol.Orient_cZ,   shrink = T) #+
+#  scale_colour_okabe_ito()
+
+ancova_plot_cond <- pl_b_ancova + pl_b_gee + pl_b + plot_annotation(tag_levels = "A")
+
+
+ancova_plot_cond
+
+
+ggsave(
+  ancova_plot_cond,
+  path = here::here(here::here("figs")),
+  width = 24,
+  height = 12,
+  units = "in",
+  filename = "ancova_plot_cond.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 800
+)
+
+
 
 
 

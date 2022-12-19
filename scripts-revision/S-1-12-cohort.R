@@ -1210,7 +1210,7 @@ ggsave(
 
 #
 # # This is good
-# gee_pl <- plot_cco(
+# plot_cco(
 #   model_gee_muslim,
 #   effect = "Attack",
 #   condition = c("Wave", "Pol.Orient_cZ"),
@@ -1234,4 +1234,276 @@ ggsave(
   limitsize = FALSE,
   dpi = 1200
 )
+
+
+
+# BAYES -------------------------------------------------------------------
+
+
+prior_mus_cond  = c(
+  set_prior("normal(0,1)",  class = "b"),
+  set_prior("normal(0,1)", class = "b", dpar = "sigma"),
+  set_prior(
+    "student_t(3, 4, 2)",
+    class = "Intercept",
+    lb = 1,
+    ub = 7
+  ),
+  set_prior("exponential(1)", class = "sd")  # only for raneffs
+)
+
+
+# ord
+bform_mus_cond_ord  =   bf(yfit_ORD ~  Attack  *  Wave *  Pol.Orient_cZ + (1 | id),
+                           sigma ~ 0 + as,
+                           set_rescor(rescor = FALSE))
+
+
+system.time(
+  m_cond_mus <- brms::brm(
+    backend = "cmdstanr",
+    data = d_muslim,
+    family = "gaussian",
+    bform_mus_cond_ord,
+    prior_mus_cond,
+    init = 0,
+    file = here::here(push_mods, "m_cond_mus-2012-use-ord-rev6.rds")
+  )
+)
+
+
+
+summary(m_cond_mus)
+# GRAPHS ------------------------------------------------------------------
+
+
+options("modelsummary_format_numeric_latex" = "plain")
+
+m_bayes_latex <- modelsummary::modelsummary(
+  m_cond_mus,
+  gof_omit = "^(?!.*[{conf.low}, {conf.high}])",
+  statistic  = NULL,
+  # "conf.int",
+  ndraws = 100,
+  estimate =  "{estimate} [{conf.low}, {conf.high}]",
+  #  standardize = "posthoc",
+  output = "latex",
+  title = "Bayesian Multi-Level Model: 2012 Cohort"
+)
+
+
+# save table
+saveRDS(m_bayes_latex,
+        here::here(push_mods, "m_bayes-attacks-2012"))
+
+saveRDS(m_bayes_latex,
+        here::here(push_mods, "m_bayes_latex-attacks-2012"))
+
+
+
+# posterior checks
+pp_check(m_cond_mus)
+plot(m_cond_mus)
+summary(m_cond_mus)
+
+
+
+# another table
+parms <- model_parameters(m_cond_mus,   test = "pd")
+
+parms |>
+  kbl(format = "latex", booktabs = TRUE)
+
+
+
+
+
+
+# BAYES-GRAPHS ------------------------------------------------------------
+
+
+
+
+pred_draws <- predictions(
+  m_cond_mus,
+  newdata = datagrid("Attack" = c(0, 1),
+                     "Wave" = c(0, 1, 2, 3)),
+  ndraws = 100,
+  re_formula = NA
+)
+
+
+
+pred_draws <- posteriordraws(pred_draws)
+
+head(pred_draws)
+
+
+pred_mar <- predictions(
+  m_cond_mus,
+  conf_level = 0.95,
+  type = "response",
+  newdata = datagrid("Attack" = 0:1,
+                     "Wave" = 0:3),
+  ndraws = 1000,
+  re_formula = NA
+) |>
+  posteriordraws()
+
+pred_cond <- predictions(
+  m_cond_mus,
+  conf_level = 0.95,
+  type = "response",
+  newdata = datagrid(
+    "Attack" = 0:1,
+    "Wave" = 0:3,
+    "Pol.Orient_cZ" = c(-1.91,-1, 0, 1, 2.46)
+  ),
+  ndraws = 1000,
+  re_formula = NA
+) |>
+  posteriordraws()
+
+
+
+library(ggdist)
+
+pl_a12<- ggplot(pred_mar, aes(x = Wave,
+                             y = draw,
+                             fill = Attack))  + # + scale_y_continuous(limits = c(3, 5.2)) +
+  stat_halfeye(slab_alpha = .8) +
+  labs(title = "Predicted Muslim Warmth by condition and wave (Bayesian)",
+       subtitle = "NZAVS 2012 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)")  +
+  scale_fill_okabe_ito() + scale_y_continuous(limits = c(3.8, 4.5))
+
+# check
+pl_a12
+
+
+
+ggsave(
+  pl_a12,
+  path = here::here(here::here("figs")),
+  width = 12,
+  height = 8,
+  units = "in",
+  filename = "bayes_ord_pred-12.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 1200
+)
+
+
+# plot # use
+pl_b12 <- ggplot(pred_cond, aes(
+  x = Wave,
+  y = draw,
+  fill = Attack
+))  + scale_y_continuous(limits = c(3, 5.2)) +
+  stat_halfeye(slab_alpha = .8) +
+  labs(title = "Predicted Muslim Warmth effect modification by political conservativism (Bayesian)",
+       subtitle = "NZAVS 2012 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)") +
+  #  scale_y_continuous(limits = c(3.0,5.2)) +
+  facet_grid(. ~ Pol.Orient_cZ,   shrink = T) +
+  scale_fill_okabe_ito(alpha = 1)
+
+pl_b12
+
+
+
+
+
+# bayes marg
+
+bayes_mar_eff12 <- plot_cco(
+  m_cond_mus,
+  effect = "Attack",
+  condition = c("Wave"),
+  conf_level = 0.95,
+  transform_pre = "difference",
+) +
+  #  scale_y_continuous(limits = c(-.05, .41)) +
+  labs(title = "Marginal contrasts (Bayesian) ",
+       subtitle = "NZAVS 2012 Cohort, Times 10 - 13, N =7,824",
+       y = "Difference in Warmth to Muslims") +
+  scale_color_okabe_ito()
+
+# difference scale
+bayes_con_eff12 <- plot_cco(
+  m_cond_mus,
+  effect = "Attack",
+  condition = list("Wave",
+                   #    Pol.Orient_cZ = "fivenum"),
+                   Pol.Orient_cZ = c(-1.91,-1, 0, 1, 2.46)),
+  #  Pol.Orient_cZ = "threenum"),
+  conf_level = 0.95,
+  transform_pre = "difference"
+) +
+  scale_y_continuous(limits = c(-.05, .41)) +
+  labs(title = "Conditional contrasts by political conservativism (Bayesian)",
+       subtitle = "NZAVS 2012 Cohort, Times 10 - 13, N =7,824",
+       y = "Difference in Warmth to Muslims") +
+  scale_color_okabe_ito()
+
+bayes_mar_eff12
+bayes_con_eff12
+
+
+# graph model
+bayes_412 <-
+  (pl_a12 + bayes_mar_eff12) / (pl_b12 + bayes_con_eff12) + plot_annotation(tag_levels = "A")
+
+bayes_marg_2panel12 <-
+  (pl_a12 / bayes_mar_eff12)  + plot_annotation(tag_levels = "A")
+
+bayes_marg_2panel12
+
+
+bayes_con_2panel12 <-
+  (pl_b12 / bayes_con_eff12)  + plot_annotation(tag_levels = "A")
+
+bayes_con_2panel12
+
+ggsave(
+  bayes_412,
+  path = here::here(here::here("figs")),
+  width = 16,
+  height = 12,
+  units = "in",
+  filename = "bayes_412.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 600
+)
+
+
+
+
+ggsave(
+  bayes_marg_2panel12,
+  path = here::here(here::here("figs")),
+  width = 12,
+  height = 12,
+  units = "in",
+  filename = "bayes_marg_2panel12.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 600
+)
+
+
+ggsave(
+  bayes_con_2panel12,
+  path = here::here(here::here("figs")),
+  width = 12,
+  height = 12,
+  units = "in",
+  filename = "bayes_con_2panel12.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 600
+)
+
 
