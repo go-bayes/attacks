@@ -1,28 +1,52 @@
 # Graphs for timeline
 # first run "analysis.R"
 # remove scientific notation
+# set digits
 options(scipen = 999)
+
 #libraries
-source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs.R")
-library("lubridate") # working with dates
-# read functions
+source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs2.R")
+
+library("modelsummary")
+options("modelsummary_format_numeric_latex" = "plain")
+
+conflict_prefer("filter", "dplyr")
+conflict_prefer("lag", "dplyr")
+conflict_prefer("lead", "dplyr")
+
+# additional (add to libs later)
+library(ggdist)
+library(geepack)
+
+# read functions (most not used here)
 source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/funs.R")
 
-# for saving models (bulbulia only - use own paths for simulated data)
-push_mods <-
-  fs::path_expand("~/The\ Virtues\ Project\ Dropbox/outcomewide/attacks/mods")
-push_figs <-
-  fs::path_expand("~/The\ Virtues\ Project\ Dropbox/outcomewide/attacks/figs")
+# bayesian models set up
+library("brms")
+library("rstan")
+rstan_options(auto_write = TRUE) # bayesian estimation
+options(mc.cores = parallel::detectCores ()) # use all course
+theme_set(theme_pubclean()) # nice theme
+library(cmdstanr)
 
-# install.packages("arrow", repos = c(arrow = "https://nightlies.apache.org/arrow/r", getOption("repos")))
-# read data (again bulbulia only) If replicating use the jittered data in the data folder
+# for saving models (again for JB only - set paths for your own directory)
+
+# set paths for JB** YOU NEED TO SET YOUR OWN **
+push_mods <-
+  fs::path_expand("/Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/outcomewide/attacks/mods")
+
+push_figs <-
+  fs::path_expand(" /Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/outcomewide/attacks/figs")
+
 pull_path <-
   fs::path_expand(
-    "/Users/joseph/The\ Virtues\ Project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/time13"
+    "/Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/time13"
   )
 
 
-dat <- arrow::read_parquet(pull_path)
+
+
+# dat <- arrow::read_parquet(pull_path)
 
 #source(here::here("R", "libs.R"))
 
@@ -255,7 +279,7 @@ ggsave(
 rarepA <- dt_2013 %>%
   # dplyr::filter(YearMeasured == 1) %>%
   dplyr::filter(Wave ==   "Time5" |
-                  Wave ==   "Time6" |
+                  Wave == "Time6" |
                   Wave == "Time7" |
                   Wave == "Time8" |
                   Wave == "Time9" |

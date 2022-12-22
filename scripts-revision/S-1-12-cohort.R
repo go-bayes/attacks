@@ -15,14 +15,16 @@ source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/funs
 
 # set paths for JB** YOU NEED TO SET YOUR OWN **
 push_mods <-
-  fs::path_expand("~/The\ Virtues\ Project\ Dropbox/outcomewide/attacks/mods")
+  fs::path_expand("/Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/outcomewide/attacks/mods")
+
 push_figs <-
-  fs::path_expand("~/The\ Virtues\ Project\ Dropbox/outcomewide/attacks/figs")
+  fs::path_expand(" /Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/outcomewide/attacks/figs")
 
 pull_path <-
   fs::path_expand(
-    "/Users/joseph/The\ Virtues\ Project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/time13"
+    "/Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/time13"
   )
+
 
 
 # Read data
@@ -639,20 +641,6 @@ mutate(
 length(unique(dt_prep$Id))
 
 
-skimr::skim(dt_prep) %>%
-  arrange(n_missing)
-
-head(dt_prep)
-colnames(dt_prep)
-
-str(dt_prep)
-hist(dt_prep$Age_cZ)
-
-
-head(dt_prep)
-
-
-
 # bind data
 dt_bind <-  dat_bayes %>%
   bind_rows(dt_prep) %>%
@@ -731,11 +719,11 @@ library(naniar)
 naniar::gg_miss_var(dt_ni)
 naniar::gg_miss_var(dt_ni1)
 
-dt_ni1$CONSCIENTIOUSNESS_cZ
 ## save data
 
 arrow::write_parquet(dt_ni,
                      here::here(push_mods, "dt_ni-attacks-2012-6pre.rds"))
+
 arrow::write_parquet(dt_ni1,
                      here::here(push_mods, "dt_ni1-attacks-2012-6pre.rds"))
 
@@ -846,8 +834,7 @@ m_1a <- brm(
   )
 )
 summary(m_1a)
-4896
-4865
+
 
 table(is.na(dt_ni$AGREEABLENESS_cZ))
 
@@ -1119,36 +1106,11 @@ g_mod <- geeglm(
 plot ( ggeffects::ggpredict(g_mod, terms = c("Wave", "Attack", "Pol.Orient_cZ[-1,0,1]"))  )
 
 
-plot_cco(
-  g_mod,
-  effect = "Attack",
-  condition = list("Wave",
-                   Pol.Orient_cZ = "minmax"),
-  conf_level = 0.95,
-  transform_pre = "difference",
-  draw = TRUE
-)
 
 
 
-plot_cco(
-  g_mod,
-  effect = "Attack",
-  # condition = c("Wave",
-  #               "Pol.Orient_cZ"),
-  condition = list("Wave",
-                 Pol.Orient_cZ = "minmax"),
-  conf_level = 0.95,
-  transform_pre = "difference",
-  draw = FALSE
-)|>
- select(-id) |>
- mutate(condition2 = factor(condition2, labels = c("pol_conserve_low", "pol_conserve_high")))|>
- kbl(format = "markdown", booktabs = TRUE)
-dev.off()
 
-
-gee_mar_eff <- plot_cco(
+gee_mar_eff12 <- plot_cco(
   g_mod,
   effect = "Attack",
   condition = c("Wave"),
@@ -1163,7 +1125,7 @@ gee_mar_eff <- plot_cco(
 
 
 
-gee_mar_eff <- plot_cco(
+gee_mar_eff12 <- plot_cco(
   g_mod,
   effect = "Attack",
   condition = c("Wave"),
@@ -1177,7 +1139,7 @@ gee_mar_eff <- plot_cco(
 
 
 # difference scale
-gee_con_eff <- plot_cco(
+gee_con_eff12 <- plot_cco(
   g_mod,
   effect = "Attack",
   condition = list("Wave",
@@ -1191,13 +1153,13 @@ gee_con_eff <- plot_cco(
        y = "Conterfactual contrasts, difference scale") +
   scale_color_okabe_ito()
 
-gee_con_eff
-gee_plots <- gee_mar_eff + gee_con_eff + plot_annotation(tag_levels = "A")
+gee_con_eff12
+gee_plots12 <- gee_mar_eff12 + gee_con_eff12 + plot_annotation(tag_levels = "A")
 
-gee_plots
+gee_plots12
 
 ggsave(
-  gee_plots,
+  gee_plots12,
   path = here::here(here::here("figs")),
   width = 12,
   height = 8,
@@ -1279,25 +1241,28 @@ summary(m_cond_mus)
 
 options("modelsummary_format_numeric_latex" = "plain")
 
-m_bayes_latex <- modelsummary::modelsummary(
-  m_cond_mus,
-  gof_omit = "^(?!.*[{conf.low}, {conf.high}])",
-  statistic  = NULL,
-  # "conf.int",
-  ndraws = 100,
-  estimate =  "{estimate} [{conf.low}, {conf.high}]",
-  #  standardize = "posthoc",
-  output = "latex",
-  title = "Bayesian Multi-Level Model: 2012 Cohort"
-)
 
 
-# save table
-saveRDS(m_bayes_latex,
-        here::here(push_mods, "m_bayes-attacks-2012"))
-
-saveRDS(m_bayes_latex,
-        here::here(push_mods, "m_bayes_latex-attacks-2012"))
+#
+# m_bayes_latex <- modelsummary::modelsummary(
+#   m_cond_mus,
+#   gof_omit = "^(?!.*[{conf.low}, {conf.high}])",
+#   statistic  = NULL,
+#   # "conf.int",
+#   ndraws = 100,
+#   estimate =  "{estimate} [{conf.low}, {conf.high}]",
+#   #  standardize = "posthoc",
+#   output = "latex",
+#   title = "Bayesian Multi-Level Model: 2012 Cohort"
+# )
+#
+#
+# # save table
+# saveRDS(m_bayes_latex,
+#         here::here(push_mods, "m_bayes-attacks-2012"))
+#
+# saveRDS(m_bayes_latex,
+#         here::here(push_mods, "m_bayes_latex-attacks-2012"))
 
 
 
@@ -1505,5 +1470,541 @@ ggsave(
   limitsize = FALSE,
   dpi = 600
 )
+
+
+
+
+# ANCOVA ------------------------------------------------------------------
+
+# save-imputations --------------------------------------------------------
+name_error = "sd"
+
+# set N for id counts
+id_0 <- m_0a$data$Id
+id_1 <- m_1a$data$Id
+
+standata(m_0a)
+
+length(m_0a$data$Id)
+
+# analysis
+name <- "yfit_muslim"
+
+fitted_values_0 <- predict(m_0a, ndraws = 100)
+fitted_values_0
+
+
+fitted_values_1 <- predict(m_1a,  ndraws = 100)
+
+
+# make df
+fitted_values_0 <- data.frame(fitted_values_0)
+head(fitted_values_0)
+head(fitted_values_0)
+mean(fitted_values_0$Est.Error)
+
+nrow(fitted_values_0)
+
+fitted_values_0 <- data.frame(fitted_values_0)
+head(fitted_values_0)
+head(fitted_values_0)
+mean(fitted_values_0$Est.Error)
+
+# needs to be df
+yfit <- as.data.frame(fitted_values_0$Estimate)
+sd <- as.data.frame(fitted_values_0$Est.Error)
+# rename
+colnames(yfit) <- name
+colnames(sd) <- name_error
+
+# data frame
+dat_0 <-
+  as.data.frame(cbind(Y_orig = standata(m_0a)$Y, standata(m_0a)$X, yfit, id_0, sd)) |>
+  mutate(id = as.factor(id_0)) |>
+  select(-id_0) |>
+  arrange(id, wave)
+
+
+
+head(dat_0_wide)
+dat_0_wide <- dat_0 |>
+  # note changes
+  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+                                  yfit_muslim,
+                                  Y_orig)) |>
+  mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
+  mutate(as = as.factor(rep(0, nrow(dat_0)))) |>
+  arrange(id_0, wave) |>
+  mutate(
+    yfit_ORD_lagS = scale (dplyr::lag(yfit_ORD)),
+    yfit_ORD_lead1 =  dplyr::lead(yfit_ORD, n = 1),
+    yfit_ORD_lead2 =  dplyr::lead(yfit_ORD, n = 2),
+    yfit_ORD_lead3 =  dplyr::lead(yfit_ORD, n = 3)
+  ) |>
+  filter(wave == 0)
+
+head(dat_0_wide)
+
+length(unique(dat_0_wide$id))
+
+yfit_ORD_lagS <- dat_0_wide |>
+  dplyr::select(yfit_ORD_lagS, id)
+
+
+#
+# dat_0_wide_u <- dat_0_wide |>
+#   select(-yimpute_muslim_lag) |>
+#   select(-id_0)
+#
+# ## Same for 1s
+#
+# # make df
+fitted_values_1 <- data.frame(fitted_values_1)
+
+# needs to be df
+yfit1 <- as.data.frame(fitted_values_1$Estimate)
+sd <- as.data.frame(fitted_values_1$Est.Error)
+#
+# # rename
+colnames(yfit1) <- name
+colnames(sd) <- name_error
+#
+# # data frame
+dat_1 <-
+  as.data.frame(cbind(Y_orig = standata(m_1a)$Y, standata(m_1a)$X, yfit1, id_1, sd)) |>
+  mutate(id = as.factor(id_1)) |>
+  select(-id_1)
+
+
+
+
+#
+dat_1_wide <- dat_1 |>
+  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+                                  yfit_muslim,
+                                  Y_orig)) |>
+  mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
+  mutate(as = as.factor(rep(1, nrow(dat_1)))) |>
+  arrange(id, wave) |>
+  mutate(
+    yfit_ORD_lead1 =  dplyr::lead(yfit_ORD, n = 1),
+    yfit_ORD_lead2 =  dplyr::lead(yfit_ORD, n = 2),
+    yfit_ORD_lead3 =  dplyr::lead(yfit_ORD, n = 3)
+  ) |>
+  filter(wave == 0)
+
+rm(temp_df)
+temp_df  <-
+  inner_join(dat_1_wide, yfit_ORD_lagS, by = "id") |> as.data.frame()
+
+
+#
+#
+# dat_0_wide_u
+# # combine data
+#
+names(dat_0_wide)
+temp_df
+
+temp1_df <- semi_join(dat_0_wide,temp_df)
+
+dim(dat_0_wide)
+
+
+dat_combined_u  <- rbind(dat_0_wide, temp_df) |>
+  mutate(attack = as.factor(as))
+
+str(dat_combined_u)
+
+
+dat_combined_u <-
+  dat_combined_u |>  mutate(yfit_ORD_lagS = as.numeric (yfit_ORD_lagS)) |> mutate_if(is.matrix, as.vector)
+
+
+
+## Save data
+arrow::write_parquet(dat_combined_u, here::here(push_mods, "dat_combined_u-12.rds"))
+
+# read data
+dat_combined_u <-
+  arrow::read_parquet(here::here(push_mods, "dat_combined_u-12.rds"))
+
+
+anco_0 <-
+  lm(yfit_ORD ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
+anco_0 |>
+  model_parameters()
+
+anco_1 <-
+  lm(yfit_ORD_lead1 ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
+
+anco_1 |>
+  model_parameters()
+
+anco_2 <-
+  lm(yfit_ORD_lead2 ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
+
+anco_2 |>
+  model_parameters()
+
+anco_3 <-
+  lm(yfit_ORD_lead3 ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
+
+anco_3 |>
+  model_parameters()
+
+p_0 <-
+  plot(ggeffects::ggpredict(anco_0, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_fill_okabe_ito(alpha = 1)
+
+p_1 <-
+  plot(ggeffects::ggpredict(anco_1, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_colour_okabe_ito(alpha = 1)
+p_2 <-
+  plot(ggeffects::ggpredict(anco_2, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_colour_okabe_ito(alpha = 1)
+p_3 <-
+  plot(ggeffects::ggpredict(anco_3, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_colour_okabe_ito(alpha = 1)
+
+
+p_0 + p_1 + p_2 + p_3 + plot_layout(nrow = 1)
+
+
+
+plot_cco(anco_0,
+         effect = "attack",
+         condition = list(Pol.Orient_cZ = c(-1.91, -1, 0, 1, 2.46)))
+
+
+#  Pol.Orient_cZ = "threenum"),
+
+
+d0 <- ggeffects::ggpredict(anco_0, terms = "attack") |>
+  as.data.frame() |>
+  mutate(condition = rep(0, 2))
+
+d1 <- ggeffects::ggpredict(anco_1, terms = "attack") |>
+  as.data.frame() |>
+  mutate(condition = rep(1, 2))
+
+d2 <- ggeffects::ggpredict(anco_2, terms = "attack") |>
+  as.data.frame() |>
+  mutate(condition = rep(2, 2))
+
+d3 <- ggeffects::ggpredict(anco_3, terms = "attack") |>
+  as.data.frame() |>
+  mutate(condition = rep(3, 2))
+
+
+bound <- rbind(d0, d1, d2, d3) |>
+  mutate(
+    lower = conf.low,
+    upper = conf.high,
+    wave = factor(condition),
+    Attack =  factor(x),
+    Muslim.Warmth = predicted
+  )
+
+
+bound
+pl_anco <- ggplot(bound, aes(x = wave,
+                             y = Muslim.Warmth,
+                             color = Attack))  +
+  geom_pointrange(
+    data = bound,
+    mapping = aes(
+      x = wave,
+      y = Muslim.Warmth,
+      ymin = lower,
+      ymax = upper
+    )
+  ) + scale_y_continuous(limits = c(4, 4.5)) +
+  labs(title = "Predicted Muslim Warmth by condition and wave (ANCOVA)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)")  +
+  scale_fill_okabe_ito() #+  facet_wrap(~ condition)
+
+pl_anco
+
+# compare with other estimators
+
+ancova_plot_marg <-
+  pl_anco + pl_a_gee + pl_a + plot_annotation(tag_levels = "A")
+
+ancova_plot_marg
+
+# save plot
+ggsave(
+  ancova_plot_marg,
+  path = here::here(here::here("figs")),
+  width = 24,
+  height = 12,
+  units = "in",
+  filename = "ancova_plot_marg.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 800
+)
+
+d0a <-
+  ggeffects::ggpredict(anco_0, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(0, 10))
+
+d1a <-
+  ggeffects::ggpredict(anco_1, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(1, 10))
+
+d2a <-
+  ggeffects::ggpredict(anco_2, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(2, 10))
+
+d3a <-
+  ggeffects::ggpredict(anco_3, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(3, 10))
+
+
+bounda <- rbind(d0a, d1a, d2a, d3a) |>
+  mutate(
+    lower = conf.low,
+    upper = conf.high,
+    wave = factor(condition),
+    Attack =  factor(x),
+    Muslim.Warmth = predicted,
+    Pol.Orient_cZ = factor(group)
+  )
+bounda
+
+pl_b_ancova12 <- ggplot(bounda, aes(x = wave,
+                                  y = Muslim.Warmth,
+                                  colour = Attack))  + scale_y_continuous(limits = c(3, 5.2)) +
+  geom_pointrange(
+    data = bounda,
+    mapping = aes(
+      x = wave,
+      y = Muslim.Warmth,
+      ymin = lower,
+      ymax = upper
+    )
+  ) +
+  labs(title = "Predicted Muslim Warmth effect modification by political orientation (ANCOVA)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)") +
+  #  scale_y_continuous(limits = c(3.0,5.2)) +
+  facet_grid(. ~ Pol.Orient_cZ,   shrink = T) #+
+#  scale_colour_okabe_ito()
+
+ancova_plot_cond <-
+  pl_b_ancova12 + pl_b_gee12 + pl_b12 + plot_annotation(tag_levels = "A")
+
+
+ancova_plot_cond
+
+
+ggsave(
+  ancova_plot_cond,
+  path = here::here(here::here("figs")),
+  width = 24,
+  height = 12,
+  units = "in",
+  filename = "ancova_plot_cond.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 800
+)
+
+
+## Save data
+arrow::write_parquet(dat_combined_u, here::here(push_mods, "dat_combined_u.rds"))
+
+# read data
+dat_combined_u <-
+  arrow::read_parquet(here::here(push_mods, "dat_combined_u.rds"))
+
+
+anco_0 <-
+  lm(yfit_ORD ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
+anco_0 |>
+  model_parameters()
+
+anco_1 <-
+  lm(yfit_ORD_lead1 ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
+
+anco_1 |>
+  model_parameters()
+
+anco_2 <-
+  lm(yfit_ORD_lead2 ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
+
+anco_2 |>
+  model_parameters()
+
+anco_3 <-
+  lm(yfit_ORD_lead3 ~ attack * Pol.Orient_cZ  , data = dat_combined_u)
+
+anco_3 |>
+  model_parameters()
+
+p_0 <-
+  plot(ggeffects::ggpredict(anco_0, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_fill_okabe_ito(alpha = 1)
+
+p_1 <-
+  plot(ggeffects::ggpredict(anco_1, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_colour_okabe_ito(alpha = 1)
+p_2 <-
+  plot(ggeffects::ggpredict(anco_2, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_colour_okabe_ito(alpha = 1)
+p_3 <-
+  plot(ggeffects::ggpredict(anco_3, terms = "attack")) +  scale_y_continuous(limits = c(4, 4.5)) + scale_colour_okabe_ito(alpha = 1)
+
+
+p_0 + p_1 + p_2 + p_3 + plot_layout(nrow = 1)
+
+
+
+plot_cco(anco_0,
+         effect = "attack",
+         condition = list(Pol.Orient_cZ = c(-1.91, -1, 0, 1, 2.46)))
+
+
+#  Pol.Orient_cZ = "threenum"),
+
+
+d0 <- ggeffects::ggpredict(anco_0, terms = "attack") |>
+  as.data.frame() |>
+  mutate(condition = rep(0, 2))
+
+d1 <- ggeffects::ggpredict(anco_1, terms = "attack") |>
+  as.data.frame() |>
+  mutate(condition = rep(1, 2))
+
+d2 <- ggeffects::ggpredict(anco_2, terms = "attack") |>
+  as.data.frame() |>
+  mutate(condition = rep(2, 2))
+
+d3 <- ggeffects::ggpredict(anco_3, terms = "attack") |>
+  as.data.frame() |>
+  mutate(condition = rep(3, 2))
+
+
+bound <- rbind(d0, d1, d2, d3) |>
+  mutate(
+    lower = conf.low,
+    upper = conf.high,
+    wave = factor(condition),
+    Attack =  factor(x),
+    Muslim.Warmth = predicted
+  )
+
+
+bound
+pl_anco <- ggplot(bound, aes(x = wave,
+                             y = Muslim.Warmth,
+                             color = Attack))  +
+  geom_pointrange(
+    data = bound,
+    mapping = aes(
+      x = wave,
+      y = Muslim.Warmth,
+      ymin = lower,
+      ymax = upper
+    )
+  ) + scale_y_continuous(limits = c(4, 4.5)) +
+  labs(title = "Predicted Muslim Warmth by condition and wave (ANCOVA)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)")  +
+  scale_fill_okabe_ito() #+  facet_wrap(~ condition)
+
+pl_anco
+
+# compare with other estimators
+
+ancova_plot_marg <-
+  pl_anco + pl_a_gee + pl_a + plot_annotation(tag_levels = "A")
+
+ancova_plot_marg
+
+# save plot
+ggsave(
+  ancova_plot_marg,
+  path = here::here(here::here("figs")),
+  width = 24,
+  height = 12,
+  units = "in",
+  filename = "ancova_plot_marg.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 800
+)
+
+d0a <-
+  ggeffects::ggpredict(anco_0, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(0, 10))
+
+d1a <-
+  ggeffects::ggpredict(anco_1, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(1, 10))
+
+d2a <-
+  ggeffects::ggpredict(anco_2, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(2, 10))
+
+d3a <-
+  ggeffects::ggpredict(anco_3, terms = c("attack", "Pol.Orient_cZ[-1.91,-1, 0, 1, 2.46]")) |>
+  as.data.frame() |>
+  mutate(condition = rep(3, 10))
+
+
+bounda <- rbind(d0a, d1a, d2a, d3a) |>
+  mutate(
+    lower = conf.low,
+    upper = conf.high,
+    wave = factor(condition),
+    Attack =  factor(x),
+    Muslim.Warmth = predicted,
+    Pol.Orient_cZ = factor(group)
+  )
+bounda
+
+pl_b_ancova12 <- ggplot(bounda, aes(x = wave,
+                                  y = Muslim.Warmth,
+                                  colour = Attack))  + scale_y_continuous(limits = c(3, 5.2)) +
+  geom_pointrange(
+    data = bounda,
+    mapping = aes(
+      x = wave,
+      y = Muslim.Warmth,
+      ymin = lower,
+      ymax = upper
+    )
+  ) +
+  labs(title = "Predicted Muslim Warmth effect modification by political orientation (ANCOVA)",
+       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,824",
+       y = "Warmth to Mulsims (1-7 (ordinal)") +
+  #  scale_y_continuous(limits = c(3.0,5.2)) +
+  facet_grid(. ~ Pol.Orient_cZ,   shrink = T) #+
+#  scale_colour_okabe_ito()
+
+ancova_plot_cond <-
+  pl_b_ancova12 + pl_b_gee12 + pl_b12 + plot_annotation(tag_levels = "A")
+
+
+ancova_plot_cond
+
+
+ggsave(
+  ancova_plot_cond,
+  path = here::here(here::here("figs")),
+  width = 24,
+  height = 12,
+  units = "in",
+  filename = "ancova_plot_cond.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 800
+)
+
+
 
 
