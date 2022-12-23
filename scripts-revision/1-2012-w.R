@@ -776,6 +776,10 @@ dat_0_wide = dat_0 |>
 head(dat_0_wide$yimpute_muslim_lag)
 
 table(dat_0$wave)
+
+#save
+arrow::write_parquet(dat_0, here::here(push_mods, "dat_0"))
+
 ## Same for 1s
 
 # make df
@@ -2178,7 +2182,7 @@ y == yhat
 # plot
 plot(yhat,y)
 
-# compare variance
+# compare variances
 plot(yy,yhat)
 
 

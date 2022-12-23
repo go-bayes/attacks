@@ -52,19 +52,23 @@ dat_anova <- dt_2013 |>
 # check n
 length(unique(dat_anova$Id))
 
-m1 <- summary(lm (Warm.Elderly ~ Attack + Warm.Elderly_c, data = dat_anova))
-summary(lm (Warm.Overweight~ Attack + Warm.Overweight_c, data = dat_anova))
+summary(lm (Warm.Elderly ~ Attack + Warm.Elderly_c, data = dat_anova))
+summary(lm (Warm.Overweight ~ Attack + Warm.Overweight_c, data = dat_anova))
 summary(lm (Warm.MentalIllness ~ Attack + Warm.MentalIllness_c, data = dat_anova))
 summary(lm (Warm.Muslims ~ Attack + Warm.Muslims_c, data = dat_anova))
 
 
+lm(Warm.Muslims ~ Attack + Warm.Muslims_c * Pol.Orient_cZ, data = dat_anova) |>
+  model_parameters(
+    standardize = "refit"
+    )
 
 
 
 models <- list(
   "Warmth to Elderly" = lm (Warm.Elderly ~ Attack + Warm.Elderly_c, data = dat_anova),
   "Warmth to Mentally Ill" = lm (Warm.MentalIllness ~ Attack + Warm.MentalIllness_c, data = dat_anova),
-  "Warmth to Overweight" = lm (Warm.Overweight~ Attack + Warm.Overweight_c, data = dat_anova),
+  "Warmth to Overweight" = lm (Warm.Overweight ~ Attack + Warm.Overweight_c, data = dat_anova),
   "Warmth to Muslims"  = lm (Warm.Muslims ~ Attack + Warm.Muslims_c, data = dat_anova)
 )
 
@@ -73,13 +77,31 @@ models <- list(
 options("modelsummary_format_numeric_latex" = "plain")
 
 
-m_anova<- modelsummary::modelsummary(
+m_anova <- modelsummary::modelsummary(
   models,
   # shape = term : contrast ~ model,
   # vcov = "robust",
-  coef_omit = c(1,3:6),
-  gof_map = NA,
-  gof_map = !c("nobs", "r.squared"),
+  coef_omit = c(1, 3:6),
+ # gof_map = NA,
+  gof_map = c("nobs"),
+  gof_omit = "^(?!.*[{conf.low}, {conf.high}])",
+  statistic  = NULL,
+  # "conf.int",
+  estimate =  "{estimate} [{conf.low}, {conf.high}]",
+ # standardize = "refit",
+  output = "latex",
+  title = "Comparative effects of the attacks: negative controls and Muslims (standardised)",
+  # escape = TRUE
+
+)
+
+m_anova_s <- modelsummary::modelsummary(
+  models,
+  # shape = term : contrast ~ model,
+  # vcov = "robust",
+  coef_omit = c(1, 3:6),
+#gof_map = NA,
+  gof_map = c("nobs"),
   gof_omit = "^(?!.*[{conf.low}, {conf.high}])",
   statistic  = NULL,
   # "conf.int",
@@ -91,31 +113,14 @@ m_anova<- modelsummary::modelsummary(
 
 )
 
-m_anova_s <- modelsummary::modelsummary(
-  models,
- # shape = term : contrast ~ model,
- # vcov = "robust",
-  coef_omit = c(1,3:6),
-  gof_map = NA,
-  gof_map = !c("nobs", "r.squared"),
-  gof_omit = "^(?!.*[{conf.low}, {conf.high}])",
-  statistic  = NULL,
-  # "conf.int",
-  estimate =  "{estimate} [{conf.low}, {conf.high}]",
-  standardize = "refit",
-  output = "latex",
-  title = "Comparative effects of the attacks: negative controls and Muslims (standardised)",
- # escape = TRUE
-
-)
-
 m_anova
 
 #parameters::model_parameters(m1, standardize = "smart")
 #"refit", "posthoc", "basic", "smart" or "pseudo".
 
 
-coefplot <- modelsummary::modelplot(models,  coef_omit = c(1,3:6)) + scale_color_okabe_ito() + theme_minimal()
+coefplot <-
+  modelsummary::modelplot(models,  coef_omit = c(1, 3:6)) + scale_color_okabe_ito() + theme_minimal()
 coefplot
 
 
@@ -136,5 +141,3 @@ coefplot
 # )
 #
 #
-
-

@@ -159,7 +159,7 @@ pl_polst <- plot (ggeffects::ggpredict(
             "Pol.Orient_bZ[-1.91, -1,  0, 1, 2.46]")
 ),  one.plot = TRUE) +
   scale_color_okabe_ito()  +
-  labs(title = "Predicted Muslim Warmth effect modification by political conservativism (GEE)",
+  labs(title = "Predicted Muslim Warmth effect modification by political conservativism (lmer)",
        subtitle = "NZAVS 2018 Cohort, Times 10 - 13, N = 47,948",
        y = "Warmth to Mulsims (1-7 (ordinal)") +
   # scale_y_continuous(limits = c(3.0, 5.2)) +
@@ -168,7 +168,6 @@ pl_polst <- plot (ggeffects::ggpredict(
 pl_polst + pl_polst2
 
 pl_polst
-
 
 # allow repeated measures of Political Orientation  ( Not used, no difference)
 pl_polst2 <- plot (ggeffects::ggpredict(

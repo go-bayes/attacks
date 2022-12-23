@@ -337,8 +337,8 @@ ldsA <- ggplot(rarepA, aes(day, n)) +
   geom_vline(xintercept = as.numeric(rarep$day[dates_vline2b]),
              col = "red",
              linetype = "dashed") +
-  labs(title = "New Zealand Attitudes and Values Study (panel)", subtitle = "N = 7,890; years 2013-2021") +
-  xlab("NZAVS years 2013- 2022 cohort (N = 7,890) : daily counts by condition") + ylab("Count of Responses") +
+  labs(title = "New Zealand Attitudes and Values Study (panel)", subtitle = "N = 7,727; years 2013-2021") +
+  xlab("NZAVS years 2013- 2022 cohort (N = 7,727) : daily counts by condition") + ylab("Count of Responses") +
   theme_classic() +
   # annotate(
   #   "rect",
@@ -496,7 +496,7 @@ rdd <-
     title = "Discontinuity at attacks (GAM)",
   #  subtitle = "Boost to Warmth increase in the years following the attacks",
     y = "Muslim Warmth",
-    x = "NZAVS Time 5 - 13 Cohort (2013-2022), N = 7,890"
+    x = "NZAVS Time 5 - 13 Cohort (2013-2022), N = 7,727"
   ) +
   #theme(legend.position="none") +
   #scale_fill_discrete(name=NULL) + # not working
@@ -522,7 +522,7 @@ rdd <-
     title = "Discontinuity at attacks (GAM)",
     #  subtitle = "Boost to Warmth increase in the years following the attacks",
     y = "Muslim Warmth",
-    x = "NZAVS Time 5 - 13 Cohort (2013-2022), N = 7,890"
+    x = "NZAVS Time 5 - 13 Cohort (2013-2022), N = 7,727"
   ) +
   #theme(legend.position="none") +
   #scale_fill_discrete(name=NULL) + # not working
@@ -547,13 +547,13 @@ fig_1_rev
 ggsave(
   fig_1_rev,
   path = here::here(here::here("figs")),
-  width = 8,
-  height = 10,
+  width = 12,
+  height = 12,
   units = "in",
-  filename = "fig_1_rev_2013.jpg",
+  filename = "fig_1_rev.jpg",
   device = 'jpeg',
   limitsize = FALSE,
-  dpi = 800
+  dpi = 1200
 )
 
 
