@@ -95,6 +95,134 @@ prior = c(
 )
 
 
+
+# Model for non-imuputed data
+
+
+## impute muslim
+# ensure parrallel computations -------------------------------------------
+# for future work, this might be helpful: https://discourse.mc-stan.org/t/hierarchical-brms-with-splines-limiting-prediction-below-threshold/28200
+
+library("brms")
+library("rstan")
+
+rstan_options(auto_write = TRUE) # bayesian estimation
+options(mc.cores = parallel::detectCores ()) # use all course
+theme_set(theme_pubclean()) # nice theme
+library(cmdstanr)
+
+
+# Double check data
+
+table1::table1(~ Y_Warm.Muslims | Wave, data = df_del)
+
+bform_mus_impute_1 <-
+  bf(
+    Y_Warm.Muslims | mi()  ~ wave * (
+      Pol.Orient_cZ  +
+        AGREEABLENESS_cZ +
+        CONSCIENTIOUSNESS_cZ +
+        EXTRAVERSION_cZ +
+        HONESTY_HUMILITY_cZ +
+        OPENNESS_cZ +
+        NEUROTICISM_cZ +
+        Age_cZ +
+        BornNZ_c +
+        Edu_cZ +
+        Employed_c +
+        EthCat_c +
+        Male_c +
+        NZDep2013_cZ +
+        NZSEI13_cZ +
+        Parent_c +
+        Partner_c +
+        RaceRejAnx_cZ +
+        Relid_cZ +
+        REGC_2022_c +
+        Rural_GCH2018_c
+    ) + (1 + wave | Id)
+
+  )
+
+
+
+# model for zeros
+m_orig <- brm(
+  backend = "cmdstanr",
+  data = df_del,
+  family = "gaussian",
+  bform_mus_impute_1,
+  prior = prior,
+  init = 0,
+  file =  here::here(push_mods,
+                     "impute-2013-zero-NOT-deleted.rds")
+)
+
+
+
+
+# set N for id counts
+id_0 <- m_orig$data$Id
+
+length(unique(id_0))
+
+
+#standata(m_delet)
+
+
+# analysis
+name <- "yfit_muslim"
+
+fitted_values_0 <- fitted(m_orig, ndraws = 100)
+
+
+# make df
+fitted_values_0 <- data.frame(fitted_values_0)
+head(fitted_values_0)
+
+mean(fitted_values_0$Est.Error)
+
+nrow(fitted_values_0)
+# needs to be df
+yfit <- as.data.frame(fitted_values_0$Estimate)
+sd <- as.data.frame(fitted_values_0$Est.Error)
+# rename
+colnames(yfit) <- name
+#colnames(sd) <- name_error
+
+length(id_0)
+
+
+
+# data frame
+dat_0_org <-
+  as.data.frame(cbind(Y_orig = standata(m_orig)$Y, standata(m_orig)$X, yfit, id_0, sd)) |>
+  mutate(id = as.factor(id_0)) |>
+  arrange(id, wave)
+
+
+
+dat_0_org <- dat_0_org |>
+  mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
+  mutate(as = as.factor(rep(0, nrow(dat_0del)))) |>
+  select(-id_0) |> mutate(yimpute_muslim = if_else(Y_orig == Inf,
+                                                   yfit_muslim,
+                                                   Y_orig)) |>
+  mutate(wave = wave + 6) |>
+  mutate(Wave = as.factor(wave))
+
+
+table(dat_0_org$wave)
+
+#save Zeros
+arrow::write_parquet(dat_0_org, here::here(push_mods, "dat_0_org"))
+
+dat_0_org<- arrow::read_parquet(here::here(push_mods, "dat_0_org"))
+
+
+
+
+
 ## impute muslim
 # ensure parrallel computations -------------------------------------------
 # for future work, this might be helpful: https://discourse.mc-stan.org/t/hierarchical-brms-with-splines-limiting-prediction-below-threshold/28200
@@ -210,28 +338,31 @@ dat_0del <-
 table(dat_0del$wave)
 
 #save Zeros
-arrow::write_parquet(dat_0, here::here(push_mods, "dat_0del"))
+arrow::write_parquet(dat_0del, here::here(push_mods, "dat_0del"))
+
+dat_0del<- arrow::read_parquet(here::here(push_mods, "dat_0del"))
+
+# # import model for fitted data - no delitions
+#
+# #
+# dat_0_org <- arrow::read_parquet(here::here(push_mods, "dat_0-2012"))
 
 
-# import model for fitted data - no delitions
+
+dat_0del[sapply(dat_0del, is.infinite)] <- NA
+dat_0_org[sapply(dat_0_org, is.infinite)] <- NA
 
 #
-dat_0 <- arrow::read_parquet(here::here(push_mods, "dat_0-2012"))
+# df_del2$Warm.Muslims
+
+table1::table1(~ Y_Warm.Muslims| as.factor(wave) , data = df_del2)
+table1::table1(~ Y_orig| as.factor(wave) , data = dat_0del)
+table1::table1(~ Y_orig| as.factor(wave) , data = dat_0_org)
+
+table1::table1(~ Y_Warm.Muslims| as.factor(wave) , data = df_del)
 
 
 
-
-
-
-dat_0_org <- dat_0 |>
-  mutate(wave = wave + 6) |>
-  mutate(Wave = as.factor(wave)) |>
-  filter(wave < 7 ) |>
-  droplevels()
-
-table(dat_0del$wave)
-
-table(dat_0_org$wave)
 
 
 
@@ -273,29 +404,6 @@ x
 
 
 
-
-# Pol.Orient_cZ  +
-#   AGREEABLENESS_cZ +
-#   CONSCIENTIOUSNESS_cZ +
-#   EXTRAVERSION_cZ +
-#   HONESTY_HUMILITY_cZ +
-#   OPENNESS_cZ +
-#   NEUROTICISM_cZ +
-#   Age_cZ +
-#   BornNZ_c +
-#   Edu_cZ +
-#   Employed_c +
-#   #  EthCat_c +
-#   Male_c +
-#   NZDep2013_cZ +
-#   NZSEI13_cZ +
-#   Parent_c +
-#   Partner_c +
-#   RaceRejAnx_cZ +
-#   Relid_cZ #+
-#   REGC_2022_c +
-# Rural_GCH2018_c
-
 models <- list(
   "GEE: deleted values: fitted" = geeglm(data = dat_0del,
                                          formula = yfit_muslim ~  Wave * Pol.Orient_cZ,
@@ -304,19 +412,19 @@ models <- list(
   corstr = "ar1"
 ),
 "GEE: deleted values: ordinal" = geeglm(data = dat_0del,
-                                        formula = yfit_ORD ~  Wave * Pol.Orient_cZ,,
+                                        formula = yfit_ORD ~  Wave  * Pol.Orient_cZ,
 id = id,
 wave = wave,
 corstr = "ar1"
 ),
 "GEE: original fitted" = geeglm(data = dat_0_org,
-                                       formula = yfit_muslim ~   Wave * Pol.Orient_cZ,,
+                                       formula = yfit_muslim ~   Wave * Pol.Orient_cZ,
                                        id = id,
                                        wave = wave,
                                        corstr = "ar1"
 ),
 "GEE: original values: ordinal" = geeglm(data = dat_0_org,
-                                        formula = yfit_ORD ~  Wave * Pol.Orient_cZ,,
+                                        formula = yfit_ORD ~  Wave * Pol.Orient_cZ,
                                         id = id,
                                         wave = wave,
                                         corstr = "ar1"
@@ -334,12 +442,9 @@ m_del_fits <- modelsummary::modelsummary(
   # "conf.int",
   estimate =  "{estimate} [{conf.low}, {conf.high}]",
   #  standardize = "posthoc",
-  # output = "latex",
+  output = "latex",
   title = "Generalised Estimating Equations: comparison of imputations approaches"
 )
-
-
-
 
 
 m_del_fits
@@ -354,13 +459,63 @@ ggsave(
   p_gee_sensitivity,
   path = here::here(here::here("figs")),
   width = 10,
-  height = 5,
+  height = 10,
   units = "in",
-  filename = "p_gee_sensitivity.jpg",
+  filename = "coef_sensitivity.jpg",
   device = 'jpeg',
   limitsize = FALSE,
-  dpi = 1200
+  dpi = 600
 )
+
+
+
+models2 <- list(
+  "GEE: deleted values: fitted" = geeglm(data = dat_0del,
+                                         formula = yfit_muslim ~  Wave,
+                                         id = id,
+                                         wave = wave,
+                                         corstr = "ar1"
+  ),
+  "GEE: deleted values: ordinal" = geeglm(data = dat_0del,
+                                          formula = yfit_ORD ~  Wave,
+                                          id = id,
+                                          wave = wave,
+                                          corstr = "ar1"
+  ),
+  "GEE: original fitted" = geeglm(data = dat_0_org,
+                                  formula = yfit_muslim ~   Wave ,
+                                  id = id,
+                                  wave = wave,
+                                  corstr = "ar1"
+  ),
+  "GEE: original values: ordinal" = geeglm(data = dat_0_org,
+                                           formula = yfit_ORD ~  Wave ,
+                                           id = id,
+                                           wave = wave,
+                                           corstr = "ar1"
+  )
+)
+
+
+
+p_gee_sensitivity2 <-
+  modelsummary::modelplot(models2, coef_omit = 'Interc') + scale_color_okabe_ito()
+
+p_gee_sensitivity2
+
+ggsave(
+  p_gee_sensitivity2,
+  path = here::here(here::here("figs")),
+  width = 10,
+  height = 10,
+  units = "in",
+  filename = "coef_sensitivity2.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 600
+)
+
+
 
 # GEE graphs --------------------------------------------------------------
 
@@ -369,20 +524,20 @@ ggsave(
 
 g_model_del <- geeglm(
   data = dat_0del,
-#  formula = yfit_ORD ~ Wave * Pol.Orient_cZ,
-   formula = yfit_muslim ~ Wave * Pol.Orient_cZ,
+  formula = yfit_ORD ~ Wave * Pol.Orient_cZ,
+#  formula = yfit_muslim ~ Wave * Pol.Orient_cZ,
   # formula = yimpute_muslim ~  Attack * Wave * Pol.Orient_cZ,
   id = id,
   wave = wave,
   corstr = "ar1"
 )
 
-summary(g_model1)
+summary(g_model_del)
 
 g_model2 <- geeglm(
   data = dat_0_org,
-  #formula = yfit_ORD ~ Wave * Pol.Orient_cZ,
-  formula = yfit_muslim ~   Wave * Pol.Orient_cZ,
+  formula = yfit_ORD ~ Wave * Pol.Orient_cZ,
+#  formula = yfit_muslim ~   Wave * Pol.Orient_cZ,
   # formula = yimpute_muslim ~  Attack * Wave * Pol.Orient_cZ,
   id = id,
   wave = wave,
@@ -390,17 +545,35 @@ g_model2 <- geeglm(
 )
 
 p0a1 <-
-  plot(ggeffects::ggpredict(g_model1, terms = c("Wave", "Pol.Orient_cZ[-1.91, -1,  0, 1, 2.46]"))) + scale_y_continuous(limits = c(2.6, 4.8)) + scale_y_continuous(limits = c(2.6, 4.8)) +
-  labs(title = "Imputed data",
-       subtitle = "",
+  plot(ggeffects::ggpredict(g_model_del, terms = c("Wave", "Pol.Orient_cZ[-1.91, -1,  0, 1, 2.46]"))) +
+  annotate(
+    "rect",
+    xmin = 3.5,
+    xmax = 7.5,
+    ymin = 2.9,
+    ymax = 4.8,
+    alpha = .2,
+    fill = "grey"
+  ) +
+  scale_y_continuous(limits = c(2.6, 4.8)) + scale_y_continuous(limits = c(2.6, 4.9)) +
+  labs(title = "Imputed data (fitted response)",
+       subtitle = "Predictions for Muslim Warmth imputed data (Time 7 - 9)",
        #y = "Conterfactual contrasts: Warmth to Muslims on difference scale"
   ) +
-  scale_color_okabe_ito() +  theme_pubclean()
+   scale_color_okabe_ito() +  theme_pubclean() +
+  annotate("text",
+           x = 5.5,
+           y = 4.9,
+           size = 7,
+           label = "Fully imputed responses")
+
+
+p0a1
 
 p0a2 <-
-  plot(ggeffects::ggpredict(g_model2, terms = c("Wave",  "Pol.Orient_cZ[-1.91, -1,  0, 1, 2.46]"))) + scale_y_continuous(limits = c(2.6, 4.8)) +
-  labs(title = "Original Data",
-       subtitle = "",
+  plot(ggeffects::ggpredict(g_model2, terms = c("Wave",  "Pol.Orient_cZ[-1.91, -1,  0, 1, 2.46]"))) + scale_y_continuous(limits = c(2.6, 4.9)) +
+  labs(title = "Original Data (fitted response)",
+       subtitle = "Predictions for Muslim Warmth observed data",
        #y = "Conterfactual contrasts: Warmth to Muslims on difference scale"
        ) +
   scale_color_okabe_ito() +  theme_pubclean()
@@ -408,9 +581,33 @@ p0a2 <-
 
 # select only attack condition
 
-p0a1 + p0a2
+sens_pred_plot <- p0a1 + p0a2 + plot_annotation(tag_levels = "A")
+
+sens_pred_plot
+
+ggsave(
+  sens_pred_plot,
+  path = here::here(here::here("figs")),
+  width = 16,
+  height = 9,
+  units = "in",
+  filename = "gsens_pred_plot-fitted.jpg",
+  device = 'jpeg',
+  limitsize = FALSE,
+  dpi = 800
+)
 
 
+
+
+# not run below -----------------------------------------------------------
+
+
+
+
+
+
+dev.off()
 
 
 
@@ -422,8 +619,8 @@ gee_mar_eff <- plot_cco(
   transform_pre = "difference"
 ) +
   scale_y_continuous(limits = c(-.05, .41)) +
-  labs(title = "Marginal counterfactual contrasts in effect magnitude",
-       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,854",
+  labs(title = "P",
+       subtitle = "NZAVS 2012 Cohort, Times 10 - 13, N =7,854",
        y = "Conterfactual contrasts: Warmth to Muslims on difference scale") +
   scale_color_viridis_d() +  theme_pubclean()
 
@@ -436,7 +633,7 @@ gee_mar_effi <- plot_cco(
 ) +
   scale_y_continuous(limits = c(-.05, .41)) +
   labs(title = "Marginal counterfactual contrasts in effect magnitude",
-       subtitle = "NZAVS 2013 Cohort, Times 10 - 13, N =7,854",
+       subtitle = "NZAVS 2012 Cohort, Times 10 - 13, N =7,854",
        y = "Conterfactual contrasts: Warmth to Muslims on difference scale") +
   scale_color_viridis_d() +  theme_pubclean()
 

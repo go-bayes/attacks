@@ -139,7 +139,7 @@ lds2 <- ggplot(rarep, aes(day, n)) +
     col = "red",
     linetype = "dashed"
   ) +
-  xlab("NZAVS years 2012 - 2022 (N = 5034): daily counts by condition") + ylab("Count of Responses") +
+  xlab("NZAVS years 2012 - 2022 (N = 4865): daily counts by condition") + ylab("Count of Responses") +
   # theme_classic()  +
   # annotate(
   #   "rect",
@@ -349,7 +349,7 @@ ldsA <- ggplot(rarepA, aes(day, n)) +
     col = "red",
     linetype = "dashed"
   ) +
-  labs(title = "New Zealand Attitudes and Values Study (panel)", subtitle = "N = 7,727; years 2012-2021") +
+  labs(title = "New Zealand Attitudes and Values Study (panel)", subtitle = "N = 4865; years 2012-2021") +
   xlab("NZAVS years 2012 - 2022 cohort (N = 5,034) : daily counts by condition") + ylab("Count of Responses") +
   theme_classic() +
   # annotate(
@@ -533,7 +533,7 @@ rdd <-
   labs(title = "Discontinuity at attacks (GAM)",
        #  subtitle = "Boost to Warmth increase in the years following the attacks",
        y = "Muslim Warmth",
-       x = "NZAVS Time 4 - 2012 Cohort (2012-2022), N = 5034") +
+       x = "NZAVS Time 4 - 2012 Cohort (2012-2022), N = 4865") +
   #theme(legend.position="none") +
   #scale_fill_discrete(name=NULL) + # not working
   scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic() +
