@@ -191,7 +191,7 @@ dat_bayes <- dat |>
   dplyr::mutate(
     #   Y_Warm.Asians = Warm.Asians,
     #   Y_Warm.Chinese = Warm.Chinese,
-    # Warm.Disabled, only in wave12
+   # Warm.Disabled, #only in wave12
     Y_Warm.Elderly = Warm.Elderly,
     #    Y_Warm.Immigrants = Warm.Immigrants,
     #    Y_Warm.Indians = Warm.Indians,
@@ -200,7 +200,7 @@ dat_bayes <- dat |>
     # not in 8
     Y_Warm.Muslims = Warm.Muslims,
     #    Y_Warm.NZEuro = Warm.NZEuro,
-    #    Y_Warm.Overweight = Warm.Overweight,
+    Y_Warm.Overweight = Warm.Overweight,
     #    Y_Warm.Pacific = Warm.Pacific,
     #  Y_Warm.Refugees = Warm.Refugees,
     As = Attack

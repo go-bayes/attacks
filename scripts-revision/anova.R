@@ -42,10 +42,10 @@ dat <- arrow::read_parquet(pull_path)
 df <- readRDS(here::here("data", "df_s"))
 
 
-dt_2013 <- readRDS(here::here(push_mods, "2013_cohort_attacks"))
+dat_bayes <- arrow::read_parquet(here::here(push_mods, "2012_cohort_attacks"))
 
 
-dat_anova <- dt_2013 |>
+dat_anova <- dt_2012 |>
   filter(Wave == "Time10")
 
 
