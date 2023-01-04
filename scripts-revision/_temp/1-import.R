@@ -13,7 +13,7 @@
 
 options(scipen = 999)
 #libraries
-source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs2.R")
+source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/libs.R")
 
 # read functions
 source("https://raw.githubusercontent.com/go-bayes/templates/main/functions/funs.R")
@@ -37,15 +37,6 @@ pull_path
 #time13 <- read_parquet( (here::here("data", "time13")))
 
 dat <- arrow::read_parquet(pull_path)
-
-head(dat)
-
-library(dplyr)
-
-mar <- dat|>
-  dplyr::filter(EthnicCats == "Maori")
-
-length(unique(mar$Id))
 
 df <- dat |>
   filter(YearMeasured == 1)
@@ -1203,9 +1194,6 @@ head(d_overweight)
 arrow::write_parquet(d_muslim,
                      here::here(push_mods, "d_muslim.rds"))
 
-d_muslim <- arrow::read_parquet(d_muslim,
-                     here::here(push_mods))
-
 # # overweight gcomp ------------------------------------------------------------
 #
 
@@ -1497,6 +1485,7 @@ plot_cco(
 
 
 # d-muslims-wide ----------------------------------------------------------
+## Below are just tests -- not reported.
 
 # ------------------------------------------------------------------
 # set name for error
@@ -1506,13 +1495,10 @@ name_error = "sd"
 id_0 <- dt_five_zero_noimpute$Id
 id_1 <- dt_five_one_noimpute$Id
 
-
-
 # analysis
 name <- "yfit_muslim"
 
 fitted_values_0 <- predict(m_0, ndraws = 50)
-fitted_values_0
 
 
 fitted_values_1 <- predict(m_1,  ndraws = 50)
@@ -1520,8 +1506,6 @@ fitted_values_1 <- predict(m_1,  ndraws = 50)
 
 # make df
 fitted_values_0 <- data.frame(fitted_values_0)
-head(fitted_values_0)
-head(fitted_values_0)
 mean(fitted_values_0$Est.Error)
 
 # needs to be df
@@ -1548,18 +1532,18 @@ dat_0_wide <- dat_0 |>
   mutate(yimpute_muslim_lag = dplyr::lag(yimpute_muslim))
 
 
+# get lag of reponse from year prior to attacks
 yimpute_muslim_lag <- dat_0_wide |>
   filter(wave == 0) |>
   select(yimpute_muslim_lag, id_0)
 
 
-
+# wide format
 dat_0_wide_u<- dat_0_wide |>
   select(-yimpute_muslim_lag) |>
   select(-id_0)
 
 ## Same for 1s
-
 # make df
 fitted_values_1 <- data.frame(fitted_values_1)
 
@@ -1585,15 +1569,13 @@ dat_1_wide <- dat_1|>
   arrange(id_0, wave) |>
   select(-id_1)
 
-
-dat_0_wide_u
 # combine data
-
 dat_combined_u  <- rbind(dat_0_wide_u, dat_1_wide) |>
   filter(wave == 0 | wave == 1 | wave == 2 | wave == 3) |>
   mutate(Wave = as.factor(wave),
          Condition = as)
 
+# check
 str(dat_combined_u)
 
 # save processed data
@@ -1602,30 +1584,33 @@ saveRDS(dat_combined_u, here::here(push_mods, "dat_combined_u-muslims-attack"))
 # read processed data
 dat_combined_u <- readRDS(here::here(push_mods,  "dat_combined_u-muslims-attack"))
 
-
-
-
+# select only variables needed
 test1 <- dat_combined_u |>
   select(wave, as, yimpute_muslim, Pol.Orient_cZ,   id)
 
 
+# make wide
 shown <- test1|>
   pivot_wider(names_from = wave,
               values_from = c(yimpute_muslim),
               names_glue = "{.value}_{wave}")
 
 
+# bind lag (one for each condition)
 nbind <- rbind(yimpute_muslim_lag, yimpute_muslim_lag)
 
+# create data frame
 shown_df <- cbind(nbind,shown)
 
 shown_df <- shown_df |>
   mutate(yimpute_muslim_lag_c = scale(yimpute_muslim_lag, center = TRUE, scale = FALSE))
 
+# checks
 head(shown_df)
 tail(shown_df)
 
-summary( glm(yimpute_muslim_0 ~ as  +  yimpute_muslim_lag, data = shown_df ) )
+# standard errors won't be correct
+summary( glm(yimpute_muslim_0 ~ as + yimpute_muslim_lag_c, data = shown_df ) )
 
 
 # p <- predictions(fit, newdata = datagrid(qsmk = 0:1, grid_type = "counterfactual"))

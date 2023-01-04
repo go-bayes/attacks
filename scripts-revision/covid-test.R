@@ -131,6 +131,72 @@ lm(data = sub_dat, Warm.Muslims ~ cum_lockdowns_time11 ) |>
 
 
 
+## Time 4 cohort
+
+dat_bayes <- arrow::read_parquet(here::here(push_mods, "2012_cohort_attacks"))
+
+
+sub_dat4 <- dat_bayes %>%
+  filter(Wave == "Time11") %>%
+  dplyr::mutate(cum_lockdowns_time11 = if_else(
+    COVID19.Timeline < 1.2,
+    0,
+    if_else(
+      COVID19.Timeline >  1.2 & COVID19.Timeline  < 2,
+      2,
+      ifelse(
+        COVID19.Timeline > 2 &
+          REGC_2022 == 2  | COVID19.Timeline > 2 & REGC_2022 == 1,
+        4,
+        3
+      )
+    )
+  )) |>
+  mutate(pre_post = if_else (  COVID19.Timeline >  1.1, 1, 0 )) |>
+  select(Warm.Muslims, cum_lockdowns_time11, REGC_2022, Id , COVID19.Timeline, pre_post) |>
+  drop_na()
+
+
+length(unique(sub_dat4$Id))
+
+# Cumulative locksdowns nothing
+lm(data = sub_dat4, Warm.Muslims ~ cum_lockdowns_time11 + as.factor(REGC_2022)) |>
+  model_parameters()
+
+
+
+# nothing
+lm(data = sub_dat4, Warm.Muslims ~ pre_post ) |>
+  model_parameters()|>
+  kbl(format = "latex", booktabs = TRUE, digits = 3)
+
+
+# nothing
+lm(data = sub_dat, Warm.Muslims ~ cum_lockdowns_time11 ) |>
+  model_parameters() |>
+  kbl(format = "latex", booktabs = TRUE, digits = 3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # pre_vals ----------------------------------------------------------------
 
 sub_dat2 <- tab_in |>

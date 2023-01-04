@@ -249,8 +249,8 @@ lds2 <- ggplot(rarep, aes(day, n)) +
   # ) +
   theme(
     legend.position = "top",
-    legend.text = element_text(size = 6),
-    legend.title = element_text(color = "Black", size = 8)
+    legend.text = element_text(size = 12),
+    legend.title = element_text(color = "Black", size = 14)
   ) +   scale_fill_okabe_ito()
 #theme(legend.position="none")
 
@@ -503,8 +503,8 @@ rdd <-
   scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic() +
   theme(
     legend.position = "top",
-    legend.text = element_text(size = 10),
-   legend.title = element_text(size = 10)
+    legend.text = element_text(size = 12),
+   legend.title = element_text(size = 12)
   )
 
 
@@ -529,8 +529,8 @@ rdd <-
   scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic() +
   theme(
     legend.position = "top",
-    legend.text = element_text(size = 10),
-    legend.title = element_text(size = 10)
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12)
   )
 
 
@@ -637,8 +637,8 @@ lds_all <- ggplot(rarep_all, aes(day, n)) +
   theme_classic() +
   theme(
     legend.position = "top",
-    legend.text = element_text(size = 10),
-    legend.title = element_text(size = 10)
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12)
   )
 
 lds_all
@@ -694,7 +694,12 @@ rdd_all <-
     y = "Muslim Warmth",
     x = "NZAVS Time 4 - 13 Cohort (2012-2022), (N = 67,409)"
   ) +
-  scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic()
+scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic() +
+  theme(
+    legend.position = "top",
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12)
+  )
 
 rdd_all
 
@@ -707,7 +712,7 @@ rdd_all2 <-
     title = "Discontinuity at attacks (GAM)",
     subtitle = "Boost to Warmth increase in the years following the attacks",
     y = "Muslim Warmth",
-    x = "NZAVS Time 4 - 13 Cohort (2012-2022), (N = 67,409)"
+    x = "NZAVS Time 4 - 13, (N = 67,409)"
   ) +
   scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic()
 

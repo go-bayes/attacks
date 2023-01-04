@@ -106,14 +106,6 @@ table(w18$Attack)
 length(unique(w18$Id))
 
 
-# save data
-saveRDS(w18, here::here(push_mods, "2018_cohort_attacks"))
-
-
-
-#set if needed
-w18 <- readRDS(here::here(push_mods, "2018_cohort_attacks"))
-
 # Baseline model
 m1 <- lme4::lmer(Warm.Muslims ~ Pol.Orient_bZ * Wave  + (1|Id) , data = w18 )
 

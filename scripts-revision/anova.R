@@ -45,7 +45,7 @@ df <- readRDS(here::here("data", "df_s"))
 dat_bayes <- arrow::read_parquet(here::here(push_mods, "2012_cohort_attacks"))
 
 
-dat_anova <- dt_2012 |>
+dat_anova <- dat_bayes |>
   filter(Wave == "Time10")
 
 
@@ -90,7 +90,7 @@ m_anova <- modelsummary::modelsummary(
   estimate =  "{estimate} [{conf.low}, {conf.high}]",
  # standardize = "refit",
   output = "latex",
-  title = "Comparative effects of the attacks: negative controls and Muslims (standardised)",
+  title = "Comparative effects of the attacks: negative controls and Muslims",
   # escape = TRUE
 
 )
@@ -113,7 +113,7 @@ m_anova_s <- modelsummary::modelsummary(
 
 )
 
-m_anova
+m_anova_s
 
 #parameters::model_parameters(m1, standardize = "smart")
 #"refit", "posthoc", "basic", "smart" or "pseudo".
@@ -122,6 +122,11 @@ m_anova
 coefplot <-
   modelsummary::modelplot(models,  coef_omit = c(1, 3:6)) + scale_color_okabe_ito() + theme_minimal()
 coefplot
+
+
+## Full sample
+
+
 
 
 

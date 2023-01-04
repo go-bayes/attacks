@@ -22,6 +22,7 @@ pull_path <-
 #source(here::here("R", "libs.R"))
 
 # read data
+
 df <- readRDS(here::here("data", "df_s"))
 
 dat <- arrow::read_parquet(pull_path)
@@ -250,7 +251,7 @@ rdplot(
 )
 
 
-
+length(unique(sadi3$Id))
 # another approach
 yola
 outr_simple <-

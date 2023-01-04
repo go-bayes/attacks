@@ -354,10 +354,15 @@ dat_0_org[sapply(dat_0_org, is.infinite)] <- NA
 
 #
 # df_del2$Warm.Muslims
-
+table1::table1(~ Y_Warm.Muslims| as.factor(wave) , data = df_del)
 table1::table1(~ Y_Warm.Muslims| as.factor(wave) , data = df_del2)
 table1::table1(~ Y_orig| as.factor(wave) , data = dat_0del)
 table1::table1(~ Y_orig| as.factor(wave) , data = dat_0_org)
+
+table1::table1(~ yfit_muslim| as.factor(wave) , data = dat_0del)
+table1::table1(~ yfit_muslim| as.factor(wave) , data = dat_0_org)
+table1::table1(~ yfit_ORD| as.factor(wave) , data = dat_0del)
+table1::table1(~ yfit_ORD| as.factor(wave) , data = dat_0_org)
 
 table1::table1(~ Y_Warm.Muslims| as.factor(wave) , data = df_del)
 
@@ -464,7 +469,7 @@ ggsave(
   filename = "coef_sensitivity.jpg",
   device = 'jpeg',
   limitsize = FALSE,
-  dpi = 600
+  dpi = 650
 )
 
 

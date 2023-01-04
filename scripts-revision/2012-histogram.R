@@ -257,8 +257,8 @@ annotate("text",
 # ) +
 theme(
   legend.position = "top",
-  legend.text = element_text(size = 6),
-  legend.title = element_text(color = "Black", size = 8)
+  legend.text = element_text(size = 12),
+  legend.title = element_text(color = "Black", size = 14)
 ) +   scale_fill_okabe_ito()
 #theme(legend.position="none")
 
@@ -452,7 +452,7 @@ ldsA <- ggplot(rarepA, aes(day, n)) +
 scale_fill_okabe_ito() + theme_classic() +
   theme(
     legend.position = "top",
-    legend.text = element_text(size = 14),
+    legend.text = element_text(size = 12),
     legend.title = element_text(size = 14)
   )
 
@@ -516,8 +516,8 @@ rdd <-
   scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic() +
   theme(
     legend.position = "top",
-    legend.text = element_text(size = 10),
-    legend.title = element_text(size = 10)
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14)
   )
 
 
@@ -539,8 +539,8 @@ rdd <-
   scale_okabe_ito(alpha = 1, aesthetics = "colour") + theme_classic() +
   theme(
     legend.position = "top",
-    legend.text = element_text(size = 10),
-    legend.title = element_text(size = 10)
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   )
 
 
@@ -563,7 +563,7 @@ ggsave(
   filename = "fig_1_rev-2012.jpg",
   device = 'jpeg',
   limitsize = FALSE,
-  dpi = 1200
+  dpi = 800
 )
 
 
@@ -665,8 +665,8 @@ lds_all <- ggplot(rarep_all, aes(day, n)) +
   theme_classic() +
   theme(
     legend.position = "top",
-    legend.text = element_text(size = 10),
-    legend.title = element_text(size = 10)
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 12)
   )
 
 lds_all
