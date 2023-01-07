@@ -51,7 +51,7 @@ vignettes/*.pdf
 .Renviron
 
 # data
-data/*
+#data/*
 
 # mus
 mods/*

@@ -42,12 +42,38 @@ pull_path <-
   fs::path_expand(
     "/Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/time13"
   )
+# set paths for JB
+# ** YOU WILL NEED TO SET PATHS TO YOUR OWN COMPUTER**
+push_mods <-
+  fs::path_expand("/Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/outcomewide/attacks/mods")
+
+push_figs <-
+  fs::path_expand(" /Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/outcomewide/attacks/figs")
+
+pull_path <-
+  fs::path_expand(
+    "/Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/00Bulbulia\ Pubs/2021/DATA/time13"
+  )
 
 
-# Read data
-dat <- arrow::read_parquet(pull_path)
+# jb's workflow
+# dat <- arrow::read_parquet(pull_path)
 
 
+# These data are synthetic, and only for the purposes of understanding the code.  The data described in this study are part of the New Zealand Attitudes and Values Study
+# (NZAVS). Full copies of the NZAVS data files are held by all members of the NZAVS management
+# team and advisory board. A de-identified dataset containing the variables analysed in this
+# manuscript is available upon request from the corresponding author, or any member of the
+# NZAVS advisory board for the purposes of replication or checking of any published study using
+# NZAVS data.
+
+# for details, go to https://www.psych.auckland.ac.nz/en/about/new-zealand-attitudes-and-values-study.html
+
+
+
+# note the synthetic dataset is about 20% the size of the full NZAVS dataset
+dat <- arrow::read_parquet(here::here("data", "dat_synth"))
+str(dat)
 
 # select waves from t5 to t13
 # create baseline indicators for t9 (year before attacks)
