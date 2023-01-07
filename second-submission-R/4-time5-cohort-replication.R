@@ -57,7 +57,7 @@ table(dat$EthnicCats)
 
 dat_bayes <- dat |>
   arrange(Id, Wave) |>
-  mutate(Male = if_else(GendAll == 1, 1, 0)) |>
+  mutate(Male = ifelse(GendAll == 1, 1, 0)) |>
   dplyr::select(
     Id,
     Wave,
@@ -171,7 +171,7 @@ dat_bayes <- dat |>
           YearMeasured == 0 &
             Wave == 2020,
           TSCORE_b + 1459,
-          if_else(YearMeasured == 0 &
+          ifelse(YearMeasured == 0 &
                     Wave == 2021,   TSCORE_b + 1824,
                   TSCORE)
         )
@@ -205,67 +205,67 @@ dat_bayes <- dat |>
     #  Y_Warm.Refugees = Warm.Refugees,
     As = Attack
   ) %>%
-  dplyr::mutate(Warm.Muslims_b = if_else(Wave == "2016", (Warm.Muslims), NA_real_)) %>%
+  dplyr::mutate(Warm.Muslims_b = ifelse(Wave == "2016", (Warm.Muslims), NA_real_)) %>%
   fill(Warm.Muslims_b, .direction = "downup") %>%
-  dplyr::mutate(Warm.Overweight_b = if_else(Wave == "2016", (Warm.Overweight), NA_real_)) %>%
+  dplyr::mutate(Warm.Overweight_b = ifelse(Wave == "2016", (Warm.Overweight), NA_real_)) %>%
   fill(Warm.Overweight_b, .direction = "downup") %>%
-  dplyr::mutate(Warm.Muslims_c = if_else(Wave == "2017", (Warm.Muslims), NA_real_)) %>%
+  dplyr::mutate(Warm.Muslims_c = ifelse(Wave == "2017", (Warm.Muslims), NA_real_)) %>%
   fill(Warm.Muslims_c, .direction = "downup") %>%
-  dplyr::mutate(Warm.Overweight_c = if_else(Wave == "2017", (Warm.Overweight), NA_real_)) %>%
+  dplyr::mutate(Warm.Overweight_c = ifelse(Wave == "2017", (Warm.Overweight), NA_real_)) %>%
   fill(Warm.Overweight_c, .direction = "downup") %>%
-  dplyr::mutate(Warm.Elderly_c = if_else(Wave == "2017", (Warm.Elderly), NA_real_)) %>%
+  dplyr::mutate(Warm.Elderly_c = ifelse(Wave == "2017", (Warm.Elderly), NA_real_)) %>%
   fill(Warm.Elderly_c, .direction = "downup") %>%
-  dplyr::mutate(Warm.MentalIllness_c = if_else(Wave == "2017", (Warm.MentalIllness), NA_real_)) %>%
+  dplyr::mutate(Warm.MentalIllness_c = ifelse(Wave == "2017", (Warm.MentalIllness), NA_real_)) %>%
   fill(Warm.MentalIllness_c, .direction = "downup") %>%
-  dplyr::mutate(SampleOriginYear_b = if_else(Wave == "2016", (SampleOriginYear - 1), NA_real_)) %>%
+  dplyr::mutate(SampleOriginYear_b = ifelse(Wave == "2016", (SampleOriginYear - 1), NA_real_)) %>%
   fill(SampleOriginYear_b, .direction = "downup") %>%
-  dplyr::mutate(REGC_2022_c = if_else(Wave == "2017", as.numeric(REGC_2022), NA_real_)) %>%
+  dplyr::mutate(REGC_2022_c = ifelse(Wave == "2017", as.numeric(REGC_2022), NA_real_)) %>%
   fill(REGC_2022_c, .direction = "downup") %>%
-  dplyr::mutate(Rural_GCH2018_c = if_else(Wave == "2017", as.numeric(Rural_GCH2018), NA_real_)) %>%
+  dplyr::mutate(Rural_GCH2018_c = ifelse(Wave == "2017", as.numeric(Rural_GCH2018), NA_real_)) %>%
   fill(Rural_GCH2018_c, .direction = "downup") |>
-  dplyr::mutate(Age_c = if_else(Wave == "2017", (Age), NA_real_)) %>%
+  dplyr::mutate(Age_c = ifelse(Wave == "2017", (Age), NA_real_)) %>%
   fill(Age_c, .direction = "downup") %>%
-  dplyr::mutate(HLTH.BMI_c = if_else(Wave == "2017", (HLTH.BMI), NA_real_)) %>%
+  dplyr::mutate(HLTH.BMI_c = ifelse(Wave == "2017", (HLTH.BMI), NA_real_)) %>%
   fill(HLTH.BMI_c, .direction = "downup") %>%
-  dplyr::mutate(CONSCIENTIOUSNESS_c = if_else(Wave == "2017", (CONSCIENTIOUSNESS), NA_real_)) %>%
+  dplyr::mutate(CONSCIENTIOUSNESS_c = ifelse(Wave == "2017", (CONSCIENTIOUSNESS), NA_real_)) %>%
   fill(CONSCIENTIOUSNESS_c,  .direction = "downup") %>%
-  dplyr::mutate(OPENNESS_c = if_else(Wave == "2017", (OPENNESS), NA_real_)) %>%
+  dplyr::mutate(OPENNESS_c = ifelse(Wave == "2017", (OPENNESS), NA_real_)) %>%
   fill(OPENNESS_c,  .direction = "downup") |>
-  dplyr::mutate(HONESTY_HUMILITY_c = if_else(Wave == "2017", (HONESTY_HUMILITY), NA_real_)) %>%
+  dplyr::mutate(HONESTY_HUMILITY_c = ifelse(Wave == "2017", (HONESTY_HUMILITY), NA_real_)) %>%
   fill(HONESTY_HUMILITY_c,  .direction = "downup") |>
-  dplyr::mutate(EXTRAVERSION_c = if_else(Wave == "2017", (EXTRAVERSION), NA_real_)) %>%
+  dplyr::mutate(EXTRAVERSION_c = ifelse(Wave == "2017", (EXTRAVERSION), NA_real_)) %>%
   fill(EXTRAVERSION_c,  .direction = "downup") |>
-  dplyr::mutate(NEUROTICISM_c = if_else(Wave == "2017", (NEUROTICISM), NA_real_)) %>%
+  dplyr::mutate(NEUROTICISM_c = ifelse(Wave == "2017", (NEUROTICISM), NA_real_)) %>%
   fill(NEUROTICISM_c,  .direction = "downup") |>
-  dplyr::mutate(AGREEABLENESS_c = if_else(Wave == "2017", (AGREEABLENESS), NA_real_)) %>%
+  dplyr::mutate(AGREEABLENESS_c = ifelse(Wave == "2017", (AGREEABLENESS), NA_real_)) %>%
   fill(AGREEABLENESS_c,  .direction = "downup") |>
-  dplyr::mutate(Male_c = if_else(Wave == "2017", as.numeric(Male), NA_real_)) %>%
+  dplyr::mutate(Male_c = ifelse(Wave == "2017", as.numeric(Male), NA_real_)) %>%
   fill(Male_c,  .direction = "downup") %>%
-  dplyr::mutate(NZDep2013_c = if_else(Wave == "2017", as.numeric(NZDep2013), NA_real_)) %>%
+  dplyr::mutate(NZDep2013_c = ifelse(Wave == "2017", as.numeric(NZDep2013), NA_real_)) %>%
   fill(NZDep2013_c,  .direction = "downup")  %>%
-  dplyr::mutate(RaceRejAnx_c = if_else(Wave == "2017", as.numeric(RaceRejAnx), NA_real_)) %>%
+  dplyr::mutate(RaceRejAnx_c = ifelse(Wave == "2017", as.numeric(RaceRejAnx), NA_real_)) %>%
   fill(RaceRejAnx_c,  .direction = "downup")  %>%
-  dplyr::mutate(EthCat_c = if_else(Wave == "2017", as.numeric(EthCat), NA_real_)) %>%
+  dplyr::mutate(EthCat_c = ifelse(Wave == "2017", as.numeric(EthCat), NA_real_)) %>%
   fill(EthCat_c,  .direction = "downup") %>%
-  dplyr::mutate(BornNZ_c = if_else(Wave == "2017", as.numeric(BornNZ), NA_real_)) %>%
+  dplyr::mutate(BornNZ_c = ifelse(Wave == "2017", as.numeric(BornNZ), NA_real_)) %>%
   fill(BornNZ_c,  .direction = "downup")  %>%
-  dplyr::mutate(Pol.Orient_c = if_else(Wave == "2017", (Pol.Orient), NA_real_)) %>%
+  dplyr::mutate(Pol.Orient_c = ifelse(Wave == "2017", (Pol.Orient), NA_real_)) %>%
   fill(Pol.Orient_c,  .direction = "downup") %>%
-  dplyr::mutate(Relid_c = if_else(Wave == "2017", as.numeric(Relid), NA_real_)) %>%
+  dplyr::mutate(Relid_c = ifelse(Wave == "2017", as.numeric(Relid), NA_real_)) %>%
   fill(Relid_c,  .direction = "downup") %>%
-  dplyr::mutate(Partner_c = if_else(Wave == "2017", (as.numeric(Partner)), NA_real_)) %>%
+  dplyr::mutate(Partner_c = ifelse(Wave == "2017", (as.numeric(Partner)), NA_real_)) %>%
   fill(Partner_c,  .direction = "downup") %>%
-  dplyr::mutate(Parent_c = if_else(Wave == "2017", (as.numeric(Parent)), NA_real_)) %>%
+  dplyr::mutate(Parent_c = ifelse(Wave == "2017", (as.numeric(Parent)), NA_real_)) %>%
   fill(Parent_c,  .direction = "downup") %>%
-  dplyr::mutate(Employed_c = if_else(Wave == "2017", (as.numeric(Employed)), NA_real_)) %>%
+  dplyr::mutate(Employed_c = ifelse(Wave == "2017", (as.numeric(Employed)), NA_real_)) %>%
   fill(Employed_c,  .direction = "downup") %>%
-  dplyr::mutate(Edu_c = if_else(Wave == "2017", (Edu), NA_real_)) %>%
+  dplyr::mutate(Edu_c = ifelse(Wave == "2017", (Edu), NA_real_)) %>%
   fill(Edu_c,  .direction = "downup") %>%
-  dplyr::mutate(SDO_c = if_else(Wave == "2017", (as.numeric(SDO)), NA_real_)) %>%
+  dplyr::mutate(SDO_c = ifelse(Wave == "2017", (as.numeric(SDO)), NA_real_)) %>%
   fill(SDO_c,  .direction = "downup") %>%
-  dplyr::mutate(RWA_c = if_else(Wave == "2017", (as.numeric(RWA)), NA_real_)) %>%
+  dplyr::mutate(RWA_c = ifelse(Wave == "2017", (as.numeric(RWA)), NA_real_)) %>%
   fill(RWA_c,  .direction = "downup") %>%
-  dplyr::mutate(NZSEI13_c = if_else(Wave == "2017", (as.numeric(NZSEI13)), NA_real_)) %>%
+  dplyr::mutate(NZSEI13_c = ifelse(Wave == "2017", (as.numeric(NZSEI13)), NA_real_)) %>%
   fill(NZSEI13_c,  .direction = "downup") |>
   ungroup() %>%
   dplyr::mutate(EthCat_c = as.factor(EthCat_c)) |>
@@ -320,14 +320,14 @@ dat_bayes <- dat |>
     NEUROTICISM_cZ = scale(NEUROTICISM_c)
   ) %>%
   droplevels() |>
-  mutate(Sample = as.factor(if_else(
+  mutate(Sample = as.factor(ifelse(
     SampleOriginYear < 2,
     0,
-    if_else(
+    ifelse(
       SampleOriginYear >= 2  &
         SampleOriginYear < 4,
       1,
-      if_else(SampleOriginYear == 4, 2, 3)
+      ifelse(SampleOriginYear == 4, 2, 3)
     )
   ))) |>
   droplevels() |>
@@ -767,7 +767,7 @@ dat_0 <- dat_0 |>
 
 
 dat_0_wide = dat_0 |>
-  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+  mutate(yimpute_muslim = ifelse(Y_orig == Inf,
                                   yfit_muslim,
                                   Y_orig)) |>
   mutate(yimpute_muslim_lag = dplyr::lag(yimpute_muslim))
@@ -826,13 +826,13 @@ saveRDS(dat_combined,
 
 # wrangle for imputed values with errors
 dat_combined_imputed_muslim_2012 <- dat_combined  |>
-  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+  mutate(yimpute_muslim = ifelse(Y_orig == Inf,
                                   yfit_muslim,
                                   Y_orig)) |>
   group_by(id) |>
-  mutate(se = if_else(Y_orig != Inf, 0, sd)) |>
+  mutate(se = ifelse(Y_orig != Inf, 0, sd)) |>
   ungroup() |>
-  mutate(se = if_else(se <= 0, .01, se)) |>
+  mutate(se = ifelse(se <= 0, .01, se)) |>
   mutate(Wave = as.factor(Wave)) |>
   data.frame()
 
@@ -854,7 +854,7 @@ dat_combined_imputed_muslim_2012 <-
 # prepare data -------------------------------------------------------------
 
 d_muslim <- dat_combined_imputed_muslim_2012 |>
-  mutate(se = if_else(se <= 0, .01, se)) |>
+  mutate(se = ifelse(se <= 0, .01, se)) |>
   mutate(Wave = as.factor(Wave)) |>
   mutate(Attack = as.factor(as))
 
@@ -1661,7 +1661,7 @@ dat_0 <-
 head(dat_0_wide)
 dat_0_wide <- dat_0 |>
   # note changes
-  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+  mutate(yimpute_muslim = ifelse(Y_orig == Inf,
                                   yfit_muslim,
                                   Y_orig)) |>
   mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
@@ -1713,7 +1713,7 @@ dat_1 <-
 
 #
 dat_1_wide <- dat_1 |>
-  mutate(yimpute_muslim = if_else(Y_orig == Inf,
+  mutate(yimpute_muslim = ifelse(Y_orig == Inf,
                                   yfit_muslim,
                                   Y_orig)) |>
   mutate(yfit_ORD = round(yfit_muslim, digits = 0)) |>
