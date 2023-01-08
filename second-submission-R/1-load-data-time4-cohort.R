@@ -45,6 +45,9 @@ pull_path <-
 # note the synthetic dataset is about 20% the size of the full NZAVS dataset
 dat <- arrow::read_parquet(here::here("data", "dat_synth"))
 str(dat)
+
+
+
 #dat <- dat %>% mutate_if(is.matrix, as.vector) |> mutate_if(is.factor, as.numeric) |>  mutate_if(is.double, as.integer) |>
  # data.frame()
 
