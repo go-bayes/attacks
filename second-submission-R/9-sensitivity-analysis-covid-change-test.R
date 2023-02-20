@@ -714,3 +714,78 @@ summary( sim.att )
 
 plot(sim.att)
 
+
+
+## only weights. - SAME RESULT
+
+fit1 <- glm( Warm.Muslims ~ first_lockdown *( Male +
+                                          REGC_2022 +
+                                          Partner +
+                                          EthCat +
+                                          Age +
+                                          NZSEI13 +
+                                          CONSCIENTIOUSNESS +
+                                          OPENNESS +
+                                          HONESTY_HUMILITY +
+                                          EXTRAVERSION +
+                                          NEUROTICISM +
+                                          AGREEABLENESS +
+                                          Edu +
+                                          NZDep2018 +
+                                          Employed +
+                                          Pol.Orient +
+                                          Rural_GCH2018 +
+                                          Household.INC +
+                                          Parent +
+                                          Relid +
+                                          BornNZ),
+                                          data = new_dat)
+
+summary(fit1)
+sim.imp1 <- sim(fit1, n = 1000, vcov = "HC3")
+sim.imp1
+
+# Causal contrast by simulating differences (read clarify package)
+
+sim.att1 <- sim_ame(sim.imp1, var = "first_lockdown",
+                   subset = first_lockdown == 1, cl = 4,
+                   verbose = FALSE)
+
+
+sim.att1 <- transform(sim.att1, RD = `E[Y(1)]`-`E[Y(0)]`)
+
+# with confidence intervals -- this is for the population measured in 2019 (Not the sample studied in this article, which is a subset of that total population )
+summary( sim.att1 )
+
+plot(sim.att)
+
+
+# only weights. - SAME RESULT
+fit2 <-
+  glm(
+    Warm.Muslims ~ first_lockdown,
+    weights = exposure_model$weights,
+    family = "gaussian" ,
+    data = new_dat
+  )
+
+summary(fit2)
+sim.imp2 <- sim(fit2, n = 1000, vcov = "HC3")
+sim.imp2
+
+# Causal contrast by simulating differences (read clarify package)
+
+sim.att2 <- sim_ame(sim.imp2, var = "first_lockdown",
+                    subset = first_lockdown == 1, cl = 4,
+                    verbose = FALSE)
+
+
+sim.att2 <- transform(sim.att2, RD = `E[Y(1)]`-`E[Y(0)]`)
+
+# with confidence intervals -- this is for the population measured in 2019 (Not the sample studied in this article, which is a subset of that total population )
+summary( sim.att2 )
+
+plot(sim.att)
+
+
+
