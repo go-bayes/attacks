@@ -87,6 +87,7 @@ dat %>%
   summarise(mean(Warm.Muslims, na.rm = TRUE))
 
 
+# start here --------------------------------------------------------------
 
 
 sub_dat <- dat %>%
@@ -105,35 +106,47 @@ sub_dat <- dat %>%
       )
     )
   )) |>
-  mutate(pre_post = if_else (  COVID19.Timeline >  1.1, 1, 0 )) |>
-  select(Warm.Muslims, cum_lockdowns_time11, REGC_2022, Id , COVID19.Timeline, pre_post) |>
+  mutate(pre_post = if_else (COVID19.Timeline >  1.1, 1, 0)) |>
+  select(Warm.Muslims,
+         cum_lockdowns_time11,
+         REGC_2022,
+         Id ,
+         COVID19.Timeline,
+         pre_post) |>
   drop_na()
 
 
 length(unique(sub_dat$Id))
 
 # Cumulative locksdowns nothing
-lm(data = sub_dat, Warm.Muslims ~ cum_lockdowns_time11 + as.factor(REGC_2022)) |>
+lm(data = sub_dat,
+   Warm.Muslims ~ cum_lockdowns_time11 + as.factor(REGC_2022)) |>
   model_parameters()
 
 
 
 # nothing
-lm(data = sub_dat, Warm.Muslims ~ pre_post ) |>
-  model_parameters()|>
-  kbl(format = "latex", booktabs = TRUE, digits = 3)
+lm(data = sub_dat, Warm.Muslims ~ pre_post) |>
+  model_parameters() |>
+  kbl(format = "markdown",
+      booktabs = TRUE,
+      digits = 3)
 
 
 # nothing
-lm(data = sub_dat, Warm.Muslims ~ cum_lockdowns_time11 ) |>
+lm(data = sub_dat, Warm.Muslims ~ cum_lockdowns_time11) |>
   model_parameters() |>
-  kbl(format = "latex", booktabs = TRUE, digits = 3)
+  kbl(format = "latex",
+      booktabs = TRUE,
+      digits = 3)
+
 
 
 
 ## Time 4 cohort
 
-dat_bayes <- arrow::read_parquet(here::here(push_mods, "2012_cohort_attacks"))
+dat_bayes <-
+  arrow::read_parquet(here::here(push_mods, "2012_cohort_attacks"))
 
 
 sub_dat4 <- dat_bayes %>%
@@ -152,56 +165,277 @@ sub_dat4 <- dat_bayes %>%
       )
     )
   )) |>
-  mutate(pre_post = if_else (  COVID19.Timeline >  1.1, 1, 0 )) |>
-  select(Warm.Muslims, cum_lockdowns_time11, REGC_2022, Id , COVID19.Timeline, pre_post) |>
+  mutate(pre_post = if_else (COVID19.Timeline >  1.1, 1, 0)) |>
+  select(Warm.Muslims,
+         cum_lockdowns_time11,
+         REGC_2022,
+         Id ,
+         COVID19.Timeline,
+         pre_post) |>
   drop_na()
 
 
 length(unique(sub_dat4$Id))
 
 # Cumulative locksdowns nothing
-lm(data = sub_dat4, Warm.Muslims ~ cum_lockdowns_time11 + as.factor(REGC_2022)) |>
+lm(data = sub_dat4,
+   Warm.Muslims ~ cum_lockdowns_time11 + as.factor(REGC_2022)) |>
   model_parameters()
 
 
 
 # nothing
-lm(data = sub_dat4, Warm.Muslims ~ pre_post ) |>
-  model_parameters()|>
-  kbl(format = "latex", booktabs = TRUE, digits = 3)
+lm(data = sub_dat4, Warm.Muslims ~ pre_post) |>
+  model_parameters() |>
+  kbl(format = "latex",
+      booktabs = TRUE,
+      digits = 3)
 
 
 # nothing
-lm(data = sub_dat, Warm.Muslims ~ cum_lockdowns_time11 ) |>
+lm(data = sub_dat, Warm.Muslims ~ cum_lockdowns_time11) |>
   model_parameters() |>
-  kbl(format = "latex", booktabs = TRUE, digits = 3)
+  kbl(format = "latex",
+      booktabs = TRUE,
+      digits = 3)
 
 
 
 
 
+# propensity scores -------------------------------------------------------
+
+head(sub_dat4)
+
+
+# nothing
+lm(data = sub_dat4, Warm.Muslims ~ pre_post) |>
+  model_parameters() |>
+  kbl(format = "latex",
+      booktabs = TRUE,
+      digits = 3)
+
+
+
+# Read data
+dat <- arrow::read_parquet(pull_path)
+
+new_dat <- dat %>%
+  filter(Wave == 2019) %>%
+  select(
+    Id,
+    YearMeasured,
+    REGC_2022,
+    Wave,
+    Male,
+    REGC_2022,
+    Partner,
+    EthCat,
+    Age,
+    NZSEI13,
+    CONSCIENTIOUSNESS,
+    OPENNESS,
+    HONESTY_HUMILITY,
+    EXTRAVERSION,
+    NEUROTICISM,
+    AGREEABLENESS,
+    Edu,
+    NZDep2018,
+    Employed,
+    Pol.Orient,
+    Rural_GCH2018,
+    Household.INC,
+    COVID19.Timeline,
+    Parent,
+    Relid,
+    BornNZ,
+    Warm.Muslims
+  ) %>%
+  dplyr::mutate(Edu = as.numeric(Edu),
+                income_log = log(Household.INC + 1)) %>%
+  # dplyr::mutate(#  Volunteers = if_else(HoursCharity == 1, 1, 0),
+  #    Hours.Pets_log = log(Hours.Pets + 1)) %>%
+  dplyr::mutate(across(!c(Id, Wave), ~ as.numeric(.x))) %>% # make factors numeric for easy of
+  arrange(Id, Wave) %>%
+  # dplyr::mutate(#  Volunteers = if_else(HoursCharity == 1, 1, 0),
+  #  Church = ifelse(Religion.Church > 8, 8, Religion.Church),) %>%
+  arrange(Id, Wave)  %>% # dplyr::mutate(Hours.Work_lead1 = lead(Hours.Work, n = 1)) %>%)
+  filter(COVID19.Timeline <  1.3) |> . # Comparison of pre_post lockdown
+dplyr::mutate(cum_lockdowns_time11 = if_else(
+  COVID19.Timeline < 1.2,
+  0,
+  if_else(
+    COVID19.Timeline >  1.2 & COVID19.Timeline  < 2,
+    2,
+    ifelse(
+      COVID19.Timeline > 2 &
+        REGC_2022 == 2  | COVID19.Timeline > 2 & REGC_2022 == 1,
+      4,
+      3
+    )
+  )
+)) |>
+  mutate(first_lockdown = if_else (COVID19.Timeline >  1.1, 1, 0)) |>
+  # select(Warm.Muslims,
+  #        cum_lockdowns_time11,
+  #        REGC_2022,
+  #        Id ,
+  #        COVID19.Timeline,
+  #        pre_post) |>
+  drop_na()
 
 
 
 
+length(unique(new_dat$Id)) # 29313
+
+
+## use matchit to get propensity scores for binary treatments, use weightit for continuous treatments.
+
+
+# Read this:
+#https://ngreifer.github.io/WeightIt/
+# The following is an illustration to show doubly robust causal estimation.  Where we combine propensity scores with weights.
+
+library(WeightIt)
+library(MatchThem)
+library(optmatch)
+library(MatchIt)
+library(cobalt)
+
+
+# table for conditions
+table(new_dat$first_lockdown)
+
+exposure_model <- WeightIt::weightit(
+  first_lockdown ~  Male +
+    REGC_2022 +
+    Partner +
+    EthCat +
+    Age +
+    NZSEI13 +
+    CONSCIENTIOUSNESS +
+    OPENNESS +
+    HONESTY_HUMILITY +
+    EXTRAVERSION +
+    NEUROTICISM +
+    AGREEABLENESS +
+    Edu +
+    NZDep2018 +
+    Employed +
+    Pol.Orient +
+    Rural_GCH2018 +
+    Household.INC +
+    Parent +
+    Relid +
+    BornNZ,
+  data = new_dat,
+  estimand = "ATT",
+  stabilize = TRUE,
+  method = "ebal"
+)
+
+
+# a weaker but more familiar method
+exposure_model_2 <- WeightIt::weightit(
+  first_lockdown ~  Male +
+    REGC_2022 +
+    Partner +
+    EthCat +
+    Age +
+    NZSEI13 +
+    CONSCIENTIOUSNESS +
+    OPENNESS +
+    HONESTY_HUMILITY +
+    EXTRAVERSION +
+    NEUROTICISM +
+    AGREEABLENESS +
+    Edu +
+    NZDep2018 +
+    Employed +
+    Pol.Orient +
+    Rural_GCH2018 +
+    Household.INC +
+    Parent +
+    Relid +
+    BornNZ,
+  data = new_dat,
+  estimand = "ATT",
+  method = "ps"
+)
+
+dev.off()
+# check propensity scores
+exposure_model
+
+
+# use this
+sum <- summary(exposure_model)
+plot(sum)
+sum
+bal.tab(exposure_model)
+
+
+sum_2 <- summary(exposure_model_2)
+plot(sum_2)
+sum_2
+bal.tab(exposure_model_2)
 
 
 
+# outcome model
+fit <- glm(Warm.Muslims ~ first_lockdown *( Male +
+        REGC_2022 +
+        Partner +
+        EthCat +
+        Age +
+        NZSEI13 +
+        CONSCIENTIOUSNESS +
+        OPENNESS +
+        HONESTY_HUMILITY +
+        EXTRAVERSION +
+        NEUROTICISM +
+        AGREEABLENESS +
+        Edu +
+        NZDep2018 +
+        Employed +
+        Pol.Orient +
+        Rural_GCH2018 +
+        Household.INC +
+        Parent +
+        Relid +
+        BornNZ), data = new_dat,
+      weights = exposure_model$weights, family = "gaussian")
 
 
+summary(fit)
 
 
+library(clarify)
+sim.imp <- sim(fit, n = 200, vcov = "HC3")
+sim.imp
+
+# Causal contrast by simulating differences (read clarify package)
+
+sim.att <- sim_ame(sim.imp, var = "first_lockdown",
+                   subset = first_lockdown == 1, cl = 4,
+                   verbose = FALSE)
 
 
+sim.att <- transform(sim.att, RD = `E[Y(1)]`-`E[Y(0)]`)
 
+# with confidence intervals -- this is for the population measured in 2019 (Not the sample studied in this article, which is a subset of that total population )
+summary( sim.att )
 
-
+plot(sim.att)
 
 # pre_vals ----------------------------------------------------------------
 
 sub_dat2 <- tab_in |>
-  mutate(lag_warm_muslims_z = scale( dplyr::lag(Warm.Muslims, n = 1) ) ,
-         lag_pol_orient_z = scale( dplyr::lag(Pol.Orient, n = 1))) |>
+  mutate(
+    lag_warm_muslims_z = scale(dplyr::lag(Warm.Muslims, n = 1)) ,
+    lag_pol_orient_z = scale(dplyr::lag(Pol.Orient, n = 1))
+  ) |>
   filter(Wave == 2019) %>%
   dplyr::mutate(cum_lockdowns_time11 = if_else(
     COVID19.Timeline < 1.2,
@@ -217,17 +451,29 @@ sub_dat2 <- tab_in |>
       )
     )
   )) |>
-  mutate(pre_post = if_else (  COVID19.Timeline >  1.1, 1, 0 )) |>
-  select(lag_warm_muslims_z, Warm.Muslims, cum_lockdowns_time11, REGC_2022, Id , COVID19.Timeline, pre_post) |>
+  mutate(pre_post = if_else (COVID19.Timeline >  1.1, 1, 0)) |>
+  select(
+    lag_warm_muslims_z,
+    Warm.Muslims,
+    cum_lockdowns_time11,
+    REGC_2022,
+    Id ,
+    COVID19.Timeline,
+    pre_post
+  ) |>
   droplevels()
 
 length(unique(sub_dat2$Id))
 
-lm(data = sub_dat2, Warm.Muslims ~ cum_lockdowns_time11 + as.factor(REGC_2022) + lag_warm_muslims_z) |>
+lm(
+  data = sub_dat2,
+  Warm.Muslims ~ cum_lockdowns_time11 + as.factor(REGC_2022) + lag_warm_muslims_z
+) |>
   model_parameters()
 
 
-lm(data = sub_dat2, Warm.Muslims ~ cum_lockdowns_time11 + pre_post + lag_warm_muslims_z) |>
+lm(data = sub_dat2,
+   Warm.Muslims ~ cum_lockdowns_time11 + pre_post + lag_warm_muslims_z) |>
   model_parameters()
 
 
@@ -238,4 +484,233 @@ lm(data = sub_dat2, Warm.Muslims ~ pre_post  + lag_warm_muslims_z) |>
 
 
 
+
+
+
+# propensity scores -------------------------------------------------------
+
+head(sub_dat4)
+
+
+# nothing
+lm(data = sub_dat4, Warm.Muslims ~ pre_post) |>
+  model_parameters() |>
+  kbl(format = "latex",
+      booktabs = TRUE,
+      digits = 3)
+
+
+
+# Read data
+dat <- arrow::read_parquet(pull_path)
+
+# select 2019 wave (year of covid, select only people who respond up to the end of the first lockdown, compare lockdown group with pre-lockdown group.  Estimate the average treatment effect among those who were locked down (i.e. what if they were not locked down))
+new_dat <- dat %>%
+  filter(Wave == 2019) %>%
+  select(
+    Id,
+    YearMeasured,
+    REGC_2022,
+    Wave,
+    Male,
+    REGC_2022,
+    Partner,
+    EthCat,
+    Age,
+    NZSEI13,
+    CONSCIENTIOUSNESS,
+    OPENNESS,
+    HONESTY_HUMILITY,
+    EXTRAVERSION,
+    NEUROTICISM,
+    AGREEABLENESS,
+    Edu,
+    NZDep2018,
+    Employed,
+    Pol.Orient,
+    Rural_GCH2018,
+    Household.INC,
+    COVID19.Timeline,
+    Parent,
+    Relid,
+    BornNZ,
+    Warm.Muslims
+  ) %>%
+  dplyr::mutate(Edu = as.numeric(Edu),
+                income_log = log(Household.INC + 1)) %>%
+  # dplyr::mutate(#  Volunteers = if_else(HoursCharity == 1, 1, 0),
+  #    Hours.Pets_log = log(Hours.Pets + 1)) %>%
+  dplyr::mutate(across(!c(Id, Wave), ~ as.numeric(.x))) %>% # make factors numeric for easy of
+  arrange(Id, Wave) %>%
+  # dplyr::mutate(#  Volunteers = if_else(HoursCharity == 1, 1, 0),
+  #  Church = ifelse(Religion.Church > 8, 8, Religion.Church),) %>%
+  arrange(Id, Wave)  %>% # dplyr::mutate(Hours.Work_lead1 = lead(Hours.Work, n = 1)) %>%)
+  filter(COVID19.Timeline <  1.3) |> . # Comparison of pre_post lockdown
+dplyr::mutate(cum_lockdowns_time11 = if_else(
+  COVID19.Timeline < 1.2,
+  0,
+  if_else(
+    COVID19.Timeline >  1.2 & COVID19.Timeline  < 2,
+    2,
+    ifelse(
+      COVID19.Timeline > 2 &
+        REGC_2022 == 2  | COVID19.Timeline > 2 & REGC_2022 == 1,
+      4,
+      3
+    )
+  )
+)) |>
+  mutate(first_lockdown = if_else (COVID19.Timeline >  1.1, 1, 0)) |>
+  # select(Warm.Muslims,
+  #        cum_lockdowns_time11,
+  #        REGC_2022,
+  #        Id ,
+  #        COVID19.Timeline,
+  #        pre_post) |>
+  drop_na()
+
+
+
+
+length(unique(new_dat$Id)) # 29313
+
+
+## use matchit to get propensity scores for binary treatments, use weightit for continuous treatments.
+
+
+# Read this:
+#https://ngreifer.github.io/WeightIt/
+# The following is an illustration to show doubly robust causal estimation.  Where we combine propensity scores with weights.
+
+library(WeightIt)
+library(MatchThem)
+library(optmatch)
+library(MatchIt)
+library(cobalt)
+
+
+# table for conditions
+table(new_dat$first_lockdown)
+
+exposure_model <- WeightIt::weightit(
+  first_lockdown ~  Male +
+    REGC_2022 +
+    Partner +
+    EthCat +
+    Age +
+    NZSEI13 +
+    CONSCIENTIOUSNESS +
+    OPENNESS +
+    HONESTY_HUMILITY +
+    EXTRAVERSION +
+    NEUROTICISM +
+    AGREEABLENESS +
+    Edu +
+    NZDep2018 +
+    Employed +
+    Pol.Orient +
+    Rural_GCH2018 +
+    Household.INC +
+    Parent +
+    Relid +
+    BornNZ,
+  data = new_dat,
+  estimand = "ATT",
+  stabilize = TRUE,
+  method = "ebal"
+)
+
+
+# a weaker but more familiar method
+exposure_model_2 <- WeightIt::weightit(
+  first_lockdown ~  Male +
+    REGC_2022 +
+    Partner +
+    EthCat +
+    Age +
+    NZSEI13 +
+    CONSCIENTIOUSNESS +
+    OPENNESS +
+    HONESTY_HUMILITY +
+    EXTRAVERSION +
+    NEUROTICISM +
+    AGREEABLENESS +
+    Edu +
+    NZDep2018 +
+    Employed +
+    Pol.Orient +
+    Rural_GCH2018 +
+    Household.INC +
+    Parent +
+    Relid +
+    BornNZ,
+  data = new_dat,
+  estimand = "ATT",
+  method = "ps"
+)
+
+dev.off()
+# check propensity scores
+exposure_model
+
+
+# use this
+sum <- summary(exposure_model)
+plot(sum)
+sum
+bal.tab(exposure_model)
+
+
+sum_2 <- summary(exposure_model_2)
+plot(sum_2)
+sum_2
+bal.tab(exposure_model_2)
+
+
+
+# outcome model
+fit <- glm(Warm.Muslims ~ first_lockdown *( Male +
+                                              REGC_2022 +
+                                              Partner +
+                                              EthCat +
+                                              Age +
+                                              NZSEI13 +
+                                              CONSCIENTIOUSNESS +
+                                              OPENNESS +
+                                              HONESTY_HUMILITY +
+                                              EXTRAVERSION +
+                                              NEUROTICISM +
+                                              AGREEABLENESS +
+                                              Edu +
+                                              NZDep2018 +
+                                              Employed +
+                                              Pol.Orient +
+                                              Rural_GCH2018 +
+                                              Household.INC +
+                                              Parent +
+                                              Relid +
+                                              BornNZ), data = new_dat,
+           weights = exposure_model$weights, family = "gaussian")
+
+
+summary(fit)
+
+
+library(clarify)
+sim.imp <- sim(fit, n = 1000, vcov = "HC3")
+sim.imp
+
+# Causal contrast by simulating differences (read clarify package)
+
+sim.att <- sim_ame(sim.imp, var = "first_lockdown",
+                   subset = first_lockdown == 1, cl = 4,
+                   verbose = FALSE)
+
+
+sim.att <- transform(sim.att, RD = `E[Y(1)]`-`E[Y(0)]`)
+
+# with confidence intervals -- this is for the population measured in 2019 (Not the sample studied in this article, which is a subset of that total population )
+summary( sim.att )
+
+plot(sim.att)
 
