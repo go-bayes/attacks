@@ -33,7 +33,13 @@ library(cmdstanr)
 
 # set paths for JB** YOU NEED TO SET YOUR OWN **
 push_mods <-
+<<<<<<< Updated upstream
   fs::path_expand("/Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/outcomewide/attacks/mods")
+=======
+  fs::path_expand("/Users/joseph/v-project\ Dropbox/outcomewide/attacks/mods")
+
+pull_mods <-  fs::path_expand("/Users/joseph/v-project\ Dropbox/outcomewide/attacks/mods")
+>>>>>>> Stashed changes
 
 push_figs <-
   fs::path_expand(" /Users/joseph/v-project\ Dropbox/Joseph\ Bulbulia/outcomewide/attacks/figs")
